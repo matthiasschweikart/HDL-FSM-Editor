@@ -365,9 +365,13 @@ def extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, sta
                                                                      ):
     outgoing_transition_tags = get_all_outgoing_transitions_in_priority_order(start_point)
     if not outgoing_transition_tags and start_point.startswith("connector"):
-        messagebox.showerror("Warning", 'There is a connector reached from state ' +
-                                        trace[0]["state_name"] +
-                                        ' which has no outgoing transition,\ntherefore the generated HDL may be corrupted.')
+        if trace:
+            messagebox.showerror("Warning", 'There is a connector reached from state ' +
+                                            trace[0]["state_name"] +
+                                            ' which has no outgoing transition,\ntherefore the generated HDL may be corrupted.')
+        else:
+            messagebox.showerror("Warning", 'There is a connector ' +
+                                            'which has no outgoing transition,\ntherefore the generated HDL may be corrupted.')
     for _, transition_tag in enumerate(outgoing_transition_tags):
         transition_target, transition_condition, transition_action, condition_action_reference = get_transition_target_condition_action(transition_tag)
         if transition_action!="":
