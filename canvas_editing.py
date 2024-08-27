@@ -164,7 +164,8 @@ def delete():
                             main_window.canvas.dtag(state, transition + "_start")
                         elif transition_tag.startswith("ca_connection"):
                             condition_action_tag = transition_tag[:-4]
-                            main_window.canvas.delete(condition_action_tag+ "_anchor")
+                            main_window.canvas.delete(condition_action_tag+ "_anchor") # delete the window
+                            main_window.canvas.delete(condition_action_tag)            # delete the line to the window
                     main_window.canvas.delete(transition)
                     main_window.canvas.delete(transition + "rectangle") # delete priority rectangle
                     main_window.canvas.delete(transition + "priority")  # delete priority
