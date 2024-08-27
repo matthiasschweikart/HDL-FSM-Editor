@@ -20,7 +20,7 @@ import compile_handling
 import constants
 import link_dictionary
 
-VERSION = "4.0"
+VERSION = "4.1"
 header_string ="HDL-FSM-Editor\nVersion " + VERSION + "\nCreated by Matthias Schweikart\nContact: matthias.schweikart@gmx.de"
 
 state_action_default_button        = None
