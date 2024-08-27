@@ -8,11 +8,15 @@ import hdl_generation_architecture
 import hdl_generation_module
 import main_window
 import link_dictionary
+import tag_plausibility
 
 last_line_number_of_file1 = 0
 
 def run_hdl_generation():
     if design_is_not_ready_for_hdl_generation():
+        return
+    if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
+        messagebox.showerror("Error", 'The database is corrupt.\nHDL is not generated.\nSee details at STDOUT.')
         return
     if main_window.language.get()=="VHDL":
         header = "-- Created by HDL-FSM-Editor at " + datetime.today().ctime() + "\n"
