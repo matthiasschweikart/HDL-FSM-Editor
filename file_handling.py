@@ -1,4 +1,7 @@
-from tkinter import *   
+"""
+This module contains all methods needed for reading and writing from or to a file.
+"""
+import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter import messagebox
 import os
@@ -19,6 +22,7 @@ import undo_handling
 import global_actions_combinatorial
 import main_window
 import custom_text
+import state_comment
 
 filename = ""
 
@@ -39,13 +43,13 @@ def save():
     if filename!="":
         save_in_file_new(filename)
 
-def write_coords(fileobject, id):
-    coords = main_window.canvas.coords(id)
+def write_coords(fileobject, canvas_id):
+    coords = main_window.canvas.coords(canvas_id)
     for c in coords:
         fileobject.write(str(c) + " ")
 
-def write_tags(fileobject, id):
-    tags = main_window.canvas.gettags(id)
+def write_tags(fileobject, canvas_id):
+    tags = main_window.canvas.gettags(canvas_id)
     for t in tags:
         fileobject.write(str(t) + " ")
 
@@ -68,9 +72,9 @@ def open_file_with_name(read_filename):
     custom_text.CustomText.written_variables_of_all_windows.clear()
     # Bring the notebook tab with the graphic into the foreground:
     notebook_ids = main_window.notebook.tabs()
-    for id in notebook_ids:
-        if main_window.notebook.tab(id, option="text")=="Diagram":
-            main_window.notebook.select(id)
+    for notebook_id in notebook_ids:
+        if main_window.notebook.tab(notebook_id, option="text")=="Diagram":
+            main_window.notebook.select(notebook_id)
     # Read the design from the file:
     fileobject = open(read_filename, 'r', encoding="utf-8")
     for line in fileobject:
@@ -135,9 +139,9 @@ def open_file_with_name(read_filename):
             main_window.internals_process_combinatorial_text.insert("1.0", data)
             main_window.internals_process_combinatorial_text.update_highlight_tags(10, ["not_read" , "not_written" , "control" , "datatype" , "function" , "comment"])
             main_window.internals_process_combinatorial_text.update_custom_text_class_signals_list()
-        elif line.startswith("state_number|"):                                  # The state_number (as transition_number, connector_number, ...) must be restored, 
+        elif line.startswith("state_number|"):                                  # The state_number (as transition_number, connector_number, ...) must be restored,
             rest_of_line   = remove_keyword_from_line(line,"state_number|")     # otherwise it could happen, that 2 states get both the tag "state1".
-            state_handling.state_number = int(rest_of_line)       
+            state_handling.state_number = int(rest_of_line)
         elif line.startswith("transition_number|"):
             rest_of_line   = remove_keyword_from_line(line,"transition_number|")
             transition_handling.transition_number = int(rest_of_line)
@@ -145,9 +149,9 @@ def open_file_with_name(read_filename):
             rest_of_line   = remove_keyword_from_line(line,"reset_entry_number|")
             reset_entry_handling.reset_entry_number = int(rest_of_line)
             if reset_entry_handling.reset_entry_number==0:
-                main_window.reset_entry_button.config(state=NORMAL)
+                main_window.reset_entry_button.config(state=tk.NORMAL)
             else:
-                main_window.reset_entry_button.config(state=DISABLED)
+                main_window.reset_entry_button.config(state=tk.DISABLED)
         elif line.startswith("connector_number|"):
             rest_of_line   = remove_keyword_from_line(line,"connector_number|")
             connector_handling.connector_number = int(rest_of_line)
@@ -161,23 +165,23 @@ def open_file_with_name(read_filename):
             rest_of_line   = remove_keyword_from_line(line,"global_actions_number|")
             global_actions_handling.global_actions_clocked_number = int(rest_of_line)
             if global_actions_handling.global_actions_clocked_number==0:
-                main_window.global_action_clocked_button.config(state=NORMAL)
+                main_window.global_action_clocked_button.config(state=tk.NORMAL)
             else:
-                main_window.global_action_clocked_button.config(state=DISABLED)
+                main_window.global_action_clocked_button.config(state=tk.DISABLED)
         elif line.startswith("state_actions_default_number|"):
             rest_of_line   = remove_keyword_from_line(line,"state_actions_default_number|")
             global_actions_handling.state_actions_default_number = int(rest_of_line)
             if global_actions_handling.state_actions_default_number==0:
-                main_window.state_action_default_button.config(state=NORMAL)
+                main_window.state_action_default_button.config(state=tk.NORMAL)
             else:
-                main_window.state_action_default_button.config(state=DISABLED)
+                main_window.state_action_default_button.config(state=tk.DISABLED)
         elif line.startswith("global_actions_combinatorial_number|"):
             rest_of_line   = remove_keyword_from_line(line,"global_actions_combinatorial_number|")
             global_actions_handling.global_actions_combinatorial_number = int(rest_of_line)
             if global_actions_handling.global_actions_combinatorial_number==0:
-                main_window.global_action_combinatorial_button.config(state=NORMAL)
+                main_window.global_action_combinatorial_button.config(state=tk.NORMAL)
             else:
-                main_window.global_action_combinatorial_button.config(state=DISABLED)
+                main_window.global_action_combinatorial_button.config(state=tk.DISABLED)
         elif line.startswith("state_radius|"):
             rest_of_line   = remove_keyword_from_line(line,"state_radius|")
             canvas_editing.state_radius = float(rest_of_line)
@@ -260,7 +264,7 @@ def open_file_with_name(read_filename):
             main_window.canvas.tag_bind(trans_id, "<Leave>",  lambda event, trans_id=trans_id : main_window.canvas.itemconfig(trans_id, width=1))
             for t in tags:
                 if t.startswith("connected_to_transition"):
-                    main_window.canvas.itemconfig(trans_id, dash=(2,2), state=HIDDEN)
+                    main_window.canvas.itemconfig(trans_id, dash=(2,2), state=tk.HIDDEN)
                 elif t.startswith("connected_to_state"):
                     main_window.canvas.itemconfig(trans_id, dash=(2,2))
                 elif t.startswith("transition"):
@@ -281,8 +285,8 @@ def open_file_with_name(read_filename):
             for t in tags:
                 if t.startswith("connector"):
                     rectangle_color = 'violet'
-            id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
-            main_window.canvas.tag_raise(id) # priority rectangles are always in "foreground"
+            canvas_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
+            main_window.canvas.tag_raise(canvas_id) # priority rectangles are always in "foreground"
         elif line.startswith("window_state_action_block|"):
             rest_of_line = remove_keyword_from_line(line,"window_state_action_block|")
             text         = get_data(rest_of_line, fileobject)
@@ -324,10 +328,10 @@ def open_file_with_name(read_filename):
             condition_action_ref.condition_id.format()
             condition_action_ref.action_id.insert("1.0", action)
             condition_action_ref.action_id.format()
-            if condition_action_ref.condition_id.get("1.0", END)=="\n" and condition_action_ref.action_id.get("1.0", END)!="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)=="\n" and condition_action_ref.action_id.get("1.0", tk.END)!="\n":
                 condition_action_ref.condition_label.grid_forget()
                 condition_action_ref.condition_id.grid_forget()
-            if condition_action_ref.condition_id.get("1.0", END)!="\n" and condition_action_ref.action_id.get("1.0", END)=="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)!="\n" and condition_action_ref.action_id.get("1.0", tk.END)=="\n":
                 condition_action_ref.action_label.grid_forget()
                 condition_action_ref.action_id.grid_forget()
             main_window.canvas.itemconfigure(condition_action_ref.window_id,tag=tags)
@@ -402,31 +406,31 @@ def remove_old_design():
     title = main_window.root.title()
     if title.endswith("*"):
         discard = messagebox.askokcancel("Exit", "There are unsaved changes, do you want to discard them?", default="cancel")
-        if discard==False:
+        if discard is False:
             return False
     filename =""
     main_window.root.title("unnamed")
     main_window.module_name.set("")
     main_window.reset_signal_name.set("")
     main_window.clock_signal_name.set("")
-    main_window.interface_package_text.delete("1.0", END)
-    main_window.interface_generics_text.delete("1.0", END)
-    main_window.interface_ports_text.delete("1.0", END)
-    main_window.internals_package_text.delete("1.0", END)
-    main_window.internals_architecture_text.delete("1.0", END)
-    main_window.internals_process_clocked_text.delete("1.0", END)
-    main_window.internals_process_combinatorial_text.delete("1.0", END)
-    main_window.hdl_frame_text.config(state=NORMAL)
-    main_window.hdl_frame_text.delete("1.0", END)
-    main_window.hdl_frame_text.config(state=DISABLED)
-    main_window.log_frame_text.config(state=NORMAL)
-    main_window.log_frame_text.delete("1.0", END)
-    main_window.log_frame_text.config(state=DISABLED)
+    main_window.interface_package_text.delete("1.0", tk.END)
+    main_window.interface_generics_text.delete("1.0", tk.END)
+    main_window.interface_ports_text.delete("1.0", tk.END)
+    main_window.internals_package_text.delete("1.0", tk.END)
+    main_window.internals_architecture_text.delete("1.0", tk.END)
+    main_window.internals_process_clocked_text.delete("1.0", tk.END)
+    main_window.internals_process_combinatorial_text.delete("1.0", tk.END)
+    main_window.hdl_frame_text.config(state=tk.NORMAL)
+    main_window.hdl_frame_text.delete("1.0", tk.END)
+    main_window.hdl_frame_text.config(state=tk.DISABLED)
+    main_window.log_frame_text.config(state=tk.NORMAL)
+    main_window.log_frame_text.delete("1.0", tk.END)
+    main_window.log_frame_text.config(state=tk.DISABLED)
     main_window.canvas.delete("all")
-    state_handling.state_number = 0       
+    state_handling.state_number = 0
     transition_handling.transition_number = 0
     reset_entry_handling.reset_entry_number = 0
-    main_window.reset_entry_button.config(state=NORMAL)
+    main_window.reset_entry_button.config(state=tk.NORMAL)
     connector_handling.connector_number = 0
     condition_action_handling.ConditionAction.conditionaction_id = 0
     condition_action_handling.ConditionAction.dictionary = {}
@@ -434,12 +438,12 @@ def remove_old_design():
     state_action_handling.MyText.mytext_dict = {}
     state_actions_default.StateActionsDefault.dictionary = {}
     global_actions_handling.state_actions_default_number = 0
-    main_window.state_action_default_button.config(state=NORMAL)
+    main_window.state_action_default_button.config(state=tk.NORMAL)
     global_actions_handling.global_actions_clocked_number = 0
-    main_window.global_action_clocked_button.config(state=NORMAL)
+    main_window.global_action_clocked_button.config(state=tk.NORMAL)
     global_actions_handling.global_actions_combinatorial_number = 0
-    main_window.global_action_combinatorial_button.config(state=NORMAL)
-    global_actions_combinatorial.GlobalActionsCombinatorial.dictionary = {}    
+    main_window.global_action_combinatorial_button.config(state=tk.NORMAL)
+    global_actions_combinatorial.GlobalActionsCombinatorial.dictionary = {}
     global_actions.GlobalActions.dictionary = {}
     canvas_editing.state_radius = 20.0
     canvas_editing.priority_distance = 14
@@ -509,19 +513,20 @@ def save_in_file_new(save_filename):
     design_dictionary["fontsize"]                            = canvas_editing.fontsize
     design_dictionary["label_fontsize"]                      = canvas_editing.label_fontsize
     design_dictionary["visible_center"]                      = canvas_editing.get_visible_center_as_string()
-    design_dictionary["interface_package"]                   = main_window.interface_package_text.get              ("1.0",END + "-1 chars")
-    design_dictionary["interface_generics"]                  = main_window.interface_generics_text.get             ("1.0",END + "-1 chars")
-    design_dictionary["interface_ports"]                     = main_window.interface_ports_text.get                ("1.0",END + "-1 chars")
-    design_dictionary["internals_package"]                   = main_window.internals_package_text.get              ("1.0",END + "-1 chars")
-    design_dictionary["internals_architecture"]              = main_window.internals_architecture_text.get         ("1.0",END + "-1 chars")
-    design_dictionary["internals_process"]                   = main_window.internals_process_clocked_text.get      ("1.0",END + "-1 chars")
-    design_dictionary["internals_process_combinatorial"]     = main_window.internals_process_combinatorial_text.get("1.0",END + "-1 chars")
+    design_dictionary["interface_package"]                   = main_window.interface_package_text.get              ("1.0",tk.END + "-1 chars")
+    design_dictionary["interface_generics"]                  = main_window.interface_generics_text.get             ("1.0",tk.END + "-1 chars")
+    design_dictionary["interface_ports"]                     = main_window.interface_ports_text.get                ("1.0",tk.END + "-1 chars")
+    design_dictionary["internals_package"]                   = main_window.internals_package_text.get              ("1.0",tk.END + "-1 chars")
+    design_dictionary["internals_architecture"]              = main_window.internals_architecture_text.get         ("1.0",tk.END + "-1 chars")
+    design_dictionary["internals_process"]                   = main_window.internals_process_clocked_text.get      ("1.0",tk.END + "-1 chars")
+    design_dictionary["internals_process_combinatorial"]     = main_window.internals_process_combinatorial_text.get("1.0",tk.END + "-1 chars")
     design_dictionary["state"]                               = []
     design_dictionary["text"]                                = []
     design_dictionary["line"]                                = []
     design_dictionary["polygon"]                             = []
     design_dictionary["rectangle"]                           = []
     design_dictionary["window_state_action_block"]           = []
+    design_dictionary["window_state_comment"]                = []
     design_dictionary["window_condition_action_block"]       = []
     design_dictionary["window_global_actions"]               = []
     design_dictionary["window_global_actions_combinatorial"] = []
@@ -549,25 +554,29 @@ def save_in_file_new(save_filename):
         elif main_window.canvas.type(i)=="window":
             if i in state_action_handling.MyText.mytext_dict:
                 design_dictionary["window_state_action_block"].append       ([main_window.canvas.coords(i),
-                                                                            state_action_handling.MyText.mytext_dict[i].text_id.get("1.0", END + "-1 chars"),
+                                                                            state_action_handling.MyText.mytext_dict[i].text_id.get("1.0", tk.END + "-1 chars"),
+                                                                            main_window.canvas.gettags(i)])
+            elif i in state_comment.StateComment.dictionary:
+                design_dictionary["window_state_comment"].append            ([main_window.canvas.coords(i),
+                                                                            state_comment.StateComment.dictionary[i].text_id.get("1.0", tk.END + "-1 chars"),
                                                                             main_window.canvas.gettags(i)])
             elif i in condition_action_handling.ConditionAction.dictionary:
                 design_dictionary["window_condition_action_block"].append   ([main_window.canvas.coords(i),
-                                                                            condition_action_handling.ConditionAction.dictionary[i].condition_id.get("1.0", END + "-1 chars"),
-                                                                            condition_action_handling.ConditionAction.dictionary[i].action_id.get("1.0", END + "-1 chars"),
+                                                                            condition_action_handling.ConditionAction.dictionary[i].condition_id.get("1.0", tk.END + "-1 chars"),
+                                                                            condition_action_handling.ConditionAction.dictionary[i].action_id.get("1.0", tk.END + "-1 chars"),
                                                                             main_window.canvas.gettags(i)])
             elif i in global_actions.GlobalActions.dictionary:
                 design_dictionary["window_global_actions"].append           ([main_window.canvas.coords(i),
-                                                                            global_actions.GlobalActions.dictionary[i].text_before_id.get("1.0", END + "-1 chars"),
-                                                                            global_actions.GlobalActions.dictionary[i].text_after_id.get("1.0", END + "-1 chars"),
+                                                                            global_actions.GlobalActions.dictionary[i].text_before_id.get("1.0", tk.END + "-1 chars"),
+                                                                            global_actions.GlobalActions.dictionary[i].text_after_id.get("1.0", tk.END + "-1 chars"),
                                                                             main_window.canvas.gettags(i)])
             elif i in global_actions_combinatorial.GlobalActionsCombinatorial.dictionary:
                 design_dictionary["window_global_actions_combinatorial"].append([main_window.canvas.coords(i),
-                                                                            global_actions_combinatorial.GlobalActionsCombinatorial.dictionary[i].text_id.get("1.0",END+"-1 chars"),
+                                                                            global_actions_combinatorial.GlobalActionsCombinatorial.dictionary[i].text_id.get("1.0",tk.END+"-1 chars"),
                                                                             main_window.canvas.gettags(i)])
             elif i in state_actions_default.StateActionsDefault.dictionary:
                 design_dictionary["window_state_actions_default"].append    ([main_window.canvas.coords(i),
-                                                                            state_actions_default.StateActionsDefault.dictionary[i].text_id.get("1.0", END + "-1 chars"),
+                                                                            state_actions_default.StateActionsDefault.dictionary[i].text_id.get("1.0", tk.END + "-1 chars"),
                                                                             main_window.canvas.gettags(i)])
             else:
                 print("file_handling: Fatal, unknown dictionary key ", i)
@@ -638,27 +647,27 @@ def open_file_with_name_new(read_filename):
         transition_handling.transition_number = design_dictionary["transition_number"]
         reset_entry_handling.reset_entry_number = design_dictionary["reset_entry_number"]
         if reset_entry_handling.reset_entry_number==0:
-            main_window.reset_entry_button.config(state=NORMAL)
+            main_window.reset_entry_button.config(state=tk.NORMAL)
         else:
-            main_window.reset_entry_button.config(state=DISABLED)
+            main_window.reset_entry_button.config(state=tk.DISABLED)
         connector_handling.connector_number                          = design_dictionary["connector_number"]
         condition_action_handling.ConditionAction.conditionaction_id = design_dictionary["conditionaction_id"]
         state_action_handling.MyText.mytext_id                       = design_dictionary["mytext_id"]
         global_actions_handling.global_actions_clocked_number        = design_dictionary["global_actions_number"]
         if global_actions_handling.global_actions_clocked_number==0:
-            main_window.global_action_clocked_button.config(state=NORMAL)
+            main_window.global_action_clocked_button.config(state=tk.NORMAL)
         else:
-            main_window.global_action_clocked_button.config(state=DISABLED)
+            main_window.global_action_clocked_button.config(state=tk.DISABLED)
         global_actions_handling.state_actions_default_number         = design_dictionary["state_actions_default_number"]
         if global_actions_handling.state_actions_default_number==0:
-            main_window.state_action_default_button.config(state=NORMAL)
+            main_window.state_action_default_button.config(state=tk.NORMAL)
         else:
-            main_window.state_action_default_button.config(state=DISABLED)
+            main_window.state_action_default_button.config(state=tk.DISABLED)
         global_actions_handling.global_actions_combinatorial_number  = design_dictionary["global_actions_combinatorial_number"]
         if global_actions_handling.global_actions_combinatorial_number==0:
-            main_window.global_action_combinatorial_button.config(state=NORMAL)
+            main_window.global_action_combinatorial_button.config(state=tk.NORMAL)
         else:
-            main_window.global_action_combinatorial_button.config(state=DISABLED)
+            main_window.global_action_combinatorial_button.config(state=tk.DISABLED)
         canvas_editing.state_radius                                  = design_dictionary["state_radius"]
         canvas_editing.reset_entry_size                              = int(design_dictionary["reset_entry_size"]) # stored as float in dictionary
         canvas_editing.priority_distance                             = int(design_dictionary["priority_distance"])# stored as float in dictionary
@@ -699,9 +708,9 @@ def open_file_with_name_new(read_filename):
             main_window.canvas.tag_bind(trans_id, "<Leave>",  lambda event, trans_id=trans_id : main_window.canvas.itemconfig(trans_id, width=1))
             for t in tags:
                 if t.startswith("connected_to_transition"):
-                    main_window.canvas.itemconfig(trans_id, dash=(2,2), state=HIDDEN)
-                elif t.startswith("connected_to_state"):
-                    main_window.canvas.itemconfig(trans_id, dash=(2,2))
+                    main_window.canvas.itemconfig(trans_id, dash=(2,2), fill="black", state=tk.HIDDEN)
+                elif t.startswith("connected_to_state") or t.endswith("_comment_line"):
+                    main_window.canvas.itemconfig(trans_id, dash=(2,2), fill="black")
                 elif t.startswith("transition"):
                     main_window.canvas.itemconfig(trans_id, arrow='last')
                     main_window.canvas.tag_bind(trans_id,"<Button-3>",lambda event, id=trans_id : transition_handling.show_menu(event, id))
@@ -712,10 +721,10 @@ def open_file_with_name_new(read_filename):
             for t in tags:
                 if t.startswith("connector"):
                     rectangle_color = 'violet'
-            id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
+            canvas_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
             if rectangle_color=="cyan":
-                rectangle_ids.append(id)
-            rectangle_ids.append(id)
+                rectangle_ids.append(canvas_id)
+            rectangle_ids.append(canvas_id)
             #main_window.canvas.tag_raise(id) # priority rectangles are always in "foreground"
         for definition in design_dictionary["window_state_action_block"]:
             coords = definition[0]
@@ -725,6 +734,15 @@ def open_file_with_name_new(read_filename):
             action_ref.text_id.insert("1.0", text)
             action_ref.text_id.format()
             main_window.canvas.itemconfigure(action_ref.window_id,tag=tags)
+        if "window_state_comment" in design_dictionary: # HDL-FSM-versions before 4.2 did not support state-comments.
+            for definition in design_dictionary["window_state_comment"]:
+                coords = definition[0]
+                text   = definition[1]
+                tags   = definition[2]
+                comment_ref = state_comment.StateComment(coords[0]-100, coords[1], height=1, width=8, padding=1)
+                comment_ref.text_id.insert("1.0", text)
+                comment_ref.text_id.format()
+                main_window.canvas.itemconfigure(comment_ref.window_id,tag=tags)
         for definition in design_dictionary["window_condition_action_block"]:
             coords    = definition[0]
             condition = definition[1]
@@ -739,10 +757,10 @@ def open_file_with_name_new(read_filename):
             condition_action_ref.condition_id.format()
             condition_action_ref.action_id.insert("1.0", action)
             condition_action_ref.action_id.format()
-            if condition_action_ref.condition_id.get("1.0", END)=="\n" and condition_action_ref.action_id.get("1.0", END)!="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)=="\n" and condition_action_ref.action_id.get("1.0", tk.END)!="\n":
                 condition_action_ref.condition_label.grid_forget()
                 condition_action_ref.condition_id.grid_forget()
-            if condition_action_ref.condition_id.get("1.0", END)!="\n" and condition_action_ref.action_id.get("1.0", END)=="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)!="\n" and condition_action_ref.action_id.get("1.0", tk.END)=="\n":
                 condition_action_ref.action_label.grid_forget()
                 condition_action_ref.action_id.grid_forget()
             main_window.canvas.itemconfigure(condition_action_ref.window_id,tag=tags)

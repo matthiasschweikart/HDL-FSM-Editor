@@ -26,10 +26,16 @@ def move_initialization(event):
 
 def move_initialization_overlapping(event, event_x, event_y):
     items_near_mouse_click_location = create_a_list_of_overlapping_items_near_the_mouse_click_location(event_x, event_y)
-    if items_near_mouse_click_location==(): return
-    if mouse_click_happened_in_state_name     (items_near_mouse_click_location) : return # The state name shall be changed and no moving is required.
-    if mouse_click_happened_in_priority_number(items_near_mouse_click_location) : return # The priority shall be changed and no moving is required.
-    if mouse_click_happened_in_connection_line(items_near_mouse_click_location) : return # No connection-line can be moved.
+    if items_near_mouse_click_location==():
+        return
+    if mouse_click_happened_in_state_name     (items_near_mouse_click_location):
+        return # The state name shall be changed and no moving is required.
+    if mouse_click_happened_in_priority_number(items_near_mouse_click_location):
+        return # The priority shall be changed and no moving is required.
+    if mouse_click_happened_in_connection_line(items_near_mouse_click_location):
+        return # No connection-line can be moved.
+    if mouse_click_happened_in_state_comment_line(items_near_mouse_click_location):
+        return # No state-comment-line can be moved.
     move_list = create_move_list(items_near_mouse_click_location, event_x, event_y)
     # The move_list has an entry for each item, which must be moved.
     # The first entry contains always the object, the user wants to move.
@@ -44,10 +50,10 @@ def move_initialization_overlapping(event, event_x, event_y):
     # The second value is only different from "" at transitions:
     # There the point of the line which has to bemoved is stored as a string: 'start', 'next_to_start', 'next_to_end', 'end'.
     # The third value is the tag of the transition to which the moved condition_action belongs.
-    
+
     # Give the user a feedback, that an object was picked up for moving, by moving the objects of the moving list immediately to the actual position of the mouse:
     move_handling.move_do(event, move_list, first=True)
-    
+
     # Create a binding for the now following movements of the mouse and for finishing the moving:
     move_do_funcid = main_window.canvas.bind('<Motion>', lambda event, move_list=move_list:
                                   move_handling.move_do(event, move_list, first=False), add='+') # Must be "added", as store_mouse_position is already bound to "Motion".
@@ -66,16 +72,12 @@ def create_a_list_of_overlapping_items_near_the_mouse_click_location(event_x, ev
     # so that the user can click beneath the window and catch it.
     return main_window.canvas.find_overlapping(event_x-6, event_y-6, event_x+6, event_y+6) # Find which Canvas-Items are near to the mouse-click.
 def mouse_click_happened_in_state_name(items_near_mouse_click_location):
-    if len(items_near_mouse_click_location)==2:
-        list_item_types = []
-        for item_id in items_near_mouse_click_location:
-            list_item_types.append(main_window.canvas.type(item_id))
-        if "oval" in list_item_types and "text" in list_item_types:
-            return True
-        else:
-            return False
-    else:
-        return False
+    list_item_types = []
+    for item_id in items_near_mouse_click_location:
+        list_item_types.append(main_window.canvas.type(item_id))
+    if "oval" in list_item_types and "text" in list_item_types:
+        return True
+    return False
 def mouse_click_happened_in_priority_number(items_near_mouse_click_location):
     list_item_types = []
     for item_id in items_near_mouse_click_location:
@@ -86,17 +88,25 @@ def mouse_click_happened_in_priority_number(items_near_mouse_click_location):
         return False
 def mouse_click_happened_in_connection_line(items_near_mouse_click_location):
     for item_id in items_near_mouse_click_location:
-        if main_window.canvas.type(item_id)=="line": 
+        if main_window.canvas.type(item_id)=="line":
             tags = main_window.canvas.gettags(item_id)
             for t in tags:
                 if t.startswith("connected_to"):
                     return True
     return False
-   
+def mouse_click_happened_in_state_comment_line(items_near_mouse_click_location):
+    for item_id in items_near_mouse_click_location:
+        if main_window.canvas.type(item_id)=="line":
+            tags = main_window.canvas.gettags(item_id)
+            for t in tags:
+                if t.startswith("state") and t.endswith("_comment_line"):
+                    return True
+    return False
+
 def create_move_list(items_near_mouse_click_location, event_x, event_y):
     move_list = []
     move_list_entry_for_diagram_object = create_move_list_entry_if_a_diagram_object_is_moved(items_near_mouse_click_location)
-    if move_list_entry_for_diagram_object!=None:
+    if move_list_entry_for_diagram_object is not None:
         move_list.append(move_list_entry_for_diagram_object)
         add_lines_connected_to_the_diagram_object_to_the_list(move_list)
     else: # A Canvas line point is moved.
@@ -148,7 +158,7 @@ def add_items_for_moving_a_single_line_point_to_the_list( move_list, items_near_
         for tag in transition_tags:
             if tag.startswith("transition"):
                 id_of_transition = main_window.canvas.find_withtag(tag)[0]
-                move_list.append([id_of_transition, moving_point]) # moving point is one of: "start", "next_to_start", "next_to_end", "end" as at maximum 4 points in a line are supported.
+                move_list.append([id_of_transition, moving_point]) # moving point is one of: "start", "next_to_start", "next_to_end", "end" as at maximum 4 points are supported
                 transition_handling.extend_to_middle_points(tag)
                 transition_tag = tag
         # Remove tags, which are not valid anymore:

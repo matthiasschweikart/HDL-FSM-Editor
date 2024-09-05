@@ -1,3 +1,6 @@
+"""
+This module contains all methods to create the main-window of the HDL-FSM-Editor.
+"""
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -20,7 +23,7 @@ import compile_handling
 import constants
 import link_dictionary
 
-VERSION = "4.1"
+VERSION = "4.2"
 header_string ="HDL-FSM-Editor\nVersion " + VERSION + "\nCreated by Matthias Schweikart\nContact: matthias.schweikart@gmx.de"
 
 state_action_default_button        = None
@@ -70,6 +73,7 @@ regex_file_name_quote        = "\\1"
 regex_file_line_number_quote = "\\2"
 regex_dialog_entry = None
 regex_dialog_filename_entry = None
+regex_dialog_linenumber_entry = None
 regex_error_happened = False
 line_number_under_pointer_log_tab = 0
 line_number_under_pointer_hdl_tab = 0
@@ -283,7 +287,9 @@ def create_control_notebook_tab():
     control_frame.columnconfigure((6,0), weight=0)
     control_frame.columnconfigure((6,1), weight=1)
 
-    compile_cmd_docu  = ttk.Label (control_frame, text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t= File with Entity and Architecture\n$name\t= Module Name", padding=5)
+    compile_cmd_docu  = ttk.Label (control_frame,
+                        text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t= File with Entity and Architecture\n$name\t= Module Name",
+                        padding=5)
     compile_cmd_docu.grid (row=7, column=1, sticky=tk.W)
     control_frame.columnconfigure((7,0), weight=0)
     control_frame.columnconfigure((7,1), weight=1)
@@ -324,7 +330,7 @@ def set_working_directory():
 def create_interface_notebook_tab():
     global interface_package_text, interface_generics_text, interface_ports_text
     global interface_package_label, interface_package_scroll
-    global interface_generics_label, interface_ports_label, internals_package_label, internals_package_scroll
+    global interface_generics_label, interface_ports_label
 
     interface_frame = ttk.Frame(notebook)
     interface_frame.grid()
@@ -519,15 +525,15 @@ def create_diagram_notebook_tab():
     minus_button.bind                      ('<Button-1>', lambda event: canvas_editing.zoom_minus())
 
     canvas.bind_all('<Delete>'            , lambda event: canvas_editing.delete())
-    canvas.bind    ('<Button-1>'          , lambda event: move_handling_initialization.move_initialization(event))
-    canvas.bind    ('<Motion>'            , lambda event: canvas_editing.store_mouse_position(event))
-    canvas.bind    ("<Control-MouseWheel>", lambda event: canvas_editing.zoom_wheel          (event)) # MouseWheel used at Windows.
-    canvas.bind    ("<Control-Button-4>"  , lambda event: canvas_editing.zoom_wheel          (event)) # MouseWheel-Scroll-Up used at Linux.
-    canvas.bind    ("<Control-Button-5>"  , lambda event: canvas_editing.zoom_wheel          (event)) # MouseWheel-Scroll-Down used at Linux.
-    canvas.bind    ('<Control-Button-1>'  , lambda event: canvas_editing.scroll_start        (event))
-    canvas.bind    ('<Control-B1-Motion>' , lambda event: canvas_editing.scroll_move         (event))
-    canvas.bind    ("<MouseWheel>"        , lambda event: canvas_editing.scroll_wheel        (event))
-    canvas.bind    ('<Button-3>'          , lambda event: canvas_editing.start_view_rectangle(event))
+    canvas.bind    ('<Button-1>'          , move_handling_initialization.move_initialization)
+    canvas.bind    ('<Motion>'            , canvas_editing.store_mouse_position)
+    canvas.bind    ("<Control-MouseWheel>", canvas_editing.zoom_wheel          ) # MouseWheel used at Windows.
+    canvas.bind    ("<Control-Button-4>"  , canvas_editing.zoom_wheel          ) # MouseWheel-Scroll-Up used at Linux.
+    canvas.bind    ("<Control-Button-5>"  , canvas_editing.zoom_wheel          ) # MouseWheel-Scroll-Down used at Linux.
+    canvas.bind    ('<Control-Button-1>'  , canvas_editing.scroll_start        )
+    canvas.bind    ('<Control-B1-Motion>' , canvas_editing.scroll_move         )
+    canvas.bind    ("<MouseWheel>"        , canvas_editing.scroll_wheel        )
+    canvas.bind    ('<Button-3>'          , canvas_editing.start_view_rectangle)
 
     canvas_editing.create_font_for_state_names()
 
@@ -759,9 +765,6 @@ def cursor_move_log_tab(*_):
 
 
 def switch_language_mode():
-    global select_file_number_label, select_file_number_frame
-    global interface_package_label, interface_package_scroll
-    global internals_package_label, internals_package_scroll
     global keywords, keyword_color
     keyword_color = {"not_read": "orange", "not_written": "red", "control": "green4", "datatype": "brown", "function": "violet", "comment": "blue"}
     new_language = language.get()
@@ -788,9 +791,10 @@ def switch_language_mode():
         internals_process_combinatorial_label.config(text="Variable Declarations for combinatorial process:")
         # Modify compile command:
         compile_cmd.set("ghdl -a $file1 $file2; ghdl -e $name; ghdl -r $name")
-        compile_cmd_docu.config(text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t= File with Entity and Architecture\n$name\t= Entity Name")
+        compile_cmd_docu.config(text=
+                            "Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t= File with Entity and Architecture\n$name\t= Entity Name")
     else: # "Verilog" or "SystemVerilog"
-        keywords = constants.verilog_keywords 
+        keywords = constants.verilog_keywords
         # Control: disable 2 files mode
         select_file_number_text.set(1)
         select_file_number_label.grid_forget()
@@ -819,30 +823,30 @@ def switch_language_mode():
             compile_cmd.set("iverilog -g2012 -o $name $file; vvp $name")
         compile_cmd_docu.config(text="Variables for compile command:\n$file\t= Module-File\n$name\t= Module Name")
 
-def handle_tab(id):
-    id.insert(tk.INSERT,"    ") # replace the Tab by 4 blanks.
-    return "break" # This prevents the "Tab" to be inserted in the text.
 
-def handle_key(event, id):
-    id.after_idle(id.update_highlight_tags, canvas_editing.fontsize, ["control" , "datatype" , "function" , "comment"])
 
-def handle_key_at_ports(id):
-    id.after_idle(update_custom_text_instance_of_ports, id)
-def update_custom_text_instance_of_ports(text_id):
-    text_id.update_custom_text_class_ports_list()
-    text_id.update_highlighting()
 
-def handle_key_at_generics(id):
-    id.after_idle(update_custom_text_instance_of_generics, id)
-def update_custom_text_instance_of_generics(id):
-    id.update_custom_text_class_generics_list()
-    id.update_highlighting()
 
-def handle_key_at_declarations(id):
-    id.after_idle(id.update_custom_text_class_signals_list)
-    id.after_idle(id.update_highlighting)
+def handle_key(event, custom_text_ref):
+    custom_text_ref.after_idle(custom_text_ref.update_highlight_tags, canvas_editing.fontsize, ["control" , "datatype" , "function" , "comment"])
 
-def show_path_has_changed(*args):
+def handle_key_at_ports(custom_text_ref):
+    custom_text_ref.after_idle(update_custom_text_instance_of_ports, custom_text_ref)
+def update_custom_text_instance_of_ports(custom_text_ref):
+    custom_text_ref.update_custom_text_class_ports_list()
+    custom_text_ref.update_highlighting()
+
+def handle_key_at_generics(custom_text_ref):
+    custom_text_ref.after_idle(update_custom_text_instance_of_generics, custom_text_ref)
+def update_custom_text_instance_of_generics(custom_text_ref):
+    custom_text_ref.update_custom_text_class_generics_list()
+    custom_text_ref.update_highlighting()
+
+def handle_key_at_declarations(custom_text_ref):
+    custom_text_ref.after_idle(custom_text_ref.update_custom_text_class_signals_list)
+    custom_text_ref.after_idle(custom_text_ref.update_highlighting)
+
+def show_path_has_changed(*_):
     undo_handling.design_has_changed()
 
 def show_tab(tab):
@@ -851,7 +855,9 @@ def show_tab(tab):
         if notebook.tab(tab_id, option="text")==tab:
             notebook.select(tab_id)
 
-def highlight_item(hdl_item_type, object_identifier, number_of_line):
+def highlight_item(hdl_item_type, *_):
+    # This method must have the same name as the method custom_text.CustomText.highlight_item.
+    # It is called, when in the "generated HDL"-tab module-name, reset-name or clock-name are clicked per mouse to jump to its declaration.
     if hdl_item_type=="module_name":
         module_name_entry.select_range(0, tk.END)
     elif hdl_item_type=="reset_and_clock_signal_name":

@@ -1,4 +1,7 @@
-from tkinter import *
+"""
+This module contains all method to support "undo" and "redo".
+"""
+import tkinter as tk
 import re
 import state_handling
 import transition_handling
@@ -12,6 +15,7 @@ import global_actions
 import global_actions_combinatorial
 import global_actions_handling
 import main_window
+import state_comment
 #import inspect
 
 stack = []
@@ -36,7 +40,7 @@ def undo():
     # As <Control-z> is bound with the bind_all-command to the diagram, this binding must be ignored, when
     # the focus is on a customtext-widget: Then a Control-z must change the text and must not change the diagram.
     focus = str(main_window.canvas.focus_get())
-    if (not "customtext" in focus and stack_write_pointer>1):
+    if ("customtext" not in focus and stack_write_pointer>1):
         stack_write_pointer -= 2
         set_diagram_to_version_selected_by_stack_pointer()
         stack_write_pointer += 1
@@ -51,13 +55,12 @@ def redo():
     # As <Control-Z> is bound with the bind_all-command to the diagram, this binding must be ignored, when
     # the focus is on the customtext-widget: Then a Control-Z must change the text and must not change the diagram.
     focus = str(main_window.canvas.focus_get())
-    if (not "customtext" in focus and stack_write_pointer<len(stack)):
+    if ("customtext" not in focus and stack_write_pointer<len(stack)):
         set_diagram_to_version_selected_by_stack_pointer()
         stack_write_pointer += 1
         #print("Redo                       : After redo,    stack_write_pointer =", stack_write_pointer)
 
 def add_changes_to_design_stack():
-    global stack
     global stack_write_pointer
     remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
     new_design = get_complete_design_as_text_object()
@@ -65,7 +68,6 @@ def add_changes_to_design_stack():
     stack_write_pointer += 1
 
 def remove_stack_entries_from_write_pointer_to_the_end_of_the_stack():
-    global stack
     if len(stack)>stack_write_pointer:
         del stack[stack_write_pointer:]
 
@@ -93,13 +95,27 @@ def get_complete_design_as_text_object ():
     design += "fontsize|"                            + str(canvas_editing.fontsize)                                     + "\n"
     design += "label_fontsize|"                      + str(canvas_editing.label_fontsize)                               + "\n"
     design += "visible_center|"                      + canvas_editing.get_visible_center_as_string()                    + "\n"
-    design += "interface_package|"               + str(len(main_window.interface_package_text.get              ("1.0",END))-1) + "|" + main_window.interface_package_text.get              ("1.0",END)
-    design += "interface_generics|"              + str(len(main_window.interface_generics_text.get             ("1.0",END))-1) + "|" + main_window.interface_generics_text.get             ("1.0",END)
-    design += "interface_ports|"                 + str(len(main_window.interface_ports_text.get                ("1.0",END))-1) + "|" + main_window.interface_ports_text.get                ("1.0",END)
-    design += "internals_package|"               + str(len(main_window.internals_package_text.get              ("1.0",END))-1) + "|" + main_window.internals_package_text.get              ("1.0",END)
-    design += "internals_architecture|"          + str(len(main_window.internals_architecture_text.get         ("1.0",END))-1) + "|" + main_window.internals_architecture_text.get         ("1.0",END)
-    design += "internals_process|"               + str(len(main_window.internals_process_clocked_text.get      ("1.0",END))-1) + "|" + main_window.internals_process_clocked_text.get      ("1.0",END)
-    design += "internals_process_combinatorial|" + str(len(main_window.internals_process_combinatorial_text.get("1.0",END))-1) + "|" + main_window.internals_process_combinatorial_text.get("1.0",END)
+    design += ("interface_package|" +
+               str(len(main_window.interface_package_text              .get("1.0",tk.END))-1) + "|" +
+                       main_window.interface_package_text              .get("1.0",tk.END))
+    design += ("interface_generics|" +
+               str(len(main_window.interface_generics_text             .get("1.0",tk.END))-1) + "|" +
+                       main_window.interface_generics_text             .get("1.0",tk.END))
+    design += ("interface_ports|" +
+               str(len(main_window.interface_ports_text                .get("1.0",tk.END))-1) + "|" +
+                       main_window.interface_ports_text                .get("1.0",tk.END))
+    design += ("internals_package|" +
+               str(len(main_window.internals_package_text              .get("1.0",tk.END))-1) + "|" +
+                       main_window.internals_package_text              .get("1.0",tk.END))
+    design += ("internals_architecture|" +
+               str(len(main_window.internals_architecture_text         .get("1.0",tk.END))-1) + "|" +
+                       main_window.internals_architecture_text         .get("1.0",tk.END))
+    design += ("internals_process|" +
+               str(len(main_window.internals_process_clocked_text      .get("1.0",tk.END))-1) + "|" +
+                       main_window.internals_process_clocked_text      .get("1.0",tk.END))
+    design += ("internals_process_combinatorial|" +
+               str(len(main_window.internals_process_combinatorial_text.get("1.0",tk.END))-1) + "|" +
+                       main_window.internals_process_combinatorial_text.get("1.0",tk.END))
     items = main_window.canvas.find_all()
     print_tags = False
     for i in items:
@@ -132,38 +148,44 @@ def get_complete_design_as_text_object ():
         elif main_window.canvas.type(i)=="window":
             if i in state_action_handling.MyText.mytext_dict:
                 design += "window_state_action_block|"
-                text = state_action_handling.MyText.mytext_dict[i].text_id.get("1.0", END)
+                text = state_action_handling.MyText.mytext_dict[i].text_id.get("1.0", tk.END)
+                design += str(len(text)) + "|"
+                design += text
+                design += get_coords(i)
+            elif i in state_comment.StateComment.dictionary:
+                design += "window_state_comment|"
+                text = state_comment.StateComment.dictionary[i].text_id.get("1.0", tk.END)
                 design += str(len(text)) + "|"
                 design += text
                 design += get_coords(i)
             elif i in condition_action_handling.ConditionAction.dictionary:
                 design += "window_condition_action_block|"
-                text = condition_action_handling.ConditionAction.dictionary[i].condition_id.get("1.0", END)
+                text = condition_action_handling.ConditionAction.dictionary[i].condition_id.get("1.0", tk.END)
                 design += str(len(text)) + "|"
                 design += text
-                text = condition_action_handling.ConditionAction.dictionary[i].action_id.get("1.0", END)
+                text = condition_action_handling.ConditionAction.dictionary[i].action_id.get("1.0", tk.END)
                 design += str(len(text)) + "|"
                 design += text
                 design += get_coords(i)
                 print_tags = True
             elif i in global_actions.GlobalActions.dictionary:
                 design += "window_global_actions|"
-                text_before = global_actions.GlobalActions.dictionary[i].text_before_id.get("1.0", END)
+                text_before = global_actions.GlobalActions.dictionary[i].text_before_id.get("1.0", tk.END)
                 design += str(len(text_before)) + "|"
                 design += text_before
-                text_after = global_actions.GlobalActions.dictionary[i].text_after_id.get("1.0", END)
+                text_after = global_actions.GlobalActions.dictionary[i].text_after_id.get("1.0", tk.END)
                 design += str(len(text_after)) + "|"
                 design += text_after
                 design += get_coords(i)
             elif i in global_actions_combinatorial.GlobalActionsCombinatorial.dictionary:
                 design += "window_global_actions_combinatorial|"
-                text = global_actions_combinatorial.GlobalActionsCombinatorial.dictionary[i].text_id.get("1.0", END)
+                text = global_actions_combinatorial.GlobalActionsCombinatorial.dictionary[i].text_id.get("1.0", tk.END)
                 design += str(len(text)) + "|"
                 design += text
                 design += get_coords(i)
             elif i in state_actions_default.StateActionsDefault.dictionary:
                 design += "window_state_actions_default|"
-                text = state_actions_default.StateActionsDefault.dictionary[i].text_id.get("1.0", END)
+                text = state_actions_default.StateActionsDefault.dictionary[i].text_id.get("1.0", tk.END)
                 design += str(len(text)) + "|"
                 design += text
                 design += get_coords(i)
@@ -174,19 +196,19 @@ def get_complete_design_as_text_object ():
                 print_tags = False
             design += " \n"
     return design
-def get_coords(id):
-        coords = main_window.canvas.coords(id)
-        coords_string = ""
-        for c in coords:
-            coords_string += str(c) + " "
-        return coords_string
-def get_tags(id):
-        tags = main_window.canvas.gettags(id)
-        tags_string = ""
-        for t in tags:
-            tags_string += str(t) + " "
-        #print("get_tags: tags_string =", tags_string)
-        return tags_string
+def get_coords(canvas_id):
+    coords = main_window.canvas.coords(canvas_id)
+    coords_string = ""
+    for c in coords:
+        coords_string += str(c) + " "
+    return coords_string
+def get_tags(canvas_id):
+    tags = main_window.canvas.gettags(canvas_id)
+    tags_string = ""
+    for t in tags:
+        tags_string += str(t) + " "
+    #print("get_tags: tags_string =", tags_string)
+    return tags_string
 line_index = 0
 def set_diagram_to_version_selected_by_stack_pointer():
     global line_index
@@ -196,9 +218,9 @@ def set_diagram_to_version_selected_by_stack_pointer():
     main_window.canvas.delete("all")
     # Bring the notebook tab with the diagram into the foreground:
     notebook_ids = main_window.notebook.tabs()
-    for id in notebook_ids:
-        if main_window.notebook.tab(id, option="text")=="Graph":
-            main_window.notebook.select(id)
+    for notebook_id in notebook_ids:
+        if main_window.notebook.tab(notebook_id, option="text")=="Graph":
+            main_window.notebook.select(notebook_id)
     # Read the design from the stack:
     design = stack[stack_write_pointer]
     # Convert the string stored in "design" into a list (bit provide a return at each line end, to have the same format as when reading from a file):
@@ -219,9 +241,9 @@ def set_diagram_to_version_selected_by_stack_pointer():
             rest_of_line   = remove_keyword_from_line(lines[line_index],"reset_entry_number|")
             reset_entry_handling.reset_entry_number = int(rest_of_line)
             if reset_entry_handling.reset_entry_number==0:
-                main_window.reset_entry_button.config(state=NORMAL)
+                main_window.reset_entry_button.config(state=tk.NORMAL)
             else:
-                main_window.reset_entry_button.config(state=DISABLED)
+                main_window.reset_entry_button.config(state=tk.DISABLED)
         elif lines[line_index].startswith("connector_number|"):
             rest_of_line   = remove_keyword_from_line(lines[line_index],"connector_number|")
             connector_handling.connector_number = int(rest_of_line)
@@ -235,23 +257,23 @@ def set_diagram_to_version_selected_by_stack_pointer():
             rest_of_line   = remove_keyword_from_line(lines[line_index],"state_actions_default_number|")
             global_actions_handling.state_actions_default_number = int(rest_of_line)
             if global_actions_handling.state_actions_default_number==0:
-                main_window.state_action_default_button.config(state=NORMAL)
+                main_window.state_action_default_button.config(state=tk.NORMAL)
             else:
-                main_window.state_action_default_button.config(state=DISABLED)
+                main_window.state_action_default_button.config(state=tk.DISABLED)
         elif lines[line_index].startswith("global_actions_number|"):
             rest_of_line   = remove_keyword_from_line(lines[line_index],"global_actions_number|")
             global_actions_handling.global_actions_clocked_number = int(rest_of_line)
             if global_actions_handling.global_actions_clocked_number==0:
-                main_window.global_action_clocked_button.config(state=NORMAL)
+                main_window.global_action_clocked_button.config(state=tk.NORMAL)
             else:
-                main_window.global_action_clocked_button.config(state=DISABLED)
+                main_window.global_action_clocked_button.config(state=tk.DISABLED)
         elif lines[line_index].startswith("global_actions_combinatorial_number|"):
             rest_of_line   = remove_keyword_from_line(lines[line_index],"global_actions_combinatorial_number|")
             global_actions_handling.global_actions_combinatorial_number = int(rest_of_line)
             if global_actions_handling.global_actions_combinatorial_number==0:
-                main_window.global_action_combinatorial_button.config(state=NORMAL)
+                main_window.global_action_combinatorial_button.config(state=tk.NORMAL)
             else:
-                main_window.global_action_combinatorial_button.config(state=DISABLED)
+                main_window.global_action_combinatorial_button.config(state=tk.DISABLED)
         elif lines[line_index].startswith("state_radius|"):
             rest_of_line   = remove_keyword_from_line(lines[line_index],"state_radius|")
             canvas_editing.state_radius = float(rest_of_line)
@@ -334,9 +356,9 @@ def set_diagram_to_version_selected_by_stack_pointer():
             main_window.canvas.tag_bind(trans_id, "<Leave>",  lambda event, trans_id=trans_id : main_window.canvas.itemconfig(trans_id, width=1))
             for t in tags:
                 if t.startswith("connected_to_transition"):
-                    main_window.canvas.itemconfig(trans_id, dash=(2,2), state=HIDDEN)
-                elif t.startswith("connected_to_state"):
-                    main_window.canvas.itemconfig(trans_id, dash=(2,2))
+                    main_window.canvas.itemconfig(trans_id, dash=(2,2), fill="black", state=tk.HIDDEN)
+                elif t.startswith("connected_to_state") or t.endswith("_comment_line"):
+                    main_window.canvas.itemconfig(trans_id, dash=(2,2), fill="black")
                 elif t.startswith("transition"):
                     main_window.canvas.itemconfig(trans_id, arrow='last')
                     main_window.canvas.tag_bind(trans_id,"<Button-3>",lambda event, id=trans_id : transition_handling.show_menu(event, id))
@@ -355,8 +377,8 @@ def set_diagram_to_version_selected_by_stack_pointer():
             for t in tags:
                 if t.startswith("connector"):
                     rectangle_color = 'violet'
-            id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
-            main_window.canvas.tag_raise(id) # priority rectangles are always in "foreground"
+            notebook_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
+            main_window.canvas.tag_raise(notebook_id) # priority rectangles are always in "foreground"
         elif lines[line_index].startswith("window_state_action_block|"): # state_action
             rest_of_line = remove_keyword_from_line(lines[line_index],"window_state_action_block|")
             text         = get_data(rest_of_line, lines)
@@ -375,6 +397,24 @@ def set_diagram_to_version_selected_by_stack_pointer():
             action_ref.text_id.insert("1.0", text)
             action_ref.text_id.format()
             main_window.canvas.itemconfigure(action_ref.window_id,tag=tags)
+        elif lines[line_index].startswith("window_state_comment|"):
+            rest_of_line = remove_keyword_from_line(lines[line_index],"window_state_comment|")
+            text         = get_data(rest_of_line, lines)
+            coords = []
+            tags = ()
+            line_index += 1
+            last_line = lines[line_index]
+            entries = last_line.split()
+            for e in entries:
+                try:
+                    v = float(e)
+                    coords.append(v)
+                except ValueError:
+                    tags = tags + (e,)
+            comment_ref = state_comment.StateComment(coords[0]-100, coords[1], height=1, width=8, padding=1)
+            comment_ref.text_id.insert("1.0", text)
+            comment_ref.text_id.format()
+            main_window.canvas.itemconfigure(comment_ref.window_id,tag=tags)
         elif lines[line_index].startswith("window_condition_action_block|"):
             rest_of_line = remove_keyword_from_line(lines[line_index],"window_condition_action_block|")
             condition    = get_data(rest_of_line, lines)
@@ -401,10 +441,10 @@ def set_diagram_to_version_selected_by_stack_pointer():
             condition_action_ref.condition_id.format()
             condition_action_ref.action_id.insert("1.0", action)
             condition_action_ref.action_id.format()
-            if condition_action_ref.condition_id.get("1.0", END)=="\n" and condition_action_ref.action_id.get("1.0", END)!="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)=="\n" and condition_action_ref.action_id.get("1.0", tk.END)!="\n":
                 condition_action_ref.condition_label.grid_forget()
                 condition_action_ref.condition_id.grid_forget()
-            if condition_action_ref.condition_id.get("1.0", END)!="\n" and condition_action_ref.action_id.get("1.0", END)=="\n":
+            if condition_action_ref.condition_id.get("1.0", tk.END)!="\n" and condition_action_ref.action_id.get("1.0", tk.END)=="\n":
                 condition_action_ref.action_label.grid_forget()
                 condition_action_ref.action_id.grid_forget()
             main_window.canvas.itemconfigure(condition_action_ref.window_id,tag=tags)
@@ -486,7 +526,7 @@ def remove_length_info(rest_of_line):
 def get_remaining_data(lines, length_of_data, first_data):
     global line_index
     data = first_data
-    while(len(data)<length_of_data):
+    while len(data)<length_of_data:
         line_index += 1
         data = data + lines[line_index]
     return data[:-1]

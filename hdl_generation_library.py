@@ -1,4 +1,7 @@
-from tkinter import *
+"""
+This module contains methods used at HDL generation.
+"""
+import tkinter as tk
 from tkinter import messagebox
 import re
 
@@ -8,6 +11,7 @@ import global_actions_handling
 import global_actions
 import global_actions_combinatorial
 import canvas_editing
+import state_comment
 
 def indent_text_by_the_given_number_of_tabs(number_of_tabs, text):
     keep_newline_at_each_line_end = True
@@ -20,7 +24,7 @@ def indent_text_by_the_given_number_of_tabs(number_of_tabs, text):
     return result_string
 
 def get_text_from_text_widget(wiget_id):
-    text = wiget_id.get("1.0", END + "-1 chars")
+    text = wiget_id.get("1.0", tk.END + "-1 chars")
     if text!="":
         return text + "\n"
     return ""
@@ -43,7 +47,7 @@ def get_a_list_of_all_state_names():
     state_name_list_sorted = sorted(state_name_list)
     try:
         state_name_list_sorted.remove(first_state_name)
-    except Exception as e:
+    except Exception as _:
         pass
     state_name_list_sorted = [first_state_name] + state_name_list_sorted
     return state_name_list_sorted
@@ -70,12 +74,12 @@ mouse button at the transition from the reset-connector
 to the state, which shall be reached by active reset.""")
     else:
         reference_to_reset_condition_custom_text = ref.condition_id
-        condition = reference_to_reset_condition_custom_text.get("1.0", END + "-1 chars") # without "return" at the end
+        condition = reference_to_reset_condition_custom_text.get("1.0", tk.END + "-1 chars") # without "return" at the end
         all_reset_transition_tags = main_window.canvas.gettags(reset_transition_tag)
         target_state_name = get_target_state_name(all_reset_transition_tags)
         action  = "state <= " + target_state_name + ";\n"
         reference_to_reset_action_custom_text = ref.action_id
-        action_text = reference_to_reset_action_custom_text.get("1.0", END) # action_text will always have a return as last character.
+        action_text = reference_to_reset_action_custom_text.get("1.0", tk.END) # action_text will always have a return as last character.
         if action_text!="\n": # check for empty line
             action += action_text
     return [condition, action, reference_to_reset_condition_custom_text, reference_to_reset_action_custom_text]
@@ -126,10 +130,19 @@ def get_target_tag_of_transition(transition_tag):
             return transition_tag[9:]
 
 def extract_transition_specifications_from_the_graph():
-    list_of_all_state_tags = get_a_list_of_all_state_tags()
+    list_of_all_state_tags = get_a_list_of_all_state_tags() # list_of_all_state_tags = ["state1", "state2", ...]
     transition_specifications = []
     for state_tag in list_of_all_state_tags:
-        state_name      = main_window.canvas.itemcget(state_tag + "_name", "text")
+        state_name = main_window.canvas.itemcget(state_tag + "_name", "text")
+        all_tags_of_state = main_window.canvas.gettags(state_tag)
+        if state_tag + "_comment_line_end" in all_tags_of_state:
+            canvas_id_of_comment_window = main_window.canvas.find_withtag(state_tag + "_comment")[0]
+            reference_to_state_comment_window = state_comment.StateComment.dictionary[canvas_id_of_comment_window]
+            canvas_id_of_comment_text_widget = reference_to_state_comment_window.text_id
+            state_comments = reference_to_state_comment_window.text_id.get("1.0", "end")
+        else:
+            canvas_id_of_comment_text_widget = None
+            state_comments = ""
         condition_level = 0
         moved_actions   = []
         trace           = []
@@ -137,7 +150,8 @@ def extract_transition_specifications_from_the_graph():
         extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, state_tag, moved_actions, condition_level,
                                                                      trace, trace_array
                                                                      )
-        transition_specifications.append({"state_name": state_name, "command" : "when"})
+        transition_specifications.append({"state_name": state_name, "command" : "when",
+                                          "state_comments": state_comments, "state_comments_canvas_id": canvas_id_of_comment_text_widget})
         #print("state_tag = ", state_tag)
         #print("trace_array = ", trace_array)
         transition_specifications += merge_trace_array(trace_array)
@@ -299,7 +313,8 @@ def merge_trace_array(trace_array):
             if (trace!=[] and trace[0]["command"]!="if" and
                 trace_index!=0):  # Check is only done, when more than 1 trace exists.
                 messagebox.showerror("Warning",
-                'There is a transition starting at ' + trace[0]["state_name"] + ' which has no condition but does not have the lowest priority,\ntherefore the generated HDL may be corrupted.')
+                'There is a transition starting at ' + trace[0]["state_name"] +
+                ' which has no condition but does not have the lowest priority,\ntherefore the generated HDL may be corrupted.')
         else:
             if trace: # An empty trace may happen, when the transition with lowest priority has no condition and action (and has a connector?!).
                 first_command_of_trace      = trace[0]["command"]+trace[0]["condition"]
@@ -307,7 +322,8 @@ def merge_trace_array(trace_array):
                 if (trace[0]["command"]!="if" and
                     trace_index!=0):  # All traces except the trace with the lowest priority must start with an "if".
                     messagebox.showerror("Warning",
-                    'There is a transition starting at ' + trace[0]["state_name"] + ' which has no condition but does not have the lowest priority,\ntherefore the generated HDL may be corrupted.')
+                    'There is a transition starting at ' + trace[0]["state_name"] +
+                    ' which has no condition but does not have the lowest priority,\ntherefore the generated HDL may be corrupted.')
                 if trace[0]["command"]=="action":
                     # insert before the endif, which's existence was tested here.
                     traces_of_a_state_reversed[trace_index+1][-1:-1] = [{"state_name": trace[0]["state_name"], "command": "else", "condition": ""}]
@@ -326,7 +342,8 @@ def merge_trace_array(trace_array):
                             target_at_error = trace[search_index]["target"]
                         if search_index==len(trace)-1 or search_index==len(traces_of_a_state_reversed[trace_index+1])-1:
                             messagebox.showerror("Error",
-                            'There is a transition starting at ' + trace[0]["state_name"] + ' to state ' + target_at_error + ' which will never fire,\ntherefore the generated HDL may be corrupted.')
+                            'There is a transition starting at ' + trace[0]["state_name"] + ' to state ' + target_at_error +
+                            ' which will never fire,\ntherefore the generated HDL may be corrupted.')
                             break
                         search_index += 1
                     #print(search_index, traces_of_a_state_reversed[trace_index+1][search_index]["command"] + traces_of_a_state_reversed[trace_index+1][search_index]["condition"])
@@ -339,8 +356,9 @@ def merge_trace_array(trace_array):
                         # Remove superfluous (search_index+1)*"endifs", which were copied with trace:
                         traces_of_a_state_reversed[trace_index+1] = traces_of_a_state_reversed[trace_index+1][:-(search_index+1)]
                     else: # The command is an "action" without any condition, so it must be converted into an "else".
-                        traces_of_a_state_reversed[trace_index+1][-(search_index+1):-(search_index+1)] = [{"state_name": trace[search_index]["state_name"], "command": "else", "condition": ""}]
-                        traces_of_a_state_reversed[trace_index+1][-(search_index+1):-(search_index+1)] = trace[search_index:search_index+1] # copy action into new "else" before "endif"
+                        traces_of_a_state_reversed[trace_index+1][-(search_index+1):-(search_index+1)] = [{"state_name": trace[search_index]["state_name"],
+                                                                                                           "command": "else", "condition": ""}]
+                        traces_of_a_state_reversed[trace_index+1][-(search_index+1):-(search_index+1)] = trace[search_index:search_index+1]#copy action into new "else" before "endif"
                         traces_of_a_state_reversed[trace_index+1][-(search_index  ):-(search_index  )] = trace[search_index+1:] # copy rest of trace after the endif
                         traces_of_a_state_reversed[trace_index+1] = traces_of_a_state_reversed[trace_index+1][:-search_index] # remove superfluous "endifs"
                 #print("traces_of_a_state_reversed[trace_index+1] =", traces_of_a_state_reversed[trace_index+1])
@@ -374,9 +392,20 @@ def extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, sta
                                             'which has no outgoing transition,\ntherefore the generated HDL may be corrupted.')
     for _, transition_tag in enumerate(outgoing_transition_tags):
         transition_target, transition_condition, transition_action, condition_action_reference = get_transition_target_condition_action(transition_tag)
-        if transition_action!="":
-            #transition_action_new = moved_actions + [transition_action]
-            moved_actions_dict = {"moved_action": transition_action, "moved_action_ref": condition_action_reference.action_id}
+        transition_condition_is_a_comment = check_if_condition_is_a_comment(transition_condition)
+        if transition_action!="" or transition_condition_is_a_comment:
+            if transition_action!="":
+                if transition_condition_is_a_comment:
+                    if not transition_condition.endswith("\n"):
+                        transition_condition = transition_condition + "\n"
+                    transition_action = transition_condition + transition_action
+                    moved_actions_dict = {"moved_action": transition_action, "moved_action_ref": condition_action_reference.action_id,
+                                                                             "moved_condition_ref": condition_action_reference.condition_id,
+                                                                             "moved_condition_lines": transition_condition.count("\n")}
+                else:
+                    moved_actions_dict = {"moved_action": transition_action, "moved_action_ref": condition_action_reference.action_id}
+            else:
+                moved_actions_dict = {"moved_action": transition_condition, "moved_action_ref": condition_action_reference.condition_id}
             transition_action_new = []
             for entry in moved_actions:
                 transition_action_new.append(entry)
@@ -388,7 +417,7 @@ def extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, sta
             trace_new = []
             for entry in trace:
                 trace_new.append(entry)
-            if transition_condition!="":
+            if transition_condition!="" and not transition_condition_is_a_comment:
                 trace_new.append({"state_name" : state_name, "command": "if", "condition": transition_condition,
                                   "target": transition_target, "condition_level": condition_level, "condition_action_reference": condition_action_reference.condition_id})
                 condition_level_new = condition_level + 1
@@ -403,7 +432,7 @@ def extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, sta
             for entry in trace:
                 trace_new.append(entry)
             #print("start-point, trace", start_point, trace)
-            if transition_condition!="":
+            if transition_condition!="" and not transition_condition_is_a_comment:
                 condition_level_new = condition_level + 1
                 trace_new.append({"state_name" : state_name, "command": "if", "condition": transition_condition,
                                   "target": transition_target, "condition_level": condition_level, "condition_action_reference": condition_action_reference.condition_id})
@@ -420,6 +449,14 @@ def extract_conditions_for_all_outgoing_transitions_of_the_state(state_name, sta
                                   "target": "", "condition_level": condition_level})
             #print("trace_new =", trace_new)
             trace_array.append(trace_new)
+
+def check_if_condition_is_a_comment(transition_condition):
+    if transition_condition=='' or transition_condition.isspace():
+        return False
+    transition_condition_without_comments = remove_comments_and_returns(transition_condition)
+    if transition_condition_without_comments=='' or transition_condition_without_comments.isspace():
+        return True
+    return False
 
 def get_all_outgoing_transitions_in_priority_order(state_tag):
     transition_tags_and_priority        = create_outgoing_transition_list_with_priority_information(state_tag)
@@ -454,30 +491,30 @@ def check_for_equal_priorities(transition_tags_and_priority_sorted, state_tag):
             state_name = main_window.canvas.itemcget(state_tag + "_name", "text")
             if state_name=="":
                 state_name = "a connector"
-            messagebox.showerror("Warning", 'Two outgoing transition of ' + state_name + ' have the same priority with value ' + transition_tags_and_priority_sorted[n+1][1] + '.')   
+            messagebox.showerror("Warning", 'Two outgoing transition of ' + state_name + ' have the same priority with value ' + transition_tags_and_priority_sorted[n+1][1] + '.')
 def get_transition_condition(condition_action_reference):
-    return condition_action_reference.condition_id.get("1.0", END + "-1 chars") # without "return" at the end
+    return condition_action_reference.condition_id.get("1.0", tk.END + "-1 chars") # without "return" at the end
 def get_transition_action(condition_action_reference):
-    return condition_action_reference.action_id.get("1.0", END + "-1 chars") # without "return" at the end
+    return condition_action_reference.action_id.get("1.0", tk.END + "-1 chars") # without "return" at the end
 def create_global_actions_before():
     if global_actions_handling.global_actions_clocked_number==1:
         canvas_item_id = main_window.canvas.find_withtag("global_actions1")
         ref = global_actions.GlobalActions.dictionary[canvas_item_id[0]]
-        return ref.text_before_id, ref.text_before_id.get("1.0", END)
+        return ref.text_before_id, ref.text_before_id.get("1.0", tk.END)
     else:
         return "", ""
 def create_global_actions_after():
     if global_actions_handling.global_actions_clocked_number==1:
         canvas_item_id = main_window.canvas.find_withtag("global_actions1")
         ref = global_actions.GlobalActions.dictionary[canvas_item_id[0]]
-        return ref.text_after_id, ref.text_after_id.get("1.0", END)
+        return ref.text_after_id, ref.text_after_id.get("1.0", tk.END)
     else:
         return "", ""
 def create_concurrent_actions():
     if global_actions_handling.global_actions_combinatorial_number==1:
         canvas_item_id = main_window.canvas.find_withtag("global_actions_combinatorial1")
         ref = global_actions_combinatorial.GlobalActionsCombinatorial.dictionary[canvas_item_id[0]]
-        return ref.text_id, ref.text_id.get("1.0", END)
+        return ref.text_id, ref.text_id.get("1.0", tk.END)
     else:
         return "", ""
 def remove_comments_and_returns(hdl_text):
@@ -506,7 +543,7 @@ def remove_verilog_block_comments(hdl_text):
     return re.sub("/\\*.*\\*/", "", hdl_text, flags=re.DOTALL)
 
 def convert_hdl_lines_into_a_searchable_string(text):
-    without_comments = remove_comments_and_returns(text) 
+    without_comments = remove_comments_and_returns(text)
     separated  = surround_character_by_blanks(";" , without_comments)
     separated  = surround_character_by_blanks("\(", separated) # "\" is needed to be able to search for "("
     separated  = surround_character_by_blanks("\)", separated) # "\" is needed to be able to search for ")"

@@ -5,21 +5,6 @@ from tkinter import ttk
 import main_window
 import undo_handling
 
-# Todo:
-# Im HDL-FSM-Editor muss immer noch das letzte Semikolon fehlen?!
-# Im HDL-FSM-Editor kann ein Port vom Typ natural keinen range haben.
-# Tasten-Kombination einführen, mit der man die Zwischenpunkte einer Transitionkurve löschen kann.
-# Wenn es nur eine Transition gibt, dann Prio-Zahl unsichtbar schalten.
-#
-# Für die State-Sequenz wird als target der String "connector..." abgefragt. Falls ein Statename so gewählt wird,
-# gibt es Probleme. Deshalb sollte als Bezeichner für Konnektoren besser ein in den HDLs illegaler Name gewählt werden, z.B. __connector.
-#
-# Für die state-sequence wird "null" nicht verwendet, für die default-state-actions aber schon?!
-#
-# Automatische Formatierung?!
-# Selektion von mehreren Elementen zum Verschieben oder löschen.
-# Auch eine Slice-Angabe kann ein zu lesendes Signal sein (data_bus(index) => index wird gelesen)
-
 print(main_window.header_string)
 
 # The top window:
@@ -75,6 +60,7 @@ main_window.root.mainloop()
 # "transition<n>_start"           : The transition "transition<n>" starts at this state.
 # "transition<n>_end"             : The transition "transition<n>" ends at this state.
 # "connection<n>_end"             : The connection "connection<n>" (a dashed line) assigns a state action block to this state.
+# "state<n>_comment_line_end"     : The line "state<n>_comment_line" (a dashed line) connects a state comment block to this state.
 #
 # Tags of the string inside each state circle:
 # "state<n>_name"                 : identifier for the text object, which stores the state name.
@@ -131,3 +117,10 @@ main_window.root.mainloop()
 #
 # Tags of the global actions clocked block (not connected text window with green background):
 # "global_actions1"               : Unique identifier for the window.
+
+# Tags of a state comment block (text window with blue background in the header):
+# state<n>_comment                : Unique identifier for the window
+# state<n>_comment_line_start     : The line with the identifier state<n>_comment_line connects the state comment block to the state
+
+# Tags of a state comment line (dashed line in the diagram, which connects a state and its state comment block block):
+# state<n>_comment_line           : Unique identifier for the line

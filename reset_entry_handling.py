@@ -1,7 +1,11 @@
-from tkinter import *
+"""
+This module contains all methods needed for the reset-entry object.
+"""
+import tkinter as tk
 import canvas_editing
 import undo_handling
 import main_window
+import canvas_modify_bindings
 
 reset_entry_number = 0
 difference_x = 0
@@ -11,9 +15,10 @@ def insert_reset_entry(event):
     global reset_entry_number
     if reset_entry_number==0: # Only 1 reset entry is allowed.
         reset_entry_number += 1
-        main_window.reset_entry_button.config(state=DISABLED)
+        main_window.reset_entry_button.config(state=tk.DISABLED)
         insert_reset_entry_in_canvas(event)
         undo_handling.design_has_changed()
+        canvas_modify_bindings.switch_to_move_mode()
 
 def insert_reset_entry_in_canvas(event):
     canvas_grid_coordinates_of_the_event = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
@@ -49,14 +54,14 @@ def move_reset_entry_polygon_to_event(canvas_grid_coordinates_of_the_event, rese
 
 def move_to(event_x, event_y, polygon_id, first, last):
     global difference_x, difference_y
-    if first==True:
+    if first is True:
         # Calculate the difference between the "anchor" point and the event:
         coords = main_window.canvas.coords(polygon_id)
         middle_point = [coords[4], coords[5]]
         difference_x, difference_y = - event_x + middle_point[0], - event_y + middle_point[1]
     # Keep the distance between event and anchor point constant:
     event_x, event_y = event_x + difference_x, event_y + difference_y
-    if last==True:
+    if last is True:
         event_x = canvas_editing.state_radius * round(event_x/canvas_editing.state_radius)
         event_y = canvas_editing.state_radius * round(event_y/canvas_editing.state_radius)
     width  = determine_width_of_the_polygon (polygon_id)
