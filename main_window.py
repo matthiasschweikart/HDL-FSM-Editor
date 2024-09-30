@@ -23,7 +23,7 @@ import compile_handling
 import constants
 import link_dictionary
 
-VERSION = "4.2"
+VERSION = "4.3"
 header_string ="HDL-FSM-Editor\nVersion " + VERSION + "\nCreated by Matthias Schweikart\nContact: matthias.schweikart@gmx.de"
 
 state_action_default_button        = None
@@ -133,7 +133,7 @@ def evaluate_commandline_parameters():
             file_handling.filename = args.filename
             file_handling.open_file_with_name_new(args.filename)
             if args.generate_hdl:
-                hdl_generation.run_hdl_generation()
+                hdl_generation.run_hdl_generation(write_to_file=True)
                 sys.exit()
     root.wm_deiconify()
     return
@@ -176,7 +176,7 @@ def create_menu_bar():
     hdl_menu_button = ttk.Menubutton(menue_frame, text="HDL", style="Window.TMenubutton")
     hdl_menu = tk.Menu(hdl_menu_button)
     hdl_menu_button.configure(menu=hdl_menu)
-    hdl_menu.add_command(label="Generate", accelerator="Ctrl+g", command=hdl_generation.run_hdl_generation, font=("Arial", 10))
+    hdl_menu.add_command(label="Generate", accelerator="Ctrl+g", command=lambda: hdl_generation.run_hdl_generation(write_to_file=True), font=("Arial", 10))
     hdl_menu.add_command(label="Compile" , accelerator="Ctrl+p", command=compile_handling.compile         , font=("Arial", 10))
 
     search_frame = ttk.Frame(menue_frame, borderwidth=2)#, relief=RAISED)
@@ -206,7 +206,7 @@ def create_menu_bar():
     # Bindings of the menus:
     root.bind_all("<Control-o>", lambda event : file_handling.open_file())
     root.bind_all("<Control-s>", lambda event : file_handling.save())
-    root.bind_all("<Control-g>", lambda event : hdl_generation.run_hdl_generation())
+    root.bind_all("<Control-g>", lambda event : hdl_generation.run_hdl_generation(write_to_file=True))
     root.bind_all("<Control-n>", lambda event : file_handling.remove_old_design())
     root.bind_all("<Control-p>", lambda event : compile_handling.compile())
     root.bind_all('<Control-f>', lambda event : search_string_entry.focus_set())
@@ -350,7 +350,7 @@ def create_interface_notebook_tab():
     interface_package_scroll = ttk.Scrollbar         (interface_frame, orient=tk.VERTICAL, cursor='arrow', command=interface_package_text.yview)
     interface_package_text.config(yscrollcommand=interface_package_scroll.set)
 
-    interface_generics_label = ttk.Label             (interface_frame, text="Generics (last generic-declaration must not end with ';'):", padding=5)
+    interface_generics_label = ttk.Label             (interface_frame, text="Generics:", padding=5)
     interface_generics_text  = custom_text.CustomText(interface_frame, type="generics", height=3, width=10, undo=True, font=("Courier", 10))
     interface_generics_text.bind("<Control-Z>"      , lambda event : interface_generics_text.edit_redo())
     interface_generics_text.bind("<<TextModified>>" , lambda event : undo_handling.modify_window_title())
@@ -358,7 +358,7 @@ def create_interface_notebook_tab():
     interface_generics_scroll= ttk.Scrollbar         (interface_frame, orient=tk.VERTICAL, cursor='arrow', command=interface_generics_text.yview)
     interface_generics_text.config(yscrollcommand=interface_generics_scroll.set)
 
-    interface_ports_label    = ttk.Label             (interface_frame, text="Ports (last port-declaration must not end with ';'):"   , padding=5)
+    interface_ports_label    = ttk.Label             (interface_frame, text="Ports:"   , padding=5)
     interface_ports_text     = custom_text.CustomText(interface_frame, type="ports", height=3, width=10, undo=True, font=("Courier", 10))
     interface_ports_text.bind   ("<Control-z>"      , lambda event : interface_ports_text.undo())
     interface_ports_text.bind   ("<Control-Z>"      , lambda event : interface_ports_text.redo())
@@ -511,7 +511,7 @@ def create_diagram_notebook_tab():
     button_frame.columnconfigure(5, weight=1)
 
     # Bindings of the drawing area:
-    diagram_frame.bind_all                 ('<Escape>'  , lambda event: canvas_modify_bindings.switch_to_move_mode())
+    root.bind_all                          ('<Escape>'  , lambda event: canvas_modify_bindings.switch_to_move_mode())
     new_state_button.bind                  ('<Button-1>', lambda event: canvas_modify_bindings.switch_to_state_insertion())
     new_transition_button.bind             ('<Button-1>', lambda event: canvas_modify_bindings.switch_to_transition_insertion())
     new_connector_button.bind              ('<Button-1>', lambda event: canvas_modify_bindings.switch_to_connector_insertion())
@@ -779,8 +779,8 @@ def switch_language_mode():
         interface_package_text.grid   (row=1, column=0, sticky=(tk.W,tk.E,tk.S,tk.N)) # "W,E" nötig, damit Text tatsächlich breiter wird
         interface_package_scroll.grid (row=1, column=1, sticky=(tk.W,tk.E,tk.S,tk.N)) # "W,E" nötig, damit Text tatsächlich breiter wird
         # Interface: Adapt documentation for generics and ports
-        interface_generics_label.config(text="Generics (last generic-declaration must not end with ';'):")
-        interface_ports_label.config   (text="Ports (last port-declaration must not end with ';'):")
+        interface_generics_label.config(text="Generics:")
+        interface_ports_label.config   (text="Ports:")
         # Internals: Enable VHDL-package text field
         internals_package_label.grid  (row=0, column=0, sticky=tk.W) # "W" nötig, damit Text links bleibt
         internals_package_text.grid   (row=1, column=0, sticky=(tk.W,tk.E,tk.S,tk.N)) # "W,E" nötig, damit Text tatsächlich breiter wird
@@ -805,8 +805,8 @@ def switch_language_mode():
         interface_package_text.delete("1.0", tk.END)
         interface_package_scroll.grid_forget()
         # Interface: Adapt documentation for generics and ports
-        interface_generics_label.config(text="Parameters (last parameter-declaration must not end with ','):")
-        interface_ports_label.config   (text="Ports (last port-declaration must not end with ','):")
+        interface_generics_label.config(text="Parameters:")
+        interface_ports_label.config   (text="Ports:")
         # Internals: Remove VHDL-package text field
         internals_package_label.grid_forget()
         internals_package_text.grid_forget()

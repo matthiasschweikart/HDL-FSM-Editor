@@ -2,6 +2,7 @@
 This module contains all methods for inserting states.
 """
 import tkinter as tk
+from tkinter import messagebox
 import OptionMenu
 import state_action_handling
 import move_handling_initialization
@@ -116,7 +117,7 @@ def edit_state_name(event, text_id):
     main_window.canvas.unbind_all('<Delete>')
     old_text = main_window.canvas.itemcget(text_id,'text')
     text_box = tk.Entry(main_window.canvas, width=10, justify=tk.CENTER)
-    #text_box = Entry(None, width=10, justify=CENTER) funktioniert auch, unklar, was richtig/besser ist.
+    #text_box = Entry(None, width=10, justify=tk.CENTER) funktioniert auch, unklar, was richtig/besser ist.
     text_box.insert(tk.END, old_text)
     text_box.select_range(0, tk.END)
     text_box.bind('<Return>', lambda event, text_id=text_id, text_box=text_box: update_state_name(text_id, text_box))
@@ -126,6 +127,7 @@ def edit_state_name(event, text_id):
     text_box.focus_set()
 
 def update_state_name(text_id, text_box):
+    state_name_list = __get_list_of_state_names()
     tags = main_window.canvas.gettags(text_id)
     for t in tags:
         if t.startswith("state"): # Format of text_id tag: 'state' + str(state_number) + "_name"
@@ -136,7 +138,10 @@ def update_state_name(text_id, text_box):
     main_window.canvas.delete('entry-window')
     new_text = text_box.get()
     if new_text!="":
-        main_window.canvas.itemconfig(text_id, text=new_text)
+        if new_text not in state_name_list:
+            main_window.canvas.itemconfig(text_id, text=new_text)
+        else:
+            messagebox.showerror("Error", "The state name\n" + new_text + "\nis already used at another state.")
     # Resize the state:
     size = main_window.canvas.bbox(text_id)
     text_width = size[2] - size[0] + 5 # Make the text a little bit bigger, so that it does not touch the state circle.
@@ -159,11 +164,23 @@ def update_state_name(text_id, text_box):
     tags = main_window.canvas.gettags(state_tag)
     for t in tags:
         if t.endswith("_start"):
-            transition_handling.extend_to_middle_points(t[:-6])
+            transition_handling.extend_transition_to_state_middle_points(t[:-6])
             transition_handling.shorten_to_state_border(t[:-6])
         elif t.endswith("_end"):
-            transition_handling.extend_to_middle_points(t[:-4])
+            transition_handling.extend_transition_to_state_middle_points(t[:-4])
             transition_handling.shorten_to_state_border(t[:-4])
+
+def __get_list_of_state_names():
+    state_name_list = []
+    all_canvas_ids = main_window.canvas.find_withtag("all")
+    for canvas_id in all_canvas_ids:
+        if main_window.canvas.type(canvas_id)=="oval":
+            state_tags = main_window.canvas.gettags(canvas_id)
+            for tag in state_tags:
+                if tag.startswith("state"):
+                    state_name_list.append(main_window.canvas.itemcget(tag + "_name", "text"))
+    return state_name_list
+
 
 def abort_edit_text(text_id, text_box, old_text):
     main_window.canvas.delete('entry-window')

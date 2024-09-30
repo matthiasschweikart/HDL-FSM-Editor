@@ -23,6 +23,7 @@ import global_actions_combinatorial
 import main_window
 import custom_text
 import state_comment
+import update_hdl_tab
 
 filename = ""
 
@@ -675,9 +676,17 @@ def open_file_with_name_new(read_filename):
         canvas_editing.state_name_font.configure(size=int(canvas_editing.fontsize))
         canvas_editing.label_fontsize                                = design_dictionary["label_fontsize"]
         canvas_editing.shift_visible_center_to_window_center(design_dictionary["visible_center"])
+        hide_priority_rectangle_list = []
         for definition in design_dictionary["state"]:
             coords = definition[0]
             tags   = definition[1]
+            number_of_outgoing_transitions = 0
+            for tag in tags:
+                if tag.startswith("transition") and tag.endswith("_start"):
+                    transition_identifier = tag.replace("_start", "")
+                    number_of_outgoing_transitions += 1
+            if number_of_outgoing_transitions==1:
+                hide_priority_rectangle_list.append(transition_identifier)
             state_id = main_window.canvas.create_oval(coords, fill='cyan', width=2, outline='blue', tags=tags)
             main_window.canvas.tag_bind(state_id,"<Enter>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=4))
             main_window.canvas.tag_bind(state_id,"<Leave>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=2))
@@ -721,6 +730,14 @@ def open_file_with_name_new(read_filename):
             for t in tags:
                 if t.startswith("connector"):
                     rectangle_color = 'violet'
+            if rectangle_color=="violet":
+                number_of_outgoing_transitions = 0
+                for tag in tags:
+                    if tag.startswith("transition") and tag.endswith("_start"):
+                        transition_identifier = tag.replace("_start", "")
+                        number_of_outgoing_transitions += 1
+                if number_of_outgoing_transitions==1:
+                    hide_priority_rectangle_list.append(transition_identifier)
             canvas_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
             if rectangle_color=="cyan":
                 rectangle_ids.append(canvas_id)
@@ -798,6 +815,9 @@ def open_file_with_name_new(read_filename):
             main_window.canvas.tag_raise(rectangle_id)
         for priority_id in priority_ids:
             main_window.canvas.tag_raise(priority_id)
+        for transition_identifer in hide_priority_rectangle_list:
+            main_window.canvas.itemconfigure(transition_identifer + 'priority' , state=tk.HIDDEN)
+            main_window.canvas.itemconfigure(transition_identifer + 'rectangle', state=tk.HIDDEN)
         undo_handling.stack = []
         undo_handling.stack_write_pointer = 0
         undo_handling.design_has_changed() # Initialize the stack with the read design.
@@ -805,6 +825,8 @@ def open_file_with_name_new(read_filename):
         dir_name, file_name = os.path.split(read_filename)
         main_window.root.title(file_name + " (" + dir_name + ")")
         #canvas_editing.priority_distance = 1.5*canvas_editing.state_radius
+        update_hdl_tab.UpdateHdlTab(design_dictionary["language"     ], design_dictionary["number_of_files"], read_filename,
+                                    design_dictionary["generate_path"], design_dictionary["modulename"     ])
         main_window.canvas.after_idle(canvas_editing.view_all)
     except FileNotFoundError:
         messagebox.showerror("Error", "File " + read_filename + " could not be found.")

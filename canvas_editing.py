@@ -226,7 +226,7 @@ def delete():
         elif main_window.canvas.type(i)=='line': # transition (can be deleted) or connection (cannot be deleted)
             # Remove transition-line, transition-priority, condition-action-block:
             for tag in tags_of_item_i:
-                if tag.startswith("transition"): # Arrow
+                if tag.startswith("transition"):
                     main_window.canvas.delete(tag) # delete transition
                     main_window.canvas.delete(tag + "rectangle") # delete priority rectangle
                     main_window.canvas.delete(tag + "priority") # delete priority
@@ -243,6 +243,15 @@ def delete():
                 elif tag.startswith("going_to_"):
                     end_state = tag[9:]
                     main_window.canvas.dtag(end_state, transition + "_end")
+            tags_of_start_state = main_window.canvas.gettags(start_state)
+            number_of_outgoing_transitions = 0
+            for start_state_tag in tags_of_start_state:
+                if start_state_tag.startswith("transition") and start_state_tag.endswith("_start"):
+                    number_of_outgoing_transitions += 1
+                    tag_of_outgoing_transition = start_state_tag.replace("_start", "")
+            if number_of_outgoing_transitions==1:
+                main_window.canvas.itemconfigure(tag_of_outgoing_transition + "rectangle", state=tk.HIDDEN)
+                main_window.canvas.itemconfigure(tag_of_outgoing_transition + "priority" , state=tk.HIDDEN)
         else:
             messagebox.showerror("Delete", "Fatal, cannot delete canvas_type " + str(main_window.canvas.type(i))
                                             + " with tags " + str(main_window.canvas.gettags(i)))

@@ -140,7 +140,7 @@ def add_lines_connected_to_the_diagram_object_to_the_list(move_list):
         if to_be_moved_point_of_connected_line!="":
             id_of_connected_line = main_window.canvas.find_withtag(tag_of_connected_line)[0]
             move_list.append([id_of_connected_line, to_be_moved_point_of_connected_line])
-            transition_handling.extend_to_middle_points(tag_of_connected_line)
+            transition_handling.extend_transition_to_state_middle_points(tag_of_connected_line)
     return
 def get_move_list_entry_for_line_of_condition_action_block(transition_tag):
     transition_tags = main_window.canvas.gettags(transition_tag)
@@ -159,7 +159,7 @@ def add_items_for_moving_a_single_line_point_to_the_list( move_list, items_near_
             if tag.startswith("transition"):
                 id_of_transition = main_window.canvas.find_withtag(tag)[0]
                 move_list.append([id_of_transition, moving_point]) # moving point is one of: "start", "next_to_start", "next_to_end", "end" as at maximum 4 points are supported
-                transition_handling.extend_to_middle_points(tag)
+                transition_handling.extend_transition_to_state_middle_points(tag)
                 transition_tag = tag
         # Remove tags, which are not valid anymore:
         remove_tags_which_will_get_obsolete_by_moving(line_id, transition_tag, transition_tags, moving_point)

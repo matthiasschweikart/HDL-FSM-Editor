@@ -1,3 +1,6 @@
+"""
+Methods needed for HDL generation
+"""
 import tkinter as tk
 from tkinter import messagebox
 from pathlib import Path
@@ -9,10 +12,11 @@ import hdl_generation_module
 import main_window
 import link_dictionary
 import tag_plausibility
+import list_separation_check
 
 last_line_number_of_file1 = 0
 
-def run_hdl_generation():
+def run_hdl_generation(write_to_file):
     if design_is_not_ready_for_hdl_generation():
         return
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
@@ -22,7 +26,7 @@ def run_hdl_generation():
         header = "-- Created by HDL-FSM-Editor at " + datetime.today().ctime() + "\n"
     else:
         header = "// Created by HDL-FSM-Editor at " + datetime.today().ctime() + "\n"
-    create_hdl(header)
+    create_hdl(header, write_to_file)
 
 def design_is_not_ready_for_hdl_generation():
     name = main_window.module_name.get()
@@ -49,7 +53,7 @@ def design_is_not_ready_for_hdl_generation():
         return True
     return False
 
-def create_hdl(header):
+def create_hdl(header, write_to_file):
     file_line_number = 0
     file_name, file_name_architecture = get_file_names()
     link_dictionary.LinkDictionary.link_dict_reference.clear_link_dict(file_name)
@@ -69,7 +73,7 @@ def create_hdl(header):
     if architecture is None:
         return # No further actions required, because when writing to a file, always an architecture must exist.
     else:
-        hdl = write_hdl_file(header, entity, architecture, file_name, file_name_architecture)
+        hdl = write_hdl_file(write_to_file, header, entity, architecture, file_name, file_name_architecture)
         copy_hdl_into_generated_hdl_tab(hdl)
 
 def copy_hdl_into_generated_hdl_tab(hdl):
@@ -99,10 +103,11 @@ def create_entity(file_name, file_line_number):
     file_line_number += 1
 
     entity += "entity " + main_window.module_name.get() + " is\n"
-    link_dictionary.LinkDictionary.link_dict_reference.add(file_name, file_line_number, "Control-Tab", 1, "module_name", "")    
+    link_dictionary.LinkDictionary.link_dict_reference.add(file_name, file_line_number, "Control-Tab", 1, "module_name", "")
     file_line_number += 1
 
     generic_declarations = hdl_generation_library.get_text_from_text_widget(main_window.interface_generics_text)
+    generic_declarations = list_separation_check.ListSeparationCheck(generic_declarations, "VHDL").get_fixed_list()
     if generic_declarations!="":
         generic_declarations = "    generic (\n" + hdl_generation_library.indent_text_by_the_given_number_of_tabs(2,generic_declarations) + "    );\n"
         file_line_number += 1 # switch to first line with generic value.
@@ -113,6 +118,7 @@ def create_entity(file_name, file_line_number):
     entity += generic_declarations
 
     port_declarations = hdl_generation_library.get_text_from_text_widget(main_window.interface_ports_text)
+    port_declarations = list_separation_check.ListSeparationCheck(port_declarations, "VHDL").get_fixed_list()
     if port_declarations!="":
         port_declarations = "    port (\n"    + hdl_generation_library.indent_text_by_the_given_number_of_tabs(2,port_declarations   ) + "    );\n"
         file_line_number += 1 # switch to first line with port.
@@ -130,10 +136,11 @@ def create_module_ports(file_name, file_line_number):
     module  = ""
     file_line_number = 3 # Line 1 = Filename, Line 2 = Header
     module += "module " + main_window.module_name.get() + "\n"
-    link_dictionary.LinkDictionary.link_dict_reference.add(file_name, file_line_number, "Control-Tab", 1, "module_name", "")    
+    link_dictionary.LinkDictionary.link_dict_reference.add(file_name, file_line_number, "Control-Tab", 1, "module_name", "")
     file_line_number += 1
 
     parameters = hdl_generation_library.get_text_from_text_widget(main_window.interface_generics_text)
+    parameters = list_separation_check.ListSeparationCheck(parameters, "Verilog").get_fixed_list()
     if parameters!="":
         parameters = "    #(parameter\n" + hdl_generation_library.indent_text_by_the_given_number_of_tabs(1,parameters) + "    )\n"
         file_line_number += 1 # switch to first line with parameters.
@@ -144,6 +151,7 @@ def create_module_ports(file_name, file_line_number):
         module += parameters
 
     ports = hdl_generation_library.get_text_from_text_widget(main_window.interface_ports_text)
+    ports = list_separation_check.ListSeparationCheck(ports, "Verilog").get_fixed_list()
     if ports!="":
         ports = "    (\n"  + hdl_generation_library.indent_text_by_the_given_number_of_tabs(2,ports) + "    );\n"
         number_of_new_lines = ports.count("\n") - 2 # Subtract first and last line
@@ -154,7 +162,7 @@ def create_module_ports(file_name, file_line_number):
         module += ports
     return module, file_line_number
 
-def write_hdl_file(header, entity, architecture, file_name, file_name_architecture):
+def write_hdl_file(write_to_file, header, entity, architecture, file_name, file_name_architecture):
     global last_line_number_of_file1
     if main_window.select_file_number_text.get()==1:
         if main_window.language.get()=="VHDL":
@@ -167,9 +175,10 @@ def write_hdl_file(header, entity, architecture, file_name, file_name_architectu
         content += header
         content += entity #+ "\n"
         content += architecture
-        fileobject = open(file_name,'w', encoding="utf-8")
-        fileobject.write(content)
-        fileobject.close()
+        if write_to_file:
+            fileobject = open(file_name,'w', encoding="utf-8")
+            fileobject.write(content)
+            fileobject.close()
         last_line_number_of_file1 = content.count("\n")
         main_window.size_of_file1_line_number = len(str(last_line_number_of_file1)) + 2 # "+2" because of string ": "
         main_window.size_of_file2_line_number = 0
@@ -178,17 +187,19 @@ def write_hdl_file(header, entity, architecture, file_name, file_name_architectu
         content1  = "-- Filename: " + file_name + "\n"
         content1 += header
         content1 += entity
-        fileobject_entity = open(file_name,'w', encoding="utf-8")
-        fileobject_entity.write(content1)
-        fileobject_entity.close()
+        if write_to_file:
+            fileobject_entity = open(file_name,'w', encoding="utf-8")
+            fileobject_entity.write(content1)
+            fileobject_entity.close()
         last_line_number_of_file1 = content1.count("\n")
         main_window.size_of_file1_line_number = len(str(last_line_number_of_file1)) + 2 # "+2" because of string ": "
         content2  = "-- Filename: " + file_name_architecture + "\n"
         content2 += header
         content2 += architecture
-        fileobject_architecture = open(file_name_architecture,'w', encoding="utf-8")
-        fileobject_architecture.write(content2)
-        fileobject_architecture.close()
+        if write_to_file:
+            fileobject_architecture = open(file_name_architecture,'w', encoding="utf-8")
+            fileobject_architecture.write(content2)
+            fileobject_architecture.close()
         content_with_numbers1 = add_line_numbers(content1)
         content_with_numbers2 = add_line_numbers(content2)
         content_with_numbers = content_with_numbers1 + content_with_numbers2

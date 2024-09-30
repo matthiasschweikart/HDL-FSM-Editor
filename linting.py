@@ -1,3 +1,6 @@
+"""
+Methods needed for highlighting signals, which are not read, not written, not defined
+"""
 import main_window
 import canvas_editing
 import custom_text

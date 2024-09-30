@@ -121,8 +121,12 @@ class CustomText(tk.Text):
         for keyword_type in keyword_type_list:
             self.tag_delete(keyword_type)
             for keyword in main_window.keywords[keyword_type]:
-                self.add_highlight_tag_for_single_keyword(keyword_type, keyword)
-            if self.type in ("condition", "action"):
+                if self.type=="comment": # State comment text
+                    if keyword=="comment": # keywords "not_read", "not_written" are ignored.
+                        self.add_highlight_tag_for_single_keyword(keyword_type, keyword)
+                else:
+                    self.add_highlight_tag_for_single_keyword(keyword_type, keyword)
+            if self.type in ("condition", "action", "comment"):
                 self.tag_configure(keyword_type, foreground=main_window.keyword_color[keyword_type],
                                    font=("Courier", int(fontsize), "bold")) # int() is necessary, because fontsize can be a "real" number.
             else:
