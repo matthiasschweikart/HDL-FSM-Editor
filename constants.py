@@ -1,3 +1,6 @@
+"""
+Constants for all modules of HDL-FSM-Editor
+"""
 vhdl_keywords_for_signal_handling = (
 " abs ",
 " after ",
@@ -244,3 +247,6 @@ verilog_keywords = {
             # It is important to have "comment" at the end of this list, as all other highlighting-tags are removed when highlighting works at the comment keyword.
             "comment"  : ["//.*$", "/\\*.*\\*/"]
             }
+
+CONNECTOR_COLOR = "violet"
+STATE_COLOR     = "cyan"

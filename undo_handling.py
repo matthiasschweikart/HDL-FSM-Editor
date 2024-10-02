@@ -16,6 +16,7 @@ import global_actions_combinatorial
 import global_actions_handling
 import main_window
 import state_comment
+import constants
 #import inspect
 
 stack = []
@@ -121,8 +122,9 @@ def get_complete_design_as_text_object ():
     for i in items:
         if main_window.canvas.type(i)=='oval':
             design += "state|"
-            design += get_coords(i)
-            design += get_tags  (i)
+            design += get_coords    (i)
+            design += get_tags      (i)
+            design += get_fill_color(i)
             design += "\n"
         elif main_window.canvas.type(i)=="text":
             design += "text|"
@@ -209,6 +211,9 @@ def get_tags(canvas_id):
         tags_string += str(t) + " "
     #print("get_tags: tags_string =", tags_string)
     return tags_string
+def get_fill_color(canvas_id):
+    color = main_window.canvas.itemcget(canvas_id, "fill")
+    return "fill=" + color + ' '
 line_index = 0
 def set_diagram_to_version_selected_by_stack_pointer():
     global line_index
@@ -298,14 +303,18 @@ def set_diagram_to_version_selected_by_stack_pointer():
             rest_of_line   = remove_keyword_from_line(lines[line_index],"state|")
             coords = []
             tags = ()
+            fill_color = constants.STATE_COLOR
             entries = rest_of_line.split()
             for e in entries:
                 try:
                     v = float(e)
                     coords.append(v)
                 except ValueError:
-                    tags = tags + (e,)
-            state_id = main_window.canvas.create_oval(coords, fill='cyan', width=2, outline='blue', tags=tags)
+                    if "fill=" in e:
+                        fill_color = e.replace("fill=", "")
+                    else:
+                        tags = tags + (e,)
+            state_id = main_window.canvas.create_oval(coords, fill=fill_color, width=2, outline='blue', tags=tags)
             main_window.canvas.tag_bind(state_id,"<Enter>"    , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=4))
             main_window.canvas.tag_bind(state_id,"<Leave>"    , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=2))
             main_window.canvas.tag_bind(state_id,"<Button-3>" , lambda event, id=state_id : state_handling.show_menu(event, id))
@@ -373,10 +382,10 @@ def set_diagram_to_version_selected_by_stack_pointer():
                     coords.append(v)
                 except ValueError:
                     tags = tags + (e,)
-            rectangle_color = 'cyan'
+            rectangle_color = constants.STATE_COLOR
             for t in tags:
                 if t.startswith("connector"):
-                    rectangle_color = 'violet'
+                    rectangle_color = constants.CONNECTOR_COLOR
             notebook_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
             main_window.canvas.tag_raise(notebook_id) # priority rectangles are always in "foreground"
         elif lines[line_index].startswith("window_state_action_block|"): # state_action

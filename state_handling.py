@@ -11,6 +11,8 @@ import transition_handling
 import undo_handling
 import main_window
 import state_comment
+import color_changer
+import constants
 
 state_number = 0 # Defaultvalue, will be increased with every new state.
 difference_x = 0
@@ -58,9 +60,12 @@ def insert_state(event):
     global state_number
     state_number += 1
     event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
+    if main_window.canvas.find_overlapping(event_x-canvas_editing.state_radius, event_y-canvas_editing.state_radius,
+                                           event_x+canvas_editing.state_radius, event_y+canvas_editing.state_radius):
+        return
     state_id = main_window.canvas.create_oval(event_x-canvas_editing.state_radius, event_y-canvas_editing.state_radius,
                                               event_x+canvas_editing.state_radius, event_y+canvas_editing.state_radius,
-                                              fill='cyan', width=2, outline='blue', tags='state' + str(state_number))
+                                              fill=constants.STATE_COLOR, width=2, outline='blue', tags='state' + str(state_number))
     main_window.canvas.tag_lower(state_id,'all')
     text_id  = main_window.canvas.create_text(event_x, event_y, text='S' + str(state_number), tags='state' + str(state_number) + "_name", font=canvas_editing.state_name_font)
     main_window.canvas.tag_bind(text_id ,"<Double-Button-1>", lambda event, text_id=text_id : edit_state_name(event, text_id))
@@ -72,7 +77,7 @@ def insert_state(event):
     #print ("New Statename", text_id , main_window.canvas.coords(text_id))
 
 def show_menu(event, state_id):
-    listbox = OptionMenu.MyListbox(main_window.canvas, ["add action", "add comment"], height=2, bg='grey', width=14, activestyle='dotbox', relief=tk.RAISED)
+    listbox = OptionMenu.MyListbox(main_window.canvas, ["add action", "add comment", "change color"], height=3, bg='grey', width=14, activestyle='dotbox', relief=tk.RAISED)
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     window = main_window.canvas.create_window(event_x+40,event_y,window=listbox)
     listbox.bind("<Button-1>", lambda event, window=window, listbox=listbox, menu_x=event_x, menu_y=event_y, state_id=state_id:
@@ -107,7 +112,10 @@ def evaluate_menu(event, window, listbox, menu_x, menu_y, state_id):
             comment_ref.add_line(menu_x, menu_y, state_identifier)
             comment_ref.tag(state_identifier)
             undo_handling.design_has_changed()
-
+    elif selected_entry=="change color":
+        new_color = color_changer.ColorChanger(constants.STATE_COLOR).get_new_color()
+        main_window.canvas.itemconfigure(state_id, fill=new_color)
+        undo_handling.design_has_changed()
 def close_menu(window, listbox):
     listbox.destroy()
     main_window.canvas.delete(window)
@@ -127,38 +135,16 @@ def edit_state_name(event, text_id):
     text_box.focus_set()
 
 def update_state_name(text_id, text_box):
-    state_name_list = __get_list_of_state_names()
+    main_window.canvas.delete('entry-window')
+    new_text = text_box.get()
+    text_box.destroy()
     tags = main_window.canvas.gettags(text_id)
     for t in tags:
         if t.startswith("state"): # Format of text_id tag: 'state' + str(state_number) + "_name"
             state_tag = t[:-5]
-    # Analyze the old situation:
-    state_coords_old = main_window.canvas.coords(state_tag)
-    # Update the text:
-    main_window.canvas.delete('entry-window')
-    new_text = text_box.get()
-    if new_text!="":
-        if new_text not in state_name_list:
-            main_window.canvas.itemconfig(text_id, text=new_text)
-        else:
-            messagebox.showerror("Error", "The state name\n" + new_text + "\nis already used at another state.")
-    # Resize the state:
-    size = main_window.canvas.bbox(text_id)
-    text_width = size[2] - size[0] + 5 # Make the text a little bit bigger, so that it does not touch the state circle.
-    state_width = state_coords_old[2] - state_coords_old[0]
-    difference = text_width - state_width
-    state_size_new = state_coords_old[2] - state_coords_old[0] + difference
-    if state_size_new<2*canvas_editing.state_radius:
-        increase = 2*canvas_editing.state_radius - state_size_new
-        difference = difference + increase
-    coords_new = []
-    coords_new.append(state_coords_old[0] - difference//2)
-    coords_new.append(state_coords_old[1] - difference//2)
-    coords_new.append(state_coords_old[2] + difference//2)
-    coords_new.append(state_coords_old[3] + difference//2)
-    main_window.canvas.coords(state_tag,coords_new)
+    show_new_state_name(new_text, text_id)
+    resize_state(state_tag, text_id)
     undo_handling.design_has_changed()
-    text_box.destroy()
     main_window.canvas.bind    ('<Button-1>', move_handling_initialization.move_initialization)
     main_window.canvas.bind_all('<Delete>'  , lambda event : canvas_editing.delete())
     tags = main_window.canvas.gettags(state_tag)
@@ -170,17 +156,16 @@ def update_state_name(text_id, text_box):
             transition_handling.extend_transition_to_state_middle_points(t[:-4])
             transition_handling.shorten_to_state_border(t[:-4])
 
-def __get_list_of_state_names():
+def __get_list_of_state_names(text_id):
     state_name_list = []
     all_canvas_ids = main_window.canvas.find_withtag("all")
     for canvas_id in all_canvas_ids:
         if main_window.canvas.type(canvas_id)=="oval":
             state_tags = main_window.canvas.gettags(canvas_id)
             for tag in state_tags:
-                if tag.startswith("state"):
+                if tag.startswith("state") and main_window.canvas.find_withtag(tag+"_name")[0]!=text_id:
                     state_name_list.append(main_window.canvas.itemcget(tag + "_name", "text"))
     return state_name_list
-
 
 def abort_edit_text(text_id, text_box, old_text):
     main_window.canvas.delete('entry-window')
@@ -188,3 +173,31 @@ def abort_edit_text(text_id, text_box, old_text):
     text_box.destroy()
     main_window.canvas.bind    ('<Button-1>', move_handling_initialization.move_initialization)
     main_window.canvas.bind_all('<Delete>'  , lambda event : canvas_editing.delete())
+
+def show_new_state_name(new_text, text_id):
+    state_name_list = __get_list_of_state_names(text_id)
+    if new_text!="":
+        if new_text not in state_name_list:
+            main_window.canvas.itemconfig(text_id, text=new_text)
+        else:
+            messagebox.showerror("Error", "The state name\n" + new_text + "\nis already used at another state.")
+
+def resize_state(state_tag, text_id):
+    state_coords = main_window.canvas.coords(state_tag)
+    state_width = state_coords[2] - state_coords[0]
+    size = main_window.canvas.bbox(text_id)
+    text_width = size[2] - size[0] + 5 # Make the text a little bit bigger, so that it does not touch the state circle.
+    if text_width<2*canvas_editing.state_radius:
+        text_width = 2*canvas_editing.state_radius
+    difference = text_width - state_width
+    state_coords[0] = state_coords[0] - difference//2
+    state_coords[1] = state_coords[1] - difference//2
+    state_coords[2] = state_coords[2] + difference//2
+    state_coords[3] = state_coords[3] + difference//2
+    overlapping_list = main_window.canvas.find_overlapping(*state_coords)
+    state_is_too_big = False
+    for canvas_item in overlapping_list:
+        if main_window.canvas.type(canvas_item) not in ["text", "line"] and canvas_item!=main_window.canvas.find_withtag(state_tag)[0]:
+            state_is_too_big = True
+    if not state_is_too_big:
+        main_window.canvas.coords(state_tag, state_coords)

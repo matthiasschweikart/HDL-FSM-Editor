@@ -22,8 +22,9 @@ import custom_text
 import compile_handling
 import constants
 import link_dictionary
+import color_changer
 
-VERSION = "4.3"
+VERSION = "4.4"
 header_string ="HDL-FSM-Editor\nVersion " + VERSION + "\nCreated by Matthias Schweikart\nContact: matthias.schweikart@gmx.de"
 
 state_action_default_button        = None
@@ -84,6 +85,8 @@ size_of_file2_line_number = 0
 func_id_jump = None
 module_name_entry = None
 clock_signal_name_entry = None
+diagram_background_color = "white"
+diagram_background_color_error = None
 
 keyword_color = {"not_read": "red", "not_written": "red", "control": "green4", "datatype": "brown", "function": "violet", "comment": "blue"}
 keywords = constants.vhdl_keywords
@@ -170,7 +173,7 @@ def create_menu_bar():
     file_menu.add_command(label="Open Version 1 file ...",        command=file_handling.open_file_old      , font=("Arial", 10))
     file_menu.add_command(label="Save",     accelerator="Ctrl+s", command=file_handling.save               , font=("Arial", 10))
     file_menu.add_command(label="Save as ...",                    command=file_handling.save_as            , font=("Arial", 10))
-    #ile_menu.add_command(label="Print",                          command=file_handling.print_canvas       , font=("Arial", 10))
+    #ile_menu.add_command(label="Print",                          command=file_handling.print_canvas       , font=("Arial", 10)) # deactivated: Canvas-print cannot handle windows.
     file_menu.add_command(label="Exit",                           command=sys.exit                         , font=("Arial", 10))
 
     hdl_menu_button = ttk.Menubutton(menue_frame, text="HDL", style="Window.TMenubutton")
@@ -178,6 +181,8 @@ def create_menu_bar():
     hdl_menu_button.configure(menu=hdl_menu)
     hdl_menu.add_command(label="Generate", accelerator="Ctrl+g", command=lambda: hdl_generation.run_hdl_generation(write_to_file=True), font=("Arial", 10))
     hdl_menu.add_command(label="Compile" , accelerator="Ctrl+p", command=compile_handling.compile         , font=("Arial", 10))
+
+    tool_title = ttk.Label(menue_frame, text="HDL-FSM-Editor", font=("Arial", 15))
 
     search_frame = ttk.Frame(menue_frame, borderwidth=2)#, relief=RAISED)
     search_string = tk.StringVar()
@@ -198,10 +203,12 @@ def create_menu_bar():
 
     file_menu_button.grid    (row=0, column=0)
     hdl_menu_button.grid     (row=0, column=1)
-    search_frame.grid        (row=0, column=2)
-    info_menu_button.grid    (row=0, column=3, sticky=tk.E)
+    tool_title.grid          (row=0, column=2)
+    search_frame.grid        (row=0, column=3)#, sticky=tk.E)
+    info_menu_button.grid    (row=0, column=4)#, sticky=tk.E)
     menue_frame.columnconfigure(2, weight=1)
-    menue_frame.columnconfigure(3, weight=1)
+    # menue_frame.columnconfigure(3, weight=1)
+    # menue_frame.columnconfigure(4, weight=1)
 
     # Bindings of the menus:
     root.bind_all("<Control-o>", lambda event : file_handling.open_file())
@@ -219,7 +226,7 @@ def create_notebook():
 def create_control_notebook_tab():
     global module_name, language, generate_path_value, working_directory_value, select_file_number_text, reset_signal_name, clock_signal_name, compile_cmd
     global select_file_number_label, select_file_number_frame, compile_cmd_docu, edit_cmd, module_name_entry, clock_signal_name_entry
-
+    global diagram_background_color, diagram_background_color_error
     control_frame = ttk.Frame(notebook, takefocus=False)
     control_frame.grid()
 
@@ -314,6 +321,23 @@ def create_control_notebook_tab():
     control_frame.columnconfigure((9,0), weight=0)
     control_frame.columnconfigure((9,1), weight=1)
     control_frame.columnconfigure((9,2), weight=0)
+
+    diagram_background_color = tk.StringVar(value="white")
+    diagram_background_color.trace_add("write", lambda *args: change_color_of_diagram_background())
+    diagram_background_color_label  = ttk.Label (control_frame, text="Diagram background color:", padding=5)
+    diagram_background_color_entry  = ttk.Entry (control_frame, textvariable=diagram_background_color, width=80)
+    diagram_background_color_button = ttk.Button(control_frame, text="Choose color...", command=run_color_changer, style='Path.TButton')
+    diagram_background_color_label.grid (row=10, column=0, sticky=tk.W)
+    diagram_background_color_entry.grid (row=10, column=1, sticky=(tk.W,tk.E))
+    diagram_background_color_button.grid(row=10, column=2, sticky=(tk.W,tk.E))
+    control_frame.columnconfigure((10,0), weight=0)
+    control_frame.columnconfigure((10,1), weight=1)
+    control_frame.columnconfigure((10,2), weight=0)
+    diagram_background_color_error = ttk.Label (control_frame, text="", padding=5)
+    diagram_background_color_error.grid (row=11, column=1, sticky=tk.W)
+    control_frame.columnconfigure((11,0), weight=0)
+    control_frame.columnconfigure((11,1), weight=1)
+    control_frame.columnconfigure((11,2), weight=0)
 
     notebook.add(control_frame, sticky=tk.N+tk.E+tk.W+tk.S, text="Control")
 
@@ -461,7 +485,8 @@ def create_diagram_notebook_tab():
     # Create the elements of the drawing area:
     h = ttk.Scrollbar(diagram_frame, orient=tk.HORIZONTAL, cursor='arrow', style='Horizontal.TScrollbar')
     v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL  , cursor='arrow')
-    canvas = tk.Canvas(diagram_frame, borderwidth=0, scrollregion=(-100000, -100000, 100000, 100000), xscrollcommand=h.set, yscrollcommand=v.set, highlightthickness=0)
+    canvas = tk.Canvas(diagram_frame, borderwidth=2, bg="white", scrollregion=(-100000, -100000, 100000, 100000),
+                       xscrollcommand=h.set, yscrollcommand=v.set, highlightthickness=0, relief=tk.SUNKEN)
     h['command'] = canvas.xview
     v['command'] = canvas.yview
     button_frame = ttk.Frame(diagram_frame, padding="3 3 3 3", borderwidth=1)
@@ -862,3 +887,16 @@ def highlight_item(hdl_item_type, *_):
         module_name_entry.select_range(0, tk.END)
     elif hdl_item_type=="reset_and_clock_signal_name":
         clock_signal_name_entry.select_range(0, tk.END)
+
+def change_color_of_diagram_background():
+    try:
+        canvas.configure(bg=diagram_background_color.get())
+        diagram_background_color_error.configure(text='')
+    except tk.TclError:
+        canvas.configure(bg="white")
+        diagram_background_color_error.configure(text="The string '" + diagram_background_color.get() + "' is not a valid color definition, using 'white' instead.")
+def run_color_changer():
+    new_color = color_changer.ColorChanger(canvas.cget("bg")).get_new_color()
+    if new_color is not None:
+        canvas.configure(bg=new_color)
+        diagram_background_color.set(new_color)

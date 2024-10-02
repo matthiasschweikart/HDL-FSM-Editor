@@ -3,6 +3,7 @@ The method move_initialization is bound to to "Button-1" (click at left mouse bu
 When the mouse hovers over one of the text boxes, this binding is not active,
 as the text boxes are Canvas-Windows, for which the Canvas binding is not valid.
 """
+import tkinter as tk
 import move_handling
 import move_handling_finish
 import transition_handling
@@ -161,8 +162,7 @@ def add_items_for_moving_a_single_line_point_to_the_list( move_list, items_near_
                 move_list.append([id_of_transition, moving_point]) # moving point is one of: "start", "next_to_start", "next_to_end", "end" as at maximum 4 points are supported
                 transition_handling.extend_transition_to_state_middle_points(tag)
                 transition_tag = tag
-        # Remove tags, which are not valid anymore:
-        remove_tags_which_will_get_obsolete_by_moving(line_id, transition_tag, transition_tags, moving_point)
+        remove_tags_and_hide_priority(line_id, transition_tag, transition_tags, moving_point)
         return
     else:
         return # move_list is emtpy in this case.
@@ -177,7 +177,7 @@ def search_for_the_tags_of_a_transition(line_id):
             return line_tags
         else:
             return ()
-def remove_tags_which_will_get_obsolete_by_moving(line_id, transition_tag, transition_tags, moving_point):
+def remove_tags_and_hide_priority(line_id, transition_tag, transition_tags, moving_point):
     for tag in transition_tags:
         if moving_point=='start' and tag.startswith("coming_from_"):
             main_window.canvas.dtag(line_id, tag) # delete the "coming_from_" tag from the line
@@ -187,6 +187,11 @@ def remove_tags_which_will_get_obsolete_by_moving(line_id, transition_tag, trans
                 for t in transition_tags:
                     if t.startswith("ca_connection"):
                         main_window.canvas.dtag("connected_to_reset_transition", "connected_to_reset_transition")
+            priority_dict = transition_handling.determine_priorities_of_outgoing_transitions(start_state_tag)
+            if len(priority_dict)==1:
+                for outgoing_transition in priority_dict:
+                    main_window.canvas.itemconfigure(outgoing_transition + 'priority' , state=tk.HIDDEN)
+                    main_window.canvas.itemconfigure(outgoing_transition + 'rectangle', state=tk.HIDDEN)
         elif moving_point=='end' and tag.startswith("going_to_"):
             end_state_tag = tag[9:]
             main_window.canvas.dtag(end_state_tag, transition_tag + "_end") # delete the transition<n>_end-tag from the connected state.

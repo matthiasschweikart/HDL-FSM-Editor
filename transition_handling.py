@@ -11,6 +11,7 @@ import condition_action_handling
 import undo_handling
 import move_handling_initialization
 import main_window
+import constants
 
 transition_number = 0
 difference_x      = 0
@@ -251,7 +252,7 @@ def transition_start(event):
         for canvas_id in ids:
             element_type = main_window.canvas.type(canvas_id)
             if ( element_type=='oval' or
-                 element_type=='polygon' or
+                 (element_type=='polygon' and reset_entry_has_no_transition(canvas_id)) or
                 (element_type=='rectangle' and main_window.canvas.gettags(canvas_id)[0].startswith("connector"))
                ):
                 for tag in main_window.canvas.gettags(canvas_id):
@@ -278,9 +279,13 @@ def transition_start(event):
                                                       handle_next_added_transition_point(event, transition_id, start_state, transition_draw_funcid))
                 main_window.root.bind_all("<Escape  >", lambda event, transition_id=transition_id, transition_draw_funcid=transition_draw_funcid:
                                                       abort_inserting_transition(transition_id, transition_draw_funcid))
-    else:
-        #print('Transition must start in a state')
-        pass
+
+def reset_entry_has_no_transition(canvas_id):
+    tags_of_reset_entry = main_window.canvas.gettags(canvas_id)
+    for tag in tags_of_reset_entry:
+        if tag.startswith("transition"):
+            return False
+    return True
 
 def transition_draw(event, canvas_id):
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
@@ -291,12 +296,16 @@ def transition_draw(event, canvas_id):
 
 def handle_next_added_transition_point(event, transition_id, start_state_canvas_id, transition_draw_funcid):
     global transition_number
-    [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    transition_coords = main_window.canvas.coords(transition_id)
-    end_state_canvas_id = get_canvas_id_of_state_or_connector_under_new_transition_point(event_x,event_y)
+    [event_x, event_y]  = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+    transition_coords   = main_window.canvas.coords(transition_id)
+    transition_tags     = main_window.canvas.gettags(transition_id)
+    end_state_canvas_id          = get_canvas_id_of_state_or_connector_under_new_transition_point(event_x,event_y)
+    transition_ends_at_connector = check_if_transition_ends_at_connector(end_state_canvas_id)
     if end_state_canvas_id is None:
         if len(transition_coords)<8: # An additional intermediate point is added to the transition.
             duplicate_last_transition_point_for_continuing_the_drawing_of_the_transition(transition_id, transition_coords, event_x, event_y)
+    elif "coming_from_reset_entry" in transition_tags and transition_ends_at_connector is True:
+        return
     elif end_state_canvas_id==start_state_canvas_id and len(transition_coords)==4:
         # Going back to the start state with only 2 points cannot be drawn. The transition point is not accepted.
         return
@@ -308,6 +317,14 @@ def handle_next_added_transition_point(event, transition_id, start_state_canvas_
         add_priority_rectangle_to_the_new_transition(transition_coords, start_state_canvas_id)
         transition_number += 1
         undo_handling.design_has_changed()
+
+def check_if_transition_ends_at_connector(end_state_canvas_id):
+    if end_state_canvas_id is not None:
+        end_state_tags = main_window.canvas.gettags(end_state_canvas_id)
+        for tag in end_state_tags:
+            if tag.startswith("connector"):
+                return True
+    return False
 
 def get_canvas_id_of_state_or_connector_under_new_transition_point(event_x,event_y):
     for canvas_id in main_window.canvas.find_overlapping(event_x,event_y,event_x,event_y):
@@ -400,7 +417,7 @@ def add_priority_rectangle_to_the_new_transition(transition_coords, start_state_
                                    font=canvas_editing.state_name_font)
     text_rectangle = main_window.canvas.bbox(tag_of_new_transition + 'priority')
     main_window.canvas.itemconfigure(tag_of_new_transition + 'priority', state=transition_priority_visibility)
-    main_window.canvas.create_rectangle(text_rectangle, tag=(tag_of_new_transition + 'rectangle'), fill='cyan', state=transition_priority_visibility)
+    main_window.canvas.create_rectangle(text_rectangle, tag=(tag_of_new_transition + 'rectangle'), fill=constants.STATE_COLOR, state=transition_priority_visibility)
     main_window.canvas.tag_raise(tag_of_new_transition + 'priority')
     main_window.canvas.tag_bind (tag_of_new_transition + 'priority',"<Double-Button-1>", lambda event, transition_tag=tag_of_new_transition: edit_priority(event, transition_tag))
 

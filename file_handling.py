@@ -24,6 +24,7 @@ import main_window
 import custom_text
 import state_comment
 import update_hdl_tab
+import constants
 
 filename = ""
 
@@ -214,7 +215,7 @@ def open_file_with_name(read_filename):
                     coords.append(v)
                 except ValueError:
                     tags = tags + (e,)
-            state_id = main_window.canvas.create_oval(coords, fill='cyan', width=2, outline='blue', tags=tags)
+            state_id = main_window.canvas.create_oval(coords, fill=constants.STATE_COLOR, width=2, outline='blue', tags=tags)
             main_window.canvas.tag_bind(state_id,"<Enter>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=4))
             main_window.canvas.tag_bind(state_id,"<Leave>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=2))
             main_window.canvas.tag_bind(state_id,"<Button-3>", lambda event, id=state_id : state_handling.show_menu(event, id))
@@ -282,10 +283,10 @@ def open_file_with_name(read_filename):
                     coords.append(v)
                 except ValueError:
                     tags = tags + (e,)
-            rectangle_color = 'cyan'
+            rectangle_color = constants.STATE_COLOR
             for t in tags:
                 if t.startswith("connector"):
-                    rectangle_color = 'violet'
+                    rectangle_color = constants.CONNECTOR_COLOR
             canvas_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
             main_window.canvas.tag_raise(canvas_id) # priority rectangles are always in "foreground"
         elif line.startswith("window_state_action_block|"):
@@ -499,6 +500,7 @@ def save_in_file_new(save_filename):
     design_dictionary["clock_signal_name"]                   = main_window.clock_signal_name.get()
     design_dictionary["compile_cmd"]                         = main_window.compile_cmd.get()
     design_dictionary["edit_cmd"]                            = main_window.edit_cmd.get()
+    design_dictionary["diagram_background_color"]            = main_window.diagram_background_color.get()
     design_dictionary["state_number"]                        = state_handling.state_number
     design_dictionary["transition_number"]                   = transition_handling.transition_number
     design_dictionary["reset_entry_number"]                  = reset_entry_handling.reset_entry_number
@@ -543,7 +545,7 @@ def save_in_file_new(save_filename):
     items = main_window.canvas.find_all()
     for i in items:
         if main_window.canvas.type(i)=='oval':
-            design_dictionary["state"].append     ([main_window.canvas.coords(i), main_window.canvas.gettags(i)])
+            design_dictionary["state"].append     ([main_window.canvas.coords(i), main_window.canvas.gettags(i), main_window.canvas.itemcget(i, "fill")])
         elif main_window.canvas.type(i)=="text":
             design_dictionary["text"].append      ([main_window.canvas.coords(i), main_window.canvas.gettags(i), main_window.canvas.itemcget(i, "text")])
         elif main_window.canvas.type(i)=="line":
@@ -601,7 +603,7 @@ def open_file_with_name_new(read_filename):
                 main_window.notebook.select(notebook_id)
         # Read the design from the file:
         transition_ids = []
-        rectangle_ids  = []
+        ids_of_rectangles_to_raise  = []
         priority_ids   = []
         main_window.module_name.set(design_dictionary["modulename"])
         old_language = main_window.language.get()
@@ -618,6 +620,12 @@ def open_file_with_name_new(read_filename):
         main_window.clock_signal_name.set      (design_dictionary["clock_signal_name"])
         main_window.compile_cmd.set            (design_dictionary["compile_cmd"])
         main_window.edit_cmd.set               (design_dictionary["edit_cmd"])
+        if "diagram_background_color" in design_dictionary:
+            diagram_background_color = design_dictionary["diagram_background_color"]
+            main_window.diagram_background_color.set(diagram_background_color)
+        else:
+            diagram_background_color = "white"
+        main_window.canvas.configure(bg=diagram_background_color)
         main_window.interface_package_text.insert              ("1.0", design_dictionary["interface_package"])
         main_window.interface_generics_text.insert             ("1.0", design_dictionary["interface_generics"])
         main_window.interface_ports_text.insert                ("1.0", design_dictionary["interface_ports"])
@@ -680,6 +688,10 @@ def open_file_with_name_new(read_filename):
         for definition in design_dictionary["state"]:
             coords = definition[0]
             tags   = definition[1]
+            if len(definition)==3:
+                fill_color = definition[2]
+            else:
+                fill_color = constants.STATE_COLOR
             number_of_outgoing_transitions = 0
             for tag in tags:
                 if tag.startswith("transition") and tag.endswith("_start"):
@@ -687,16 +699,23 @@ def open_file_with_name_new(read_filename):
                     number_of_outgoing_transitions += 1
             if number_of_outgoing_transitions==1:
                 hide_priority_rectangle_list.append(transition_identifier)
-            state_id = main_window.canvas.create_oval(coords, fill='cyan', width=2, outline='blue', tags=tags)
+            state_id = main_window.canvas.create_oval(coords, fill=fill_color, width=2, outline='blue', tags=tags)
             main_window.canvas.tag_bind(state_id,"<Enter>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=4))
             main_window.canvas.tag_bind(state_id,"<Leave>"   , lambda event, id=state_id : main_window.canvas.itemconfig(id, width=2))
             main_window.canvas.tag_bind(state_id,"<Button-3>", lambda event, id=state_id : state_handling.show_menu(event, id))
-        for definition in design_dictionary["polygon"]:
+        for definition in design_dictionary["polygon"]: # Reset symbol
             coords = definition[0]
             tags   = definition[1]
             polygon_id = main_window.canvas.create_polygon(coords, fill='red', outline='orange', tags=tags)
             main_window.canvas.tag_bind(polygon_id,"<Enter>", lambda event, id=polygon_id : main_window.canvas.itemconfig(id, width=2))
             main_window.canvas.tag_bind(polygon_id,"<Leave>", lambda event, id=polygon_id : main_window.canvas.itemconfig(id, width=1))
+            number_of_outgoing_transitions = 0
+            for tag in tags:
+                if tag.startswith("transition") and tag.endswith("_start"):
+                    transition_identifier = tag.replace("_start", "")
+                    number_of_outgoing_transitions += 1
+            if number_of_outgoing_transitions==1:
+                hide_priority_rectangle_list.append(transition_identifier)
         for definition in design_dictionary["text"]:
             coords = definition[0]
             tags   = definition[1]
@@ -726,11 +745,11 @@ def open_file_with_name_new(read_filename):
         for definition in design_dictionary["rectangle"]:
             coords = definition[0]
             tags   = definition[1]
-            rectangle_color = 'cyan'
+            rectangle_color = constants.STATE_COLOR
             for t in tags:
                 if t.startswith("connector"):
-                    rectangle_color = 'violet'
-            if rectangle_color=="violet":
+                    rectangle_color = constants.CONNECTOR_COLOR
+            if rectangle_color==constants.CONNECTOR_COLOR:
                 number_of_outgoing_transitions = 0
                 for tag in tags:
                     if tag.startswith("transition") and tag.endswith("_start"):
@@ -739,9 +758,8 @@ def open_file_with_name_new(read_filename):
                 if number_of_outgoing_transitions==1:
                     hide_priority_rectangle_list.append(transition_identifier)
             canvas_id = main_window.canvas.create_rectangle(coords, tag=tags, fill=rectangle_color)
-            if rectangle_color=="cyan":
-                rectangle_ids.append(canvas_id)
-            rectangle_ids.append(canvas_id)
+            if rectangle_color==constants.STATE_COLOR: # priority rectangle
+                ids_of_rectangles_to_raise.append(canvas_id)
             #main_window.canvas.tag_raise(id) # priority rectangles are always in "foreground"
         for definition in design_dictionary["window_state_action_block"]:
             coords = definition[0]
@@ -811,7 +829,7 @@ def open_file_with_name_new(read_filename):
         # Sort the display order for the transition priorities:
         for transition_id in transition_ids:
             main_window.canvas.tag_raise(transition_id)
-        for rectangle_id in rectangle_ids:
+        for rectangle_id in ids_of_rectangles_to_raise:
             main_window.canvas.tag_raise(rectangle_id)
         for priority_id in priority_ids:
             main_window.canvas.tag_raise(priority_id)
@@ -827,6 +845,7 @@ def open_file_with_name_new(read_filename):
         #canvas_editing.priority_distance = 1.5*canvas_editing.state_radius
         update_hdl_tab.UpdateHdlTab(design_dictionary["language"     ], design_dictionary["number_of_files"], read_filename,
                                     design_dictionary["generate_path"], design_dictionary["modulename"     ])
+        main_window.show_tab("Diagram")
         main_window.canvas.after_idle(canvas_editing.view_all)
     except FileNotFoundError:
         messagebox.showerror("Error", "File " + read_filename + " could not be found.")
