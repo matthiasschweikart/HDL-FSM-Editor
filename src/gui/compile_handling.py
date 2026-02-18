@@ -13,6 +13,8 @@ from tkinter import messagebox
 
 from constants import GuiTab
 from project_manager import project_manager
+from utils.var_expansion import expand_variables_in_list
+from utils.var_expansion_helpers import find_git_root
 
 
 def compile_hdl() -> None:
@@ -87,72 +89,65 @@ def _get_command_list():
 
 
 def _replace_variables(command_array) -> list | None:
-    command_array_new = []
-    handlers = {
-        "$file": _replace_file_var,
-        "$file1": _replace_file1_var,
-        "$file2": _replace_file2_var,
-        "$name": _replace_name_var,
-    }
-    for entry in command_array:
-        handler = handlers.get(entry)
-        if handler is not None:
-            result = handler()
-            if result is None:
-                return None
-            command_array_new.append(result)
+    try:
+        internal_vars = _get_internal_variables()
+        return expand_variables_in_list(command_array, internal_vars, error_on_missing=True, use_environ=True)
+    except KeyError as e:
+        missing_key = e.args[0]
+        number_of_files = project_manager.select_file_number_text.get()
+
+        if missing_key == "file" and number_of_files == 2:
+            messagebox.showerror(
+                "Error",
+                "The compile command uses $file, but the "
+                '"2 files mode" is selected, so only $file1 and $file2 are allowed.',
+            )
+        elif (missing_key == "file1" or missing_key == "file2") and number_of_files == 1:
+            messagebox.showerror(
+                "Error",
+                "The compile command uses $file1 or $file2, but the "
+                '"1 files mode" is selected, so only $file is allowed.',
+            )
         else:
-            command_array_new.append(entry)
-    return command_array_new
-
-
-def _replace_file_var() -> str | None:
-    if project_manager.select_file_number_text.get() == 2:
-        messagebox.showerror(
-            "Error",
-            'The compile command uses $file, but the "2 files mode" is selected, '
-            "so only $file1 and $file2 are allowed.",
-        )
+            messagebox.showerror("Error", f"Variable '{missing_key}' not found")
         return None
+
+
+def _get_internal_variables():
+    """Get the current internal variables and validate."""
+
+    internal_vars = {}
+    internal_vars["name"] = project_manager.module_name.get()
+
+    file_mode = project_manager.select_file_number_text.get()
     language = project_manager.language.get()
     extension = ".vhd" if language == "VHDL" else (".v" if language == "Verilog" else ".sv")
-    file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + extension
-    if not exists(file_name):
-        messagebox.showerror("Error", "Compile is not possible, HDL file " + file_name + " does not exist.")
-        return None
-    return file_name
+    # TODO: This should support variable expansion too.
+    base_path = project_manager.generate_path_value.get()
+    module_name = project_manager.module_name.get()
+    hfe_file_path = project_manager.current_file
 
+    internal_vars["git_root"] = lambda _: find_git_root(hfe_file_path)
 
-def _replace_file1_var() -> str | None:
-    if project_manager.select_file_number_text.get() == 1:
-        messagebox.showerror(
-            "Error",
-            'The compile command uses $file1, but the "1 files mode" is selected, so only $file is allowed).',
-        )
-        return None
-    file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + "_e.vhd"
-    if not exists(file_name):
-        messagebox.showerror("Error", "Compile is not possible, as HDL file" + file_name + " does not exist.")
-        return None
-    return file_name
+    if file_mode == 1:
+        file_name = f"{base_path}/{module_name}{extension}"
+        internal_vars["file"] = file_name
+        if not exists(file_name):
+            messagebox.showerror("Error", "Compile is not possible, HDL file " + file_name + " does not exist.")
+            return None
+    else:
+        file1 = f"{base_path}/{module_name}_e{extension}"
+        file2 = f"{base_path}/{module_name}_fsm{extension}"
+        internal_vars["file1"] = file1
+        internal_vars["file2"] = file2
+        if not exists(file1):
+            messagebox.showerror("Error", "Compile is not possible, as HDL file " + file1 + " does not exist.")
+            return None
+        if not exists(file2):
+            messagebox.showerror("Error", "Compile is not possible, as HDL file " + file2 + " does not exist.")
+            return None
 
-
-def _replace_file2_var() -> str | None:
-    if project_manager.select_file_number_text.get() == 1:
-        messagebox.showerror(
-            "Error",
-            'The compile command uses $file2, but the "1 files mode" is selected, so only $file is allowed).',
-        )
-        return None
-    file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + "_fsm.vhd"
-    if not exists(file_name):
-        messagebox.showerror("Error", "Compile is not possible, as HDL file" + file_name + " does not exist.")
-        return None
-    return file_name
-
-
-def _replace_name_var() -> str:
-    return project_manager.module_name.get()
+    return internal_vars
 
 
 def _insert_line_in_log(line) -> None:
