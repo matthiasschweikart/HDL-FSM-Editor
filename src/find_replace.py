@@ -28,7 +28,7 @@ class FindReplace:
     there the search_string/replace_string are "escaped".
     """
 
-    def __init__(self, search_string, replace_string, replace) -> None:
+    def __init__(self, search_string, replace_string, replace, in_hdl=False) -> None:
         self.number_of_hits_all = 0
         self.search_pattern = search_string.get()
         self.replace_pattern = replace_string.get()
@@ -36,15 +36,21 @@ class FindReplace:
         if self.search_pattern == "":
             messagebox.showinfo("HDL-FSM-Editor", "The search is aborted because you searched for an empty string.")
             return
-        continue_search = self._search_in_diagram()
-        if not continue_search:
-            return
-        continue_search = self._search_in_all_text_fields()
-        if not continue_search:
-            return
-        continue_search = self._search_in_all_entry_widgets()
-        if not continue_search:
-            return
+        if in_hdl:
+            text_field = {"tab": GuiTab.GENERATED_HDL, "ref": project_manager.hdl_frame_text, "update": ""}
+            continue_search = self._search_in_text_field(text_field)
+            if not continue_search:
+                return
+        else:
+            continue_search = self._search_in_diagram()
+            if not continue_search:
+                return
+            continue_search = self._search_in_all_text_fields()
+            if not continue_search:
+                return
+            continue_search = self._search_in_all_entry_widgets()
+            if not continue_search:
+                return
         if replace:
             undo_handling.design_has_changed()
             messagebox.showinfo("HDL-FSM-Editor", "Number of replacements = " + str(self.number_of_hits_all))

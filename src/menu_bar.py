@@ -62,6 +62,12 @@ class MenuBar:
             command=lambda: find_replace.FindReplace(search_string, replace_string, replace=False),
             style="Find.TButton",
         )
+        search_button2 = ttk.Button(
+            search_frame,
+            text="Find in HDL",
+            command=lambda: find_replace.FindReplace(search_string, replace_string, replace=False, in_hdl=True),
+            style="Find.TButton",
+        )
         search_string_entry = ttk.Entry(search_frame, width=23, textvariable=search_string)
         replace_string_entry = ttk.Entry(search_frame, width=23, textvariable=replace_string)
         replace_button = ttk.Button(
@@ -76,6 +82,10 @@ class MenuBar:
         search_button.bind(
             "<Return>", lambda event: find_replace.FindReplace(search_string, replace_string, replace=False)
         )
+        search_button2.bind(
+            "<Return>",
+            lambda event: find_replace.FindReplace(search_string, replace_string, replace=False, in_hdl=True),
+        )
         replace_string_entry.bind(
             "<Return>", lambda event: find_replace.FindReplace(search_string, replace_string, replace=True)
         )
@@ -84,8 +94,9 @@ class MenuBar:
         )
         search_string_entry.grid(row=0, column=0)
         search_button.grid(row=0, column=1)
-        replace_string_entry.grid(row=0, column=2)
-        replace_button.grid(row=0, column=3)
+        search_button2.grid(row=0, column=2)
+        replace_string_entry.grid(row=0, column=3)
+        replace_button.grid(row=0, column=4)
 
         help_menu = tk.Menu(project_manager.root, tearoff=0)
         help_menu.add_command(
