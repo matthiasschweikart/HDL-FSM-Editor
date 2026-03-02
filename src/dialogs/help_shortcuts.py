@@ -25,8 +25,10 @@ class ShortCutsDialog:
 11. Ctrl-[ unindents the selection or the current line (works only under Linux).
 12. Ctrl-Backspace deletes the word before the insertion cursor.
 13. Ctrl-Delete deletes the word after the insertion cursor.
-14. Tab indents the selection or the current line (independent from the position of the insertion cursor).
-15. Shift-Tab unindents the selection or the current line.
-16. The Home-Button zooms the diagram to show the entire design (same as "view all").
+14. Tab without selection adds blanks at the cursor position to the next multiple of four characters.
+15. Tab with selection inside a line deletes the selection and adds blanks at the cursor position to the next multiple of four characters.
+16. Tab with selection spanning multiple lines indents all selected lines (independent from start and end selection).
+17. Shift-Tab unindents the selection or the current line.
+18. The Home-Button zooms the diagram to show the entire design (same as "view all").
 """
-        text_dialog.TextDialog("Keyboard Shortcuts for text editing", content, "1000x280")
+        text_dialog.TextDialog("Keyboard Shortcuts for text editing", content, "1000x320")
