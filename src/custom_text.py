@@ -809,17 +809,29 @@ class CustomText(CodeEditor):
         # Comment must be the last, because in the range of a comment all other tags are deleted:
         for text_ref in CustomText.read_variables_of_all_windows:
             text_ref.update_highlight_tags(project_manager.fontsize, ["not_read", "not_written", "comment"])
-        text_refs_fixed = [
-            project_manager.interface_generics_text,
-            project_manager.interface_package_text,
-            project_manager.interface_ports_text,
-            project_manager.internals_architecture_text,
-            project_manager.internals_process_clocked_text,
-            project_manager.internals_process_combinatorial_text,
-            project_manager.internals_package_text,
-        ]
-        for text_ref in text_refs_fixed:
+        for text_ref in _declaration_text_widgets():
             text_ref.update_highlight_tags(10, ["not_read", "not_written", "comment"])
+
+
+def _declaration_text_widgets():
+    """Text widgets that show HDL declarations (interface/internals). Used for language-aware highlighting."""
+    return [
+        project_manager.interface_generics_text,
+        project_manager.interface_package_text,
+        project_manager.interface_ports_text,
+        project_manager.internals_architecture_text,
+        project_manager.internals_process_clocked_text,
+        project_manager.internals_process_combinatorial_text,
+        project_manager.internals_package_text,
+    ]
+
+
+def refresh_highlighting_in_all_declaration_widgets() -> None:
+    """Reapply syntax highlighting in all declaration widgets (e.g. after language change)."""
+    tag_list = ["not_read", "not_written", "control", "datatype", "function", "comment"]
+    for text_ref in _declaration_text_widgets():
+        text_ref.update_highlight_tags(10, tag_list)
+    project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
 
 
 def _remove_items_from_list(lst: list, items) -> None:

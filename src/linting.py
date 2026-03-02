@@ -2,6 +2,8 @@
 Methods needed for highlighting signals, which are not read, not written, not defined
 """
 
+import copy
+
 import constants
 import custom_text
 from elements import global_actions_combinatorial
@@ -16,7 +18,7 @@ class HighLightDict:
     """
 
     def __init__(self) -> None:
-        self.highlight_pattern_dict: dict[str, list[str]] = constants.VHDL_HIGHLIGHT_PATTERN_DICT
+        self.highlight_pattern_dict: dict[str, list[str]] = copy.deepcopy(constants.VHDL_HIGHLIGHT_PATTERN_DICT)
         self.recreate_after_id = None
         self.update_highlight_tags_id = None
 
