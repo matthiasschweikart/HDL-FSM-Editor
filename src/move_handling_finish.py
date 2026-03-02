@@ -15,6 +15,7 @@ from project_manager import project_manager
 
 
 def move_finish(event, move_list, move_do_funcid) -> None:
+    """End moving: snap to grid, unbind handlers, update transitions and condition-actions, record undo."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
 
     item_ids_at_moving_end_location = _get_item_ids_at_moving_end_location(event_x, event_y, move_list)
@@ -44,6 +45,7 @@ def move_finish(event, move_list, move_do_funcid) -> None:
 
 
 def move_finish_for_transitions(move_list):
+    """Shorten transitions to state borders, move condition-action endpoints, hide connection lines, lower grid."""
     _shorten_all_moved_transitions_to_the_state_borders(move_list)
     _move_all_ca_connection_end_points_to_the_new_transition_start_points(move_list)
     _hide_the_connection_line_of_moved_condition_action_window(
@@ -265,6 +267,7 @@ def _get_canvas_id_of_state_name(state_id):
 
 
 def try_to_convert_into_straight_line(coords) -> list:
+    """If coords form a near-straight line, return [x0,y0, x_end,y_end]; otherwise return coords unchanged."""
     number_of_points = len(coords) / 2
     if number_of_points == 2:
         return coords

@@ -235,11 +235,13 @@ class ConditionAction:
             self.action_id.grid_forget()
 
     def change_descriptor_to(self, text) -> None:
+        """Set the action label text (e.g. 'asynchronous' or 'synchronous')."""
         self.action_label.config(
             text=text
-        )  # Used for switching between "asynchronous" and "synchron" (clocked) transition.
+        )  # Used for switching between "asynchronous" and "synchronous" (clocked) transition.
 
     def move_to(self, event_x, event_y, first) -> None:
+        """Reposition window and connecting line to (event_x, event_y); maintain anchor offset when first is True."""
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(self.window_id)
@@ -255,9 +257,11 @@ class ConditionAction:
         project_manager.canvas.itemconfig(self.line_id, state=tk.NORMAL)
 
     def hide_line(self) -> None:
+        """Hide the canvas line connecting this condition-action window to the transition."""
         project_manager.canvas.itemconfig(self.line_id, state=tk.HIDDEN)
 
     def delete(self):
+        """Remove condition-action window, line, and ref_dict entries; delete linked transition if connector-based."""
         number = project_manager.canvas.gettags(self.window_id)[0][16:]  # extract <n> from "condition_action<n>"
         del custom_text.CustomText.read_variables_of_all_windows[self.condition_id]
         del custom_text.CustomText.written_variables_of_all_windows[self.condition_id]

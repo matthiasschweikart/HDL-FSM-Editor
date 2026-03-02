@@ -114,5 +114,6 @@ class CanvasDelete:
 
     @classmethod
     def store_mouse_position(cls, event) -> None:
+        """Store canvas coordinates of the mouse from the given event."""
         cls.canvas_x_coordinate = project_manager.canvas.canvasx(event.x)
         cls.canvas_y_coordinate = project_manager.canvas.canvasy(event.y)

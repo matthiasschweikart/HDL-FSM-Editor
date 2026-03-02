@@ -130,10 +130,7 @@ class CustomText(CodeEditor):
             return None
 
     def edit_in_external_editor(self) -> None:
-        """
-        Loads the text into an external editor, and after closing the editor, the text in the CustomText
-        is replaced by the (possibly) modified text.
-        """
+        """Open current text in external editor (blocking), then replace content with edited result."""
         with tempfile.NamedTemporaryFile(
             suffix=".vhd" if project_manager.language.get() == "VHDL" else ".v",
             delete=False,
@@ -141,26 +138,27 @@ class CustomText(CodeEditor):
             encoding="utf-8",
         ) as tf:
             tf.write(self.get("1.0", "end-1c"))
-            tmpname = tf.name
+            tmp_name = tf.name
         try:
-            cmd = project_manager.edit_cmd.get().split() + [tmpname]
+            cmd = project_manager.edit_cmd.get().split() + [tmp_name]
             subprocess.run(cmd, check=False)  # blocks efficiently
-            with open(tmpname, encoding="utf-8") as f:
+            with open(tmp_name, encoding="utf-8") as f:
                 new_text = f.read()
         finally:
-            os.unlink(tmpname)
+            os.unlink(tmp_name)
         self.delete("1.0", tk.END)
         self.insert("1.0", new_text)
         self.format()
 
     def format_after_idle(self) -> None:
+        """Schedule format() after 200 ms idle (except for log text)."""
         if self.text_type != "log":
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
             self.format_after_id = self.after(200, self.format)
 
     def format(self) -> None:
-        """Resizes the text box, updates several lists of signals/variables, and updates the highlighting."""
+        """Update text box size and highlighting."""
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
         if self.text_type in ("declarations", "variable", "action"):
@@ -286,6 +284,7 @@ class CustomText(CodeEditor):
                 )
 
     def _replace_strings_and_attributes_by_blanks(self, copy_of_text):
+        """Replace string literals and VHDL attributes in text with spaces for safe regex search."""
         for search_string in ["'image", "'length", '".*?"', "'.*?'"]:
             while True:
                 match_object = re.search(search_string, copy_of_text, flags=re.IGNORECASE)
@@ -301,6 +300,7 @@ class CustomText(CodeEditor):
         return copy_of_text
 
     def _remove_surrounding_characters_from_the_match(self, match_object, keyword) -> tuple:
+        """Return (start, end) indices of the keyword within the match (strip word boundaries)."""
         if match_object.end() - match_object.start() == len(keyword) + 2:
             return match_object.start() + 1, match_object.end() - 1
         if match_object.end() - match_object.start() == len(keyword) + 1:
@@ -361,8 +361,8 @@ class CustomText(CodeEditor):
         if project_manager.language.get() == "VHDL":
             text = self._remove_loop_indices(text)
         if project_manager.language.get() == "VHDL" and self._text_is_global_actions_combinatorial():
-            # "processes" are possible in this text, which might contain "uncomplete" variable usage:
-            text = self._add_uncomplete_vhdl_variables_to_read_or_written_variables_of_all_windows(text)
+            # "processes" are possible in this text, which might contain "incomplete" variable usage:
+            text = self._add_incomplete_vhdl_variables_to_read_or_written_variables_of_all_windows(text)
         text = self._add_read_constants_from_case_when_to_read_variables_of_all_windows(text)  # Keywords are used here.
         text = self._remove_keywords(text)
         text = self._remove_vhdl_attributes(text)
@@ -426,7 +426,7 @@ class CustomText(CodeEditor):
                 break
 
     def _remove_vhdl_attributes(self, text):
-        search_for_attributes = r"\w+\s+'\s+\w+"  # remove signal-name and attribute; example: "paddr ' range"
+        search_for_attributes = r"\w+\s+'\s+\w+"  # remove signal-name and attribute; example: "addr ' range"
         while True:
             match = re.search(search_for_attributes, text, flags=re.IGNORECASE)
             if match:
@@ -440,7 +440,7 @@ class CustomText(CodeEditor):
         return text
 
     def _remove_loop_indices(self, text):
-        # Suchen nach "for   in"
+        # Search for "for ... in"
         while True:
             match = LOOP_INDEX_RE.search(text)
             if match:
@@ -455,7 +455,7 @@ class CustomText(CodeEditor):
                 break
         return text
 
-    def _add_uncomplete_vhdl_variables_to_read_or_written_variables_of_all_windows(self, text):
+    def _add_incomplete_vhdl_variables_to_read_or_written_variables_of_all_windows(self, text):
         text_list, proc_list, remaining_text = self._split_in_lists_of_text_and_processes(text)
         for p_number, process in enumerate(proc_list):
             process, all_variable_names = self._remove_variable_declarations(process)
@@ -592,8 +592,8 @@ class CustomText(CodeEditor):
                 " <= ",
                 " > ",
                 " >= ",
-                " = ",  # This is an uncomplete comparison, which shall not be identified as signal by highlighting.
-                " ! ",  # This is an uncomplete comparison, which shall not be identified as signal by highlighting.
+                " = ",  # This is an incomplete comparison, which shall not be identified as signal by highlighting.
+                " ! ",  # This is an incomplete comparison, which shall not be identified as signal by highlighting.
             ):
                 text = re.sub(keyword, "  ", text, flags=re.I)  # Keep the blanks the keyword is surrounded by.
         return text
@@ -702,9 +702,9 @@ class CustomText(CodeEditor):
                     " <= ",
                     " > ",
                     " >= ",
-                    " = ",  # This is an uncomplete comparison, which shall not be identified as signal by highlighting.
+                    " = ",  # This is an incomplete comparison, which shall not be identified as signal by highlighting.
                     " ! ",
-                ):  # This is an uncomplete comparison, which shall not be identified as signal by highlighting.
+                ):  # This is an incomplete comparison, which shall not be identified as signal by highlighting.
                     condition = re.sub(keyword, "  ", condition)  # Keep the blanks the keyword is surrounded by.
             CustomText.read_variables_of_all_windows[self] += condition.split()
         return text
@@ -799,6 +799,7 @@ class CustomText(CodeEditor):
         self.focus_set()
 
     def _update_highlight_tags_in_all_windows_for_not_read_not_written_and_comment(self) -> None:
+        """Schedule update of not_read, not_written, and comment highlights in all text windows after 300 ms."""
         if self.update_highlight_after_id is not None:
             project_manager.root.after_cancel(self.update_highlight_after_id)
         self.update_highlight_after_id = project_manager.root.after(

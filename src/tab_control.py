@@ -180,6 +180,7 @@ class TabControl:
         ]
 
     def switch_language_mode(self) -> None:  # also called from file_handling.py
+        """Apply current language (VHDL/Verilog): update highlight dict, file count, labels, and layout."""
         new_language = project_manager.language.get()
         if new_language == "VHDL":
             project_manager.highlight_dict_ref.highlight_pattern_dict = copy.deepcopy(
@@ -201,7 +202,7 @@ class TabControl:
             project_manager.tab_internals_ref.paned_window_internals.insert(
                 0, project_manager.tab_internals_ref.internals_package_frame, weight=1
             )
-            # Internals: Architecture-Declarations, 2*Variable Declarations umbenennen
+            # Internals: Architecture-Declarations (adapt labels to VHDL)
             project_manager.internals_architecture_label.config(text="Architecture Declarations:")
             project_manager.internals_process_clocked_label.config(text="Variable Declarations for clocked process:")
             project_manager.internals_process_combinatorial_label.config(
@@ -234,7 +235,7 @@ class TabControl:
             project_manager.tab_internals_ref.paned_window_internals.forget(
                 project_manager.tab_internals_ref.internals_package_frame
             )
-            # Internals: Architecture-Declarations umbenennen, 2*Variable Declarations umbenennen
+            # Internals: Architecture-Declarations (adapt labels to Verilog)
             project_manager.internals_architecture_label.config(text="Internal Declarations:")
             project_manager.internals_process_clocked_label.config(
                 text="Local Variable Declarations for clocked always process (not supported by all Verilog compilers):"
@@ -297,6 +298,7 @@ class TabControl:
             )
 
     def choose_bg_color(self) -> None:  # also called from canvas_editing.py
+        """Open color picker and set canvas background to the chosen color."""
         new_color = ColorChanger(project_manager.canvas.cget("bg")).ask_color()
         if new_color is not None:
             project_manager.canvas.configure(bg=new_color)

@@ -1,3 +1,5 @@
+"""Log tab: build/output log display with clear and regex-hyperlink options."""
+
 import re
 import tkinter as tk
 from tkinter import messagebox, ttk

@@ -3,9 +3,8 @@ Methods needed for HDL generation
 """
 
 import os
-import re
-import traceback
 import tkinter as tk
+import traceback
 from datetime import datetime
 from tkinter import messagebox
 
@@ -25,6 +24,7 @@ last_line_number_of_file1 = 0  # pylint: disable=invalid-name # module-level mut
 
 
 def run_hdl_generation(write_to_file, is_script_mode: bool = False) -> bool:
+    """Run HDL generation with current config; show errors in GUI or print in script mode. Return True on success."""
     config = GenerationConfig.from_main_window()
     state_tag_list_sorted = _create_sorted_state_tag_list(is_script_mode)
     success = False

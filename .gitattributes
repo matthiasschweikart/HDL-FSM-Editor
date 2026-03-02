@@ -1,4 +1,4 @@
 
-# We enforce some 
+# Enforce line endings
 *.py text eol=lf
 *.md text eol=lf

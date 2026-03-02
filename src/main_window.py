@@ -22,6 +22,7 @@ _check_version_result: str = ""  # wird nur in main_window.py verwendet, kann in
 
 
 def create_gui() -> None:
+    """Build main window, notebook, menu bar, and set project_manager references."""
     root = tk.Tk()
     root.withdraw()  # Because it could be batch-mode because of "-generate_hdl" switch.
     root.columnconfigure(0, weight=1)  # The (only) column shall expand at window resize
@@ -46,6 +47,7 @@ def create_gui() -> None:
 
 
 def set_word_boundaries() -> None:
+    """Configure Tcl word boundaries so double-click selects identifiers (e.g. signal names)."""
     # this first statement triggers tcl to autoload the library
     # that defines the variables we want to override.
     project_manager.root.tk.call("tcl_wordBreakAfter", "", 0)
@@ -56,6 +58,7 @@ def set_word_boundaries() -> None:
 
 
 def check_version() -> None:
+    """Fetch website and print whether a newer version is available."""
     global _check_version_result
     try:
         print("Checking for a newer version ...")
@@ -78,6 +81,7 @@ def check_version() -> None:
 
 
 def read_message() -> None:
+    """Fetch message from website and copy it into the log tab."""
     try:
         with urllib.request.urlopen("http://www.hdl-fsm-editor.de/message.txt") as source:
             message = source.read()
@@ -91,6 +95,7 @@ def read_message() -> None:
 
 
 def view_all_after_window_is_built() -> None:
+    """Fit all canvas content in view and unbind Visibility (one-shot)."""
     canvas_editing.view_all()
     project_manager.canvas.unbind("<Visibility>")
 

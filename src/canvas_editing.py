@@ -24,12 +24,14 @@ _abs_zoom_factor: float = 1.0
 
 
 def translate_window_event_coordinates_in_rounded_canvas_coordinates(event) -> list:
+    """Return canvas coordinates [x, y] for the event, rounded to the state radius grid."""
     canvas_grid_x_coordinate = project_manager.canvas.canvasx(event.x, gridspacing=project_manager.state_radius)
     canvas_grid_y_coordinate = project_manager.canvas.canvasy(event.y, gridspacing=project_manager.state_radius)
     return [canvas_grid_x_coordinate, canvas_grid_y_coordinate]
 
 
 def translate_window_event_coordinates_in_exact_canvas_coordinates(event) -> list:
+    """Return exact canvas coordinates [x, y] for the event."""
     canvas_grid_x_coordinate, canvas_grid_y_coordinate = (
         project_manager.canvas.canvasx(event.x),
         project_manager.canvas.canvasy(event.y),
@@ -38,6 +40,7 @@ def translate_window_event_coordinates_in_exact_canvas_coordinates(event) -> lis
 
 
 def start_view_rectangle(event) -> None:
+    """Begin drawing a view rectangle from the current event position."""
     [event_x, event_y] = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     rectangle_id = project_manager.canvas.create_rectangle(event_x, event_y, event_x, event_y, dash=(3, 5))
     project_manager.canvas.tag_raise(rectangle_id, "all")
@@ -56,6 +59,7 @@ def start_view_rectangle(event) -> None:
 
 
 def view_rectangle(complete_rectangle, check_fit) -> None:
+    """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
     if complete_rectangle[2] - complete_rectangle[0] != 0 and complete_rectangle[3] - complete_rectangle[1] != 0:
         visible_rectangle = [
             project_manager.canvas.canvasx(0),
@@ -84,6 +88,7 @@ def view_rectangle(complete_rectangle, check_fit) -> None:
 
 
 def view_all() -> None:
+    """Fit all canvas content in view and optionally adjust font size."""
     project_manager.grid_drawer.remove_grid()
     complete_rectangle = project_manager.canvas.bbox("all")
     if complete_rectangle is not None:
@@ -95,6 +100,7 @@ def view_all() -> None:
 
 
 def zoom_plus() -> None:
+    """Zoom in by 10% around the visible center."""
     project_manager.canvas.grid_remove()  # Make the canvas invisible.
     project_manager.grid_drawer.remove_grid()
     factor = 1.1
@@ -111,6 +117,7 @@ def zoom_plus() -> None:
 
 
 def zoom_minus() -> None:
+    """Zoom out by 10% around the visible center."""
     project_manager.canvas.grid_remove()  # Make the canvas invisible.
     project_manager.grid_drawer.remove_grid()
     factor = 1 / 1.1
@@ -127,6 +134,7 @@ def zoom_minus() -> None:
 
 
 def canvas_zoom(zoom_center, zoom_factor) -> None:
+    """Apply zoom factor around the given center; update scroll and font size."""
     global _abs_zoom_factor
     # Modify factor, so that fontsize is always an integer:
     fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
@@ -144,6 +152,7 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
 
 
 def zoom_wheel(event) -> None:
+    """Handle mouse wheel: zoom in/out at cursor position."""
     project_manager.grid_drawer.remove_grid()
     # event.delta: attribute of the mouse wheel under Windows and MacOs.
     # One "felt step" at the mouse wheel gives this value:
@@ -161,6 +170,7 @@ def zoom_wheel(event) -> None:
 
 
 def zoom_wheel_window_item(event, canvas_id) -> None:
+    """Zoom in/out at cursor position of the given window item."""
     project_manager.grid_drawer.remove_grid()
     # event.delta: attribute of the mouse wheel under Windows and MacOs.
     # One "felt step" at the mouse wheel gives this value:

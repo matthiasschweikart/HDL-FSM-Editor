@@ -16,6 +16,7 @@ from project_manager import project_manager
 
 
 def move_initialization(event) -> None:
+    """Start move on Button-1: find items under cursor, build move list, bind Motion and ButtonRelease-1."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     items_near_mouse_click_location = _create_a_list_of_overlapping_items_near_the_mouse_click_location(
         event_x, event_y
@@ -155,6 +156,8 @@ def _mouse_click_happened_in_grid_line(items_near_mouse_click_location) -> bool:
 
 
 def create_move_list(items_near_mouse_click_location, event_x, event_y) -> list:
+    """Build list of [[item_id, point_index], ...] to move.
+    Includes connected diagram objects or a single line point."""
     move_list = []
     move_list_entry_for_diagram_object = _create_move_list_entry_if_a_diagram_object_is_moved(
         items_near_mouse_click_location
@@ -315,6 +318,7 @@ def _remove_tags_and_hide_priority(line_id, transition_tag, transition_tags, mov
 
 
 def get_point_to_move(item_id, event_x, event_y) -> str:
+    """Return index of the transition point nearest to (event_x, event_y); insert extra point if needed."""
     # Determine which point of the transition is nearest to the event and insert an additional if necessary:
     transition_coords = project_manager.canvas.coords(item_id)
     number_of_points = len(transition_coords) // 2

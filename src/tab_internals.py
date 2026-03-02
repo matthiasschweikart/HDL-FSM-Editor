@@ -1,3 +1,5 @@
+"""Internals tab: editing of internal packages and architecture declarations."""
+
 import tkinter as tk
 from tkinter import ttk
 

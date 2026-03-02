@@ -259,6 +259,7 @@ class TransitionLine:
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
     def delete(self) -> None:
+        """Remove transition line, priority rect/text, tags, linked condition-action; update ref_dict and visibility."""
         transition_tags = project_manager.canvas.gettags(self.transition_id)
         project_manager.canvas.delete(self.transition_id)
         project_manager.canvas.delete(self.priority_text)
@@ -278,6 +279,7 @@ class TransitionLine:
 
     @classmethod
     def adapt_visibility_of_priority_rectangles_at_state(cls, start_state) -> None:
+        """Hide priority rect/text for the single outgoing transition from start_state; show if multiple."""
         tags_of_start_state = project_manager.canvas.gettags(start_state)
         number_of_outgoing_transitions = 0
         tag_of_outgoing_transition = ""
@@ -291,6 +293,9 @@ class TransitionLine:
 
     @classmethod
     def move_to(cls, event_x, event_y, transition_id, point, first, move_list, last=False) -> None:
+        """Move transition point (start/next_to_start/next_to_end/end) to (event_x, event_y);
+        Records the move offset when first is True, else maintains the offset.
+        Snaps to grid when last is True."""
         if project_manager.canvas.type(move_list[0][0]) == "line" and (move_list[0][1] in ("start", "end")):
             middle_of_line_is_moved = False
         else:
@@ -406,6 +411,7 @@ class TransitionLine:
 
     @classmethod
     def extend_transition_to_state_middle_points(cls, transition_tag) -> None:
+        """Set transition start/end to center of connected state/connector; lower line under states."""
         transition_coords = project_manager.canvas.coords(transition_tag)
         end_state_coords = project_manager.canvas.coords(transition_tag + "_end")
         if transition_tag.startswith(
@@ -428,6 +434,7 @@ class TransitionLine:
 
     @classmethod
     def determine_priorities_of_outgoing_transitions(cls, start_state_canvas_id) -> dict:
+        """Return dict mapping transition_tag -> priority text for all transitions starting at start_state_canvas_id."""
         priority_dict = {}
         all_tags = project_manager.canvas.gettags(start_state_canvas_id)
         for tag in all_tags:
@@ -438,6 +445,7 @@ class TransitionLine:
 
     @classmethod
     def shorten_to_state_border(cls, transition_tag) -> None:
+        """Shorten transition line to state borders, remove duplicate points, reposition priority rect."""
         transition_coords = project_manager.canvas.coords(transition_tag)
         tag_list = project_manager.canvas.gettags(transition_tag)
         connection = False
@@ -533,6 +541,7 @@ class TransitionLine:
 
     @classmethod
     def remove_duplicate_points(cls, transition_coords) -> list:
+        """Return coords list with consecutive duplicate points removed."""
         new_transition_coords = []
         new_transition_coords.append(transition_coords[0])
         new_transition_coords.append(transition_coords[1])
@@ -547,6 +556,7 @@ class TransitionLine:
 
     @classmethod
     def get_rectangle_dimensions(cls, canvas_id) -> list:
+        """Return [width_half, height_half] for the rectangle canvas item."""
         rectangle_coords = project_manager.canvas.coords(canvas_id)
         rectangle_width_half = (rectangle_coords[2] - rectangle_coords[0]) / 2
         rectangle_height_half = (rectangle_coords[3] - rectangle_coords[1]) / 2
@@ -554,6 +564,7 @@ class TransitionLine:
 
     @classmethod
     def hide_priority_of_single_outgoing_transitions(cls) -> None:
+        """Hide priority rect/text where a state has only one outgoing transition; show where multiple."""
         canvas_ids = project_manager.canvas.find_all()
         for canvas_id in canvas_ids:
             if project_manager.canvas.type(canvas_id) in [
@@ -576,6 +587,7 @@ class TransitionLine:
 
     @classmethod
     def shorten_vector(cls, delta0, x0, y0, delta1, x1, y1, modify0, modify1) -> list:
+        """Return [x0', y0', x1', y1'] shortening (x0,y0)->(x1,y1) by delta0 at start and delta1 at end (modify flags)."""
         phi = math.pi / 2 if x1 - x0 == 0 else math.atan((y1 - y0) / (x1 - x0))
         phi = abs(phi)
         delta0_x = delta0 * math.cos(phi)
@@ -592,6 +604,7 @@ class TransitionLine:
 
     @classmethod
     def transition_start(cls, event) -> None:
+        """Begin new transition from item under cursor (state/reset/connector); bind Motion and ButtonRelease."""
         [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
         ids = project_manager.canvas.find_overlapping(event_x, event_y, event_x, event_y)
         if ids != ():

@@ -31,6 +31,7 @@ class NotebookTop(ttk.Notebook):
         project_manager.tab_log_ref = tab_log.TabLog()
 
     def show_tab(self, tab: GuiTab) -> None:
+        """Select the notebook tab whose text equals the given GuiTab value."""
         notebook_ids = self.tabs()
         for tab_id in notebook_ids:
             if self.tab(tab_id, option="text") == tab.value:

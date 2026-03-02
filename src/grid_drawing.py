@@ -15,9 +15,11 @@ class GridDraw:
         self.show_grid = True
 
     def remove_grid(self) -> None:
+        """Remove all grid lines from the canvas."""
         self.canvas.delete("grid_line")
 
     def draw_grid(self) -> None:
+        """Draw grid lines in the visible window if show_grid is True; lower grid below content."""
         if self.show_grid is True:
             visible_window = [
                 self.canvas.canvasx(0),

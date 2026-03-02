@@ -119,7 +119,9 @@ class UpdateHdlTab:
         return content_with_numbers
 
     def get_date_of_hdl_file(self) -> float:
+        """Return modification date of the first generated HDL file."""
         return self.date_of_hdl_file
 
     def get_date_of_hdl_file2(self) -> float:
+        """Return modification date of the second generated HDL file (e.g. architecture)."""
         return self.date_of_hdl_file2

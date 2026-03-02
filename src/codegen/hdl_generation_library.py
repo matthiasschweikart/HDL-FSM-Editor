@@ -15,6 +15,7 @@ BLOCK_COMMENT_RE = re.compile(r"\/\*.*?\*\/", flags=re.DOTALL)
 
 
 def indent_text_by_the_given_number_of_tabs(number_of_tabs, text) -> str:
+    """Prefix each line with number_of_tabs * 4 spaces; preserve trailing newlines per line."""
     keep_newline_at_each_line_end = True
     list_of_lines = text.splitlines(keep_newline_at_each_line_end)
     result_string = ""
@@ -25,8 +26,9 @@ def indent_text_by_the_given_number_of_tabs(number_of_tabs, text) -> str:
     return result_string
 
 
-def get_text_from_text_widget(wiget_id) -> str:
-    text = wiget_id.get("1.0", tk.END)
+def get_text_from_text_widget(widget_id) -> str:
+    """Return widget contents; empty string if only a single newline."""
+    text = widget_id.get("1.0", tk.END)
     if text != "\n":
         return text
     return ""
@@ -42,6 +44,9 @@ def _get_target_state_name(all_reset_transition_tags):
 
 
 def create_reset_condition_and_reset_action() -> list:
+    """Return [condition_text, action_text, condition_widget_ref, action_widget_ref] for reset transition;
+    Raises GenerationError if missing.
+    """
     reset_transition_tag = _get_reset_transition_tag()
     ref = _get_condition_action_reference_of_transition(reset_transition_tag)
     if ref is None:
@@ -60,9 +65,7 @@ def create_reset_condition_and_reset_action() -> list:
             ],
         )
     reference_to_reset_condition_custom_text = ref.condition_id
-    condition = reference_to_reset_condition_custom_text.get(
-        "1.0", tk.END + "-1 chars"
-    )  # without "return" at the end
+    condition = reference_to_reset_condition_custom_text.get("1.0", tk.END + "-1 chars")  # without "return" at the end
     all_reset_transition_tags = project_manager.canvas.gettags(reset_transition_tag)
     target_state_name = _get_target_state_name(all_reset_transition_tags)
     action = "state <= " + target_state_name + ";\n"
@@ -524,7 +527,7 @@ def _merge_trace_array(trace_array) -> list:
                         traces_of_a_state_reversed[trace_index + 1][-(search_index + 1) : -(search_index + 1)] = trace[
                             search_index:
                         ]
-                        # Remove superfluous (search_index+1)*"endifs", which were copied with trace:
+                        # Remove superfluous (search_index+1)*"endif", which were copied with trace:
                         traces_of_a_state_reversed[trace_index + 1] = traces_of_a_state_reversed[trace_index + 1][
                             : -(search_index + 1)
                         ]
@@ -545,7 +548,7 @@ def _merge_trace_array(trace_array) -> list:
                         ]  # copy rest of trace after the endif
                         traces_of_a_state_reversed[trace_index + 1] = traces_of_a_state_reversed[trace_index + 1][
                             :-search_index
-                        ]  # remove superfluous "endifs"
+                        ]  # remove superfluous "endif"s
     transition_specifications = []
     if traces_of_a_state_reversed:
         for entry in traces_of_a_state_reversed[-1]:
@@ -691,7 +694,7 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
                         "condition_action_reference": None,
                     }
                 )
-            # Close all opened conditions by "endif" (condition-level muss eigentlich dekrementiert werden?!):
+            # Close all opened conditions by "endif" (condition-level should be actually decremented?!):
             for _ in range(condition_level_new):
                 trace_new.append(
                     {
@@ -775,6 +778,7 @@ def _get_transition_action(condition_action_reference):
 
 
 def create_global_actions_before() -> tuple[str, str] | tuple:
+    """Return (widget_ref, text) for clocked global 'before' block, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
         ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
@@ -783,6 +787,7 @@ def create_global_actions_before() -> tuple[str, str] | tuple:
 
 
 def create_global_actions_after() -> tuple[str, str] | tuple:
+    """Return (widget_ref, text) for clocked global 'after' block, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
         ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
@@ -791,6 +796,7 @@ def create_global_actions_after() -> tuple[str, str] | tuple:
 
 
 def create_concurrent_actions() -> tuple[str, str] | tuple:
+    """Return (widget_ref, text) for combinatorial global actions, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions_combinatorial1")
     if canvas_item_ids != ():
         ref = global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[canvas_item_ids[0]]
@@ -799,6 +805,7 @@ def create_concurrent_actions() -> tuple[str, str] | tuple:
 
 
 def remove_comments_and_returns(hdl_text) -> str:
+    """Strip block and line comments, normalize to space-separated string for keyword search."""
     if project_manager.language.get() == "VHDL":
         hdl_text = remove_vhdl_block_comments(hdl_text)
     else:
@@ -818,6 +825,7 @@ def remove_comments_and_returns(hdl_text) -> str:
 
 
 def remove_functions(hdl_text):
+    """Remove VHDL/Verilog function declarations from text for signal/constant parsing."""
     text = re.sub(
         r"(^|\s+)function\s+.*end(\s+function\s*;|function)", "", hdl_text
     )  # Regular expression for VHDL and Verilog function declaration
@@ -825,6 +833,7 @@ def remove_functions(hdl_text):
 
 
 def remove_type_declarations(hdl_text):
+    """Remove VHDL type declarations from text for signal/constant parsing."""
     text = re.sub(
         r"(^|\s+)type\s+\w+\s+is\s+.*;", "", hdl_text
     )  # Regular expression for VHDL and Verilog type declaration
@@ -832,6 +841,7 @@ def remove_type_declarations(hdl_text):
 
 
 def remove_vhdl_block_comments(list_string):
+    """Replace /* ... */ block comments with spaces to preserve character positions."""
     # block comments are replaced by blanks, so all remaining text holds its position.
     while True:
         match_object = BLOCK_COMMENT_RE.search(list_string)
@@ -852,6 +862,7 @@ def _remove_verilog_block_comments(hdl_text):
 
 
 def convert_hdl_lines_into_a_searchable_string(text):
+    """Remove comments and surround operators/punctuation with spaces for regex/keyword search."""
     without_comments = remove_comments_and_returns(text)
     separated = surround_character_by_blanks(";", without_comments)
     separated = surround_character_by_blanks("(", separated)
@@ -879,12 +890,14 @@ def convert_hdl_lines_into_a_searchable_string(text):
 
 
 def surround_character_by_blanks(character, all_port_declarations_without_comments):
+    """Replace each occurrence of character with ' character ' in the string."""
     # Add the escape character if necessary:
     search_character = "\\" + character if character in ("(", ")", "+", "*") else character
     return re.sub(search_character, " " + character + " ", all_port_declarations_without_comments)
 
 
 def get_all_declared_signal_and_variable_names(all_signal_declarations) -> list:
+    """Parse semicolon-separated declarations and return list of signal/variable names."""
     signal_declaration_list = all_signal_declarations.split(";")
     signal_list = []
     for declaration in signal_declaration_list:
@@ -899,6 +912,7 @@ def get_all_declared_signal_and_variable_names(all_signal_declarations) -> list:
 
 
 def get_all_declared_constant_names(all_signal_declarations) -> list:
+    """Parse semicolon-separated declarations and return list of constant names."""
     signal_declaration_list = all_signal_declarations.split(";")
     constant_list = []
     for declaration in signal_declaration_list:

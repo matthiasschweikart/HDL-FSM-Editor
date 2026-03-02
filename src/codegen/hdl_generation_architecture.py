@@ -11,6 +11,7 @@ from project_manager import project_manager
 
 
 def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> None:
+    """Build VHDL architecture body and write it; update file_line_number and link dict for navigation."""
     architecture = ""
 
     package_statements = hdl_generation_library.get_text_from_text_widget(project_manager.internals_package_text)

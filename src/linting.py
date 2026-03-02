@@ -23,6 +23,7 @@ class HighLightDict:
         self.update_highlight_tags_id = None
 
     def recreate_keyword_list_of_unused_signals(self) -> None:
+        """Schedule rebuild of not_read/not_written keyword lists after 300 ms idle."""
         if self.recreate_after_id is not None:
             project_manager.root.after_cancel(self.recreate_after_id)
         self.recreate_after_id = project_manager.root.after(

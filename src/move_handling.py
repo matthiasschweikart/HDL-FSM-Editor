@@ -20,11 +20,13 @@ from project_manager import project_manager
 
 
 def move_do(event, move_list, first, move_to_grid=False) -> None:
+    """Move all items in move_list to the event's canvas coordinates."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     move_to_coordinates(event_x, event_y, move_list, first, move_to_grid)
 
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
+    """Apply move to (event_x, event_y) for each item in move_list; respect grid and proximity checks."""
     if _connector_moved_too_close_to_other_object(move_list, event_x, event_y):
         return
     for entry in move_list:

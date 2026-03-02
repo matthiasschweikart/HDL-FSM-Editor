@@ -18,5 +18,6 @@ class OptionMenu(tk.Listbox):
         self.bind("<Motion>", self.snap_highlight_to_mouse)
 
     def snap_highlight_to_mouse(self, event) -> None:
+        """Move selection to the listbox item nearest to the mouse y position."""
         self.selection_clear(0, tk.END)
         self.selection_set(self.nearest(event.y))

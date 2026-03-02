@@ -54,6 +54,7 @@ def ask_save_unsaved_changes(title) -> str:
 
 
 def save_as() -> None:
+    """Prompt for save-as path and save the project to the chosen file."""
     old_previous_file = project_manager.previous_file
     project_manager.previous_file = project_manager.current_file
     project_manager.current_file = asksaveasfilename(
@@ -71,6 +72,7 @@ def save_as() -> None:
 
 
 def save() -> None:
+    """Save project to current file, or prompt for path if never saved before."""
     # Use state manager instead of global variables
     project_manager.previous_file = project_manager.current_file
     if project_manager.current_file == "":
@@ -88,6 +90,7 @@ def save() -> None:
 
 
 def open_file() -> None:
+    """Prompt for an .hfe file and open it."""
     filename_new = askopenfilename(filetypes=(("HDL-FSM-Editor files", "*.hfe"), ("all files", "*.*")))
     if filename_new != "":
         success = new_design()
@@ -96,6 +99,7 @@ def open_file() -> None:
 
 
 def new_design() -> bool:
+    """Clear current design after optional save; return False if user cancels."""
     title = project_manager.root.title()
     if title.endswith("*"):
         action = ask_save_unsaved_changes(title)
@@ -163,6 +167,7 @@ def _clear_design() -> bool:
 
 
 def save_in_file(save_filename) -> None:  # Called at saving and at every design change (writing to .tmp-file)
+    """Serialize project to the given .hfe file (or .tmp)."""
     global _write_data_creator_ref
     allowed_element_names_in_design_dictionary = (
         "state",
@@ -345,6 +350,7 @@ def _save_window_item(design_dictionary: dict[str, Any], canvas_id: int) -> None
 
 
 def open_file_with_name(read_filename, is_script_mode) -> None:
+    """Load project from the given file; resolve path and show errors for script vs GUI."""
     replaced_read_filename = _resolve_read_filename(read_filename, is_script_mode)
     project_manager.root.config(cursor="watch")
     try:
@@ -852,6 +858,7 @@ def _update_window_element_button_states() -> None:
 
 
 def get_visible_center_as_string() -> str:
+    """Return the canvas visible center coordinates as a space-separated string."""
     visible_rectangle = [
         project_manager.canvas.canvasx(0),
         project_manager.canvas.canvasy(0),
@@ -869,6 +876,7 @@ def get_visible_center_as_string() -> str:
 
 
 def shift_visible_center_to_window_center(new_visible_center_string) -> None:
+    """Pan canvas so the given center string becomes the current window center."""
     new_visible_center = []
     new_visible_center_string_array = new_visible_center_string.split()
     for entry in new_visible_center_string_array:

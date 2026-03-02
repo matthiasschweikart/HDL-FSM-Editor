@@ -1,3 +1,5 @@
+"""HDL tab: displays and manages the generated HDL code in the notebook."""
+
 import re
 import tkinter as tk
 from tkinter import ttk

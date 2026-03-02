@@ -110,6 +110,7 @@ class StateComment:
         self.update_text()
 
     def update_text(self) -> None:
+        """Sync text_content from widget for 'dirty' checking and save_in_file."""
         # Update self.text_content, so that the <Leave>-check in deactivate_frame() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
@@ -124,24 +125,30 @@ class StateComment:
         project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
 
     def activate_frame(self) -> None:
+        """Activate window and cache text for dirty checking."""
         self.activate_window()
         self.text_content = self.text_id.get("1.0", tk.END)
 
     def activate_window(self) -> None:
+        """Show state-comment window as selected (border and label style)."""
         self._set_borderwidth(1, "StateActionsWindowSelected.TFrame")
         self.label_id.configure(style="StateActionsWindowSelected.TLabel")
 
     def deactivate_frame(self) -> None:
+        """Deactivate window and mark design changed if text was edited."""
         self.deactivate_window()
         if self.text_id.get("1.0", tk.END) != self.text_content:
             undo_handling.design_has_changed()
 
     def deactivate_window(self) -> None:
+        """Clear selection style and focus from the state-comment window."""
         project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="StateActionsWindow.TFrame")
         self.label_id.configure(style="StateActionsWindow.TLabel")
 
     def move_to(self, event_x, event_y, first) -> None:
+        """Reposition window and comment line;
+        Updates the move offset when first is True else maintains the offset."""
         if first:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(self.window_id)
@@ -160,6 +167,7 @@ class StateComment:
                 project_manager.canvas.coords(line_tag, line_coords)
 
     def move_line_point_to(self, event_x, event_y, first) -> None:
+        """Move comment line end to (event_x, event_y) snapped to grid; used when state is moved."""
         # Called when the state is moved.
         if first:
             state_tag = project_manager.canvas.gettags(self.window_id)[0][:-8]  # remove "_comment"
@@ -178,6 +186,7 @@ class StateComment:
         project_manager.canvas.coords(self.line_id, line_coords)
 
     def delete(self):
+        """Remove state-comment window, line, dtag, and ref_dict entry."""
         comment_number = project_manager.canvas.gettags(self.window_id)[0][5:-8]  # remove "state" and "_comment"
         project_manager.canvas.delete(self.window_id)
         project_manager.canvas.delete(self.line_id)

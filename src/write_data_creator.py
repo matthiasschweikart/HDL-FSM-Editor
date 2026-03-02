@@ -16,21 +16,26 @@ class WriteDataCreator:
     """
 
     def __init__(self, standard_size) -> None:
+        """Store standard_size for normalized write; last_design_dictionary used for change detection."""
         self.standard_size = standard_size
         self.last_design_dictionary = None
 
     def store_as_compare_object(self, design_dictionary) -> None:
+        """Store design_dictionary as baseline for later diff (e.g. to avoid unnecessary file writes)."""
         self.last_design_dictionary = design_dictionary
 
     def zoom_graphic_to_standard_size(self, actual_size) -> float:
+        """Zoom canvas to standard_size/actual_size at origin; return the zoom factor."""
         zoom_factor = self.standard_size / actual_size
         canvas_editing.canvas_zoom([0, 0], zoom_factor)
         return zoom_factor
 
     def zoom_graphic_back_to_actual_size(self, zoom_factor) -> None:
+        """Restore canvas zoom by applying 1/zoom_factor at origin."""
         canvas_editing.canvas_zoom([0, 0], 1 / zoom_factor)
 
     def round_and_sort_data(self, design_dictionary, allowed_element_names_in_design_dictionary) -> dict[str, list]:
+        """Sort and round coordinates/parameters in design_dictionary; store as compare object; return updated dict."""
         used_element_names = self._get_used_element_names(design_dictionary, allowed_element_names_in_design_dictionary)
         design_dictionary = self._sort_graphic_elements(design_dictionary, used_element_names)
         design_dictionary = self._round_coordinates(design_dictionary, used_element_names)

@@ -251,6 +251,7 @@ class States:
             project_manager.canvas.coords(state_tag, state_coords)
 
     def delete(self) -> None:
+        """Delete state oval and name; delete connected transitions, state-actions, comment lines; update ref_dict."""
         state_tags = project_manager.canvas.gettags(self.state_id)
         for state_tag in state_tags:
             if state_tag.startswith("transition") and state_tag.endswith("_start"):
@@ -277,6 +278,7 @@ class States:
 
     @classmethod
     def move_to(cls, event_x, event_y, state_id, first, last) -> None:
+        """Reposition state oval and name; snap to grid when last; abort if overlapping another state/connector."""
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(state_id)
@@ -361,6 +363,7 @@ class States:
 
     @classmethod
     def insert_state(cls, event) -> None:
+        """Create state at event position if not overlapping; warn and abort otherwise."""
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
         if cls.state_overlaps(event_x, event_y):
             messagebox.showwarning(
@@ -387,6 +390,7 @@ class States:
 
     @classmethod
     def state_overlaps(cls, event_x, event_y) -> bool:
+        """Return True if a state at (event_x, event_y) would overlap any non-grid item."""
         overlapping_items = project_manager.canvas.find_overlapping(
             event_x - project_manager.state_radius,
             event_y - project_manager.state_radius,

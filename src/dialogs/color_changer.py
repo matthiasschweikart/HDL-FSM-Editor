@@ -12,4 +12,5 @@ class ColorChanger:
         self.default_color = default_color
 
     def ask_color(self) -> str | None:
+        """Show color chooser; return selected hex color or None if cancelled."""
         return colorchooser.askcolor(self.default_color)[1]

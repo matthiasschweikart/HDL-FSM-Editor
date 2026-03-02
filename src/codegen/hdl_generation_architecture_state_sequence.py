@@ -9,6 +9,7 @@ from project_manager import project_manager
 
 
 def create_vhdl_for_the_state_sequence(transition_specifications, file_name, file_line_number) -> tuple:
+    """Generate VHDL when/if/else state sequence; return (indented_vhdl_string, updated_file_line_number)."""
     vhdl = []
     ignore_control_for_vhdl_indent = []
     for index, transition_specification in enumerate(transition_specifications):
@@ -167,6 +168,7 @@ def create_vhdl_for_the_state_sequence(transition_specifications, file_name, fil
 
 
 def create_verilog_for_the_state_sequence(transition_specifications, file_name, file_line_number) -> tuple:
+    """Generate Verilog state sequence (begin/end, case items); return (verilog_string, updated_file_line_number)."""
     verilog = []
     ignore_control_for_verilog_indent = []
     for index, transition_specification in enumerate(transition_specifications):

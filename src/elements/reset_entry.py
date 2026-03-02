@@ -44,6 +44,7 @@ class ResetEntry:
 
     @classmethod
     def delete(cls):
+        """Delete reset entry polygon/text and any transition starting from it; clear ref_dict."""
         reset_entry_tags = project_manager.canvas.gettags("reset_entry")
         for reset_entry_tag in reset_entry_tags:
             if reset_entry_tag.startswith("transition") and reset_entry_tag.endswith("_start"):
@@ -54,6 +55,7 @@ class ResetEntry:
 
     @classmethod
     def move_to(cls, event_x, event_y, polygon_id, first, last) -> None:
+        """Reposition reset-entry polygon and text; snap to grid when last is True."""
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(polygon_id)
@@ -118,6 +120,7 @@ class ResetEntry:
 
     @classmethod
     def insert_reset_entry(cls, event) -> None:
+        """Create reset entry at event position."""
         project_manager.reset_entry_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (
             canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)

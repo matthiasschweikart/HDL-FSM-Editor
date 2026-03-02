@@ -96,6 +96,7 @@ class GlobalActionsCombinatorial:
         self.update_text()
 
     def update_text(self):
+        """Sync text_content from widget for Leave-check and save_in_file."""
         # Update self.text_content, so that the <Leave>-check in deactivate() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
@@ -110,24 +111,30 @@ class GlobalActionsCombinatorial:
         project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
 
     def activate_frame(self) -> None:
+        """Activate window and cache text for dirty checking."""
         self.activate_window()
         self.text_content = self.text_id.get("1.0", tk.END)
 
     def activate_window(self) -> None:
+        """Show window as selected (border and label style)."""
         self._set_borderwidth(1, "GlobalActionsWindowSelected.TFrame")
         self.label.configure(style="GlobalActionsWindowSelected.TLabel")
 
     def deactivate_frame(self) -> None:
+        """Deactivate window and mark design changed if text was edited."""
         self.deactivate_window()
         if self.text_id.get("1.0", tk.END) != self.text_content:
             undo_handling.design_has_changed()
 
     def deactivate_window(self) -> None:
+        """Clear selection style and focus from the combinatorial-actions window."""
         project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="GlobalActionsWindow.TFrame")
         self.label.configure(style="GlobalActionsWindow.TLabel")
 
     def move_to(self, event_x, event_y, first) -> None:
+        """Reposition window to (event_x, event_y);
+        Updates the move offset when first is True else maintains the offset."""
         if first:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(self.window_id)
@@ -137,6 +144,7 @@ class GlobalActionsCombinatorial:
         project_manager.canvas.coords(self.window_id, event_x, event_y)
 
     def delete(self):
+        """Remove window, ref_dict entry, and re-enable global_action_combinatorial button."""
         del custom_text.CustomText.read_variables_of_all_windows[self.text_id]
         del custom_text.CustomText.written_variables_of_all_windows[self.text_id]
         project_manager.canvas.delete(self.window_id)  # delete window
@@ -145,6 +153,7 @@ class GlobalActionsCombinatorial:
 
     @classmethod
     def insert_global_actions_combinatorial(cls, event) -> None:
+        """Create combinatorial global-actions window at event position."""
         project_manager.global_action_combinatorial_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (
             canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)

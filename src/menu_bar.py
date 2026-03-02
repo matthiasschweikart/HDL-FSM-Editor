@@ -199,6 +199,7 @@ class MenuBar:
         )
 
     def _close_tool(self) -> None:
+        """Prompt to save if dirty, remove .tmp file if present, then exit the application."""
         title = project_manager.root.title()
         if title.endswith("*"):
             action = file_handling.ask_save_unsaved_changes(title)

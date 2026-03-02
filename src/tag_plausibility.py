@@ -67,6 +67,7 @@ class TagPlausibility:
             self.__check_state_action_lines(state_action_line_dict_list, state_action_dict_list, state_dict_list)
 
     def get_tag_status_is_okay(self) -> bool:
+        """Return whether the last tag plausibility check found no errors."""
         return self.tag_status_is_okay
 
     def __fill_dictionaries(

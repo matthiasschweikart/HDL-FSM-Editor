@@ -1,3 +1,5 @@
+"""Interface tab: editing of packages, generics, and signals (entity/port view)."""
+
 import tkinter as tk
 from tkinter import ttk
 

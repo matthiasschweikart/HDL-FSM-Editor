@@ -35,6 +35,7 @@ class ListSeparationCheck:
         self.__remove_illegal_separator(list_string_without_comments, separator)
 
     def get_fixed_list(self):
+        """Return the list string after comment and separator fixes."""
         return self.list_string
 
     def __replace_all_comments_at_line_end(self, list_string_without_block_comment, comment_identifier) -> str:

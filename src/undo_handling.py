@@ -28,6 +28,7 @@ stack_write_pointer = 0  # pylint: disable=invalid-name # module-level mutable p
 
 
 def update_window_title() -> None:
+    """Set window title to 'unnamed' or append '*' if the design is modified."""
     title = project_manager.root.title()
     if title == "tk":
         project_manager.root.title("unnamed")
@@ -37,6 +38,7 @@ def update_window_title() -> None:
 
 
 def design_has_changed() -> None:
+    """Push current design to undo stack, update title, and save to .tmp if file is set."""
     _add_changes_to_design_stack()
     update_window_title()
     if project_manager.current_file != "" and not project_manager.root.title().startswith("unnamed"):
@@ -45,6 +47,7 @@ def design_has_changed() -> None:
 
 
 def undo() -> None:
+    """Restore diagram to previous version from stack (ignored when focus is on custom text)."""
     global stack_write_pointer
     # As <Control-z> is bound with the bind_all-command to the diagram, this binding must be ignored, when
     # the focus is on a customtext-widget: Then a Control-z must change the text and must not change the diagram.
@@ -70,6 +73,7 @@ def undo() -> None:
 
 
 def redo() -> None:
+    """Restore diagram to next version from stack (ignored when focus is on custom text)."""
     global stack_write_pointer
     # As <Control-Z> is bound with the bind_all-command to the diagram, this binding must be ignored, when
     # the focus is on the customtext-widget: Then a Control-Z must change the text and must not change the diagram.

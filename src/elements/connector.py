@@ -34,6 +34,7 @@ class ConnectorInstance:
         ConnectorInstance.ref_dict[self.connector_id] = self
 
     def delete(self):
+        """Remove connector from canvas and delete any transition it started or ended; update ref_dict."""
         connector_tags = project_manager.canvas.gettags(self.connector_id)
         project_manager.canvas.delete(self.connector_id)
         for connector_tag in connector_tags:
@@ -49,6 +50,7 @@ class ConnectorInstance:
 
     @classmethod
     def create_connector(cls, event) -> None:
+        """Create a new connector at event position if no other item overlaps; mark design changed."""
         # Translate the window coordinate into the canvas coordinate (the Canvas is bigger than the window):
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
         overlapping_items = project_manager.canvas.find_overlapping(
@@ -74,6 +76,8 @@ class ConnectorInstance:
 
     @classmethod
     def move_to(cls, event_x, event_y, rectangle_id, first, last) -> None:
+        """Move connector rectangle to (event_x, event_y);
+        Updates the move offset when first is True."""
         # global difference_x, difference_y
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
