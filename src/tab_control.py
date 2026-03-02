@@ -1,11 +1,13 @@
 """Control-panel tab for project configuration (module name, language, paths, etc.)."""
 
+import copy
 import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
 import constants
+import custom_text
 import undo_handling
 from constants import GuiTab
 from dialogs.color_changer import ColorChanger
@@ -181,7 +183,11 @@ class TabControl:
         """Apply current language (VHDL/Verilog): update highlight dict, file count, labels, and layout."""
         new_language = project_manager.language.get()
         if new_language == "VHDL":
-            project_manager.highlight_dict_ref.highlight_dict = constants.VHDL_HIGHLIGHT_PATTERN_DICT
+            project_manager.highlight_dict_ref.highlight_pattern_dict = copy.deepcopy(
+                constants.VHDL_HIGHLIGHT_PATTERN_DICT
+            )
+            project_manager.highlight_dict_ref.highlight_pattern_dict["not_read"].clear()
+            project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # enable 2 files mode
             project_manager.select_file_number_text.set(2)
             self._select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.E)
@@ -209,7 +215,11 @@ class TabControl:
     = File with Entity and Architecture\n$name\t= Entity Name"
             )
         else:  # "Verilog" or "SystemVerilog"
-            project_manager.highlight_dict_ref.highlight_dict = constants.VERILOG_HIGHLIGHT_PATTERN_DICT
+            project_manager.highlight_dict_ref.highlight_pattern_dict = copy.deepcopy(
+                constants.VERILOG_HIGHLIGHT_PATTERN_DICT
+            )
+            project_manager.highlight_dict_ref.highlight_pattern_dict["not_read"].clear()
+            project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # Control: disable 2 files mode
             project_manager.select_file_number_text.set(1)
             self._select_file_number_radio_button1.grid_forget()
@@ -244,6 +254,8 @@ class TabControl:
             project_manager.compile_cmd_docu.config(
                 text="Variables for compile command:\n$file\t= Module-File\n$name\t= Module Name"
             )
+
+        custom_text.refresh_highlighting_in_all_declaration_widgets()
 
     def _show_path_has_changed(self) -> None:
         undo_handling.design_has_changed()
