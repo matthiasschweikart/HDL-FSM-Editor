@@ -3,6 +3,7 @@ Methods needed for HDL generation
 """
 
 import os
+import re
 import tkinter as tk
 import traceback
 from datetime import datetime
