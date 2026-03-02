@@ -256,15 +256,11 @@ class CodeEditor(tk.Text):
         if sel:
             # Don't unindent if any of the lines in the selection does not start with blank:
             start_line, end_line = self._get_start_and_end_line_of_selection(sel)
-            for line_num in range(start_line, end_line + 1):
-                if self.get(f"{line_num}.0") != " ":
-                    return False
         else:
             # Don't unindent if the current line does not start with blank:
-            current_line = self.index(tk.INSERT).split(".", maxsplit=1)[0]
-            if self.get(f"{current_line}.0") != " ":
-                return False
-        return True
+            start_line = int(self.index(tk.INSERT).split(".", maxsplit=1)[0])
+            end_line = start_line
+        return all(self.get(f"{line_num}.0") == " " for line_num in range(start_line, end_line + 1))
 
     def _get_start_and_end_line_of_selection(self, sel) -> tuple[int, int]:
         sel_start, sel_end = sel[0], sel[1]
