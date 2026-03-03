@@ -9,7 +9,7 @@ class OptionMenu(tk.Listbox):
     """Custom listbox-based dropdown menu for selecting from items."""
 
     def __init__(self, master, items, *args, **kwargs) -> None:
-        tk.Listbox.__init__(self, master, exportselection=False, background="grey", *args, **kwargs)
+        tk.Listbox.__init__(self, master, *args, exportselection=False, background="grey", **kwargs)
 
         for item in items:
             self.insert(tk.END, item)

@@ -37,7 +37,7 @@ def run_hdl_generation(write_to_file, is_script_mode: bool = False) -> bool:
             print(f"{e.caption}:\n{e.message}")
         else:
             messagebox.showerror(e.caption, e.message)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         if not is_script_mode:
             messagebox.showerror("Unexpected Error", "An unexpected error occurred.\nSee details at STDOUT.")
         print(traceback.format_exc())

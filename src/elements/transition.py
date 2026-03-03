@@ -587,7 +587,7 @@ class TransitionLine:
 
     @classmethod
     def shorten_vector(cls, delta0, x0, y0, delta1, x1, y1, modify0, modify1) -> list:
-        """Return [x0', y0', x1', y1'] shortening (x0,y0)->(x1,y1) by delta0 at start and delta1 at end (modify flags)."""
+        """Shorten vector x0, y0, x1, y1 by delta0 at start and delta1 at end. modify0, modify1 are either 0 or 1."""
         phi = math.pi / 2 if x1 - x0 == 0 else math.atan((y1 - y0) / (x1 - x0))
         phi = abs(phi)
         delta0_x = delta0 * math.cos(phi)
@@ -627,11 +627,7 @@ class TransitionLine:
                     transition_start_object_tag = cls._get_tag_of_start_object(canvas_id)
                     project_manager.canvas.bind(
                         "<Button-1>",
-                        lambda event,
-                        transition_id=transition_id,
-                        canvas_id_of_start_item=canvas_id,
-                        transition_draw_funcid=transition_draw_funcid,
-                        transition_start_object_tag=transition_start_object_tag: (
+                        lambda event, transition_id=transition_id, canvas_id_of_start_item=canvas_id, transition_draw_funcid=transition_draw_funcid, transition_start_object_tag=transition_start_object_tag: (
                             cls._handle_next_added_transition_point(
                                 event,
                                 transition_id,
@@ -643,10 +639,8 @@ class TransitionLine:
                     )
                     project_manager.root.bind_all(
                         "<Escape>",
-                        lambda event,
-                        transition_id=transition_id,
-                        transition_draw_funcid=transition_draw_funcid: cls._end_inserting_transition(
-                            transition_id, transition_draw_funcid
+                        lambda event, transition_id=transition_id, transition_draw_funcid=transition_draw_funcid: (
+                            cls._end_inserting_transition(transition_id, transition_draw_funcid)
                         ),
                     )
 

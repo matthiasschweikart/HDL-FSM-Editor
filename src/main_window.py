@@ -42,7 +42,7 @@ def create_gui() -> None:
             root.iconbitmap(icon_path)
         else:
             print(f"Warning: Icon file not found at {icon_path}")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         print(f"Warning: Could not set application icon: {e}")
 
 

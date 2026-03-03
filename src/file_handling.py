@@ -202,7 +202,7 @@ def save_in_file(save_filename) -> None:  # Called at saving and at every design
         if not save_filename.endswith(".tmp") and os.path.isfile(f"{project_manager.previous_file}.tmp"):
             os.remove(f"{project_manager.previous_file}.tmp")
         project_manager.root.config(cursor=old_cursor)
-    except Exception as _:
+    except Exception as _:  # pylint: disable=broad-except
         project_manager.root.config(cursor=old_cursor)
         messagebox.showerror("Error in HDL-FSM-Editor", f"Writing to file {save_filename} caused exception ")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
