@@ -29,18 +29,16 @@ class UpdateHdlTab:
         else:  # verilog
             hdlfilename = generate_path + "/" + module_name + ".v"
             hdlfilename_architecture = None
+        UpdateHdlTab.clear_hdl_tab()
+        entity = ""
+        arch = ""
         # Compare modification time of HDL file against modification_time of design file (.hse):
-        project_manager.hdl_frame_text.config(state=tk.NORMAL)
-        project_manager.hdl_frame_text.delete("1.0", tk.END)
-        project_manager.hdl_frame_text.insert("1.0", "")
-        project_manager.hdl_frame_text.config(state=tk.DISABLED)
-        hdl = ""
         if self.__hdl_is_up_to_date(readfile, hdlfilename, hdlfilename_architecture, show_message=False):
             # print("HDL-file exists and is 'newer' than the design-file =", self.date_of_hdl_file)
             try:
                 with open(hdlfilename, encoding="utf-8") as fileobject:
                     entity = fileobject.read()
-                hdl += self.__add_line_numbers(entity)
+                entity = self.__add_line_numbers(entity)
             except FileNotFoundError:
                 messagebox.showerror(
                     "Error in HDL-FSM-Editor", "File " + hdlfilename + " could not be opened for copying into HDL-Tab."
@@ -50,7 +48,7 @@ class UpdateHdlTab:
                 try:
                     with open(hdlfilename_architecture, encoding="utf-8") as fileobject:
                         arch = fileobject.read()
-                    hdl += self.__add_line_numbers(arch)
+                    arch = self.__add_line_numbers(arch)
                 except FileNotFoundError:
                     messagebox.showerror(
                         "Error in HDL-FSM-Editor",
@@ -60,12 +58,7 @@ class UpdateHdlTab:
                     )
             # Create hdl without writing to file for Link-Generation:
             hdl_generation.run_hdl_generation(write_to_file=False, is_script_mode=False)
-        project_manager.hdl_frame_text.config(state=tk.NORMAL)
-        project_manager.hdl_frame_text.insert("1.0", hdl)
-        project_manager.hdl_frame_text.config(state=tk.DISABLED)
-        project_manager.hdl_frame_text.update_highlight_tags(
-            10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
-        )
+            UpdateHdlTab.copy_into_hdl_tab(entity, arch)
 
     def __hdl_is_up_to_date(self, path_name, hdlfilename, hdlfilename_architecture, show_message) -> bool:
         if not os.path.isfile(path_name):
@@ -125,3 +118,28 @@ class UpdateHdlTab:
     def get_date_of_hdl_file2(self) -> float:
         """Return modification date of the second generated HDL file (e.g. architecture)."""
         return self.date_of_hdl_file2
+
+    @classmethod
+    def clear_hdl_tab(cls):
+        """Removes old content from the HDL-tab before copying new HDL into it."""
+        project_manager.hdl_frame_text.config(state=tk.NORMAL)
+        project_manager.hdl_frame_text.delete("1.0", tk.END)
+        project_manager.hdl_frame_text.insert("1.0", "")
+        project_manager.hdl_frame_text.config(state=tk.DISABLED)
+
+    @classmethod
+    def copy_into_hdl_tab(cls, entity, arch):
+        """Copies new HDL content into the HDL-tab."""
+        entity_tag = "generated_entity_bg"
+        arch_tag = "generated_arch_bg"
+        project_manager.hdl_frame_text.config(state=tk.NORMAL)
+        project_manager.hdl_frame_text.delete("1.0", tk.END)
+        project_manager.hdl_frame_text.insert("1.0", entity, entity_tag)
+        project_manager.hdl_frame_text.insert(tk.END, arch, arch_tag)
+        project_manager.hdl_frame_text.config(state=tk.DISABLED)
+        project_manager.hdl_frame_text.update_highlight_tags(
+            10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
+        )
+        # Pale brown for entity, pale yellow for architecture
+        project_manager.hdl_frame_text.tag_configure(entity_tag, background="#F5E6D3")
+        project_manager.hdl_frame_text.tag_configure(arch_tag, background="#FFF9CC")

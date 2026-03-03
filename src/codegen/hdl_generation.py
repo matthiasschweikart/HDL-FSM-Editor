@@ -4,13 +4,13 @@ Methods needed for HDL generation
 
 import os
 import re
-import tkinter as tk
 import traceback
 from datetime import datetime
 from tkinter import messagebox
 
 import file_handling
 import tag_plausibility
+import update_hdl_tab
 from codegen import hdl_generation_architecture, hdl_generation_library, hdl_generation_module
 from codegen.hdl_generation_config import GenerationConfig
 from constants import GuiTab
@@ -93,24 +93,13 @@ def _create_hdl(config, header, write_to_file, state_tag_list_sorted) -> None:
         return  # No further actions required, because when writing to a file, always an architecture must exist.
     # write_hdl_file must be called even if hdl is not needed, as write_hdl_file sets last_line_number_of_file1,
     # which is read by Linking:
-    hdl = _write_hdl_file(config, write_to_file, header, entity, architecture, file_name, file_name_architecture)
+    ent, arch = _write_hdl_file(config, write_to_file, header, entity, architecture, file_name, file_name_architecture)
     if write_to_file is True:
-        _copy_hdl_into_generated_hdl_tab(hdl, file_name, file_name_architecture)
-
-
-# TODO: This should not be here!
-def _copy_hdl_into_generated_hdl_tab(hdl, file_name, file_name_architecture) -> None:
-    project_manager.date_of_hdl_file_shown_in_hdl_tab = os.path.getmtime(file_name)
-    if file_name_architecture != "":
-        project_manager.date_of_hdl_file2_shown_in_hdl_tab = os.path.getmtime(file_name_architecture)
-    project_manager.hdl_frame_text.config(state=tk.NORMAL)
-    project_manager.hdl_frame_text.delete("1.0", tk.END)
-    project_manager.hdl_frame_text.insert("1.0", hdl)
-    project_manager.hdl_frame_text.update_highlight_tags(
-        10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
-    )
-    project_manager.hdl_frame_text.config(state=tk.DISABLED)
-    project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
+        project_manager.date_of_hdl_file_shown_in_hdl_tab = os.path.getmtime(file_name)
+        if file_name_architecture != "":
+            project_manager.date_of_hdl_file2_shown_in_hdl_tab = os.path.getmtime(file_name_architecture)
+        update_hdl_tab.UpdateHdlTab.copy_into_hdl_tab(ent, arch)
+        project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
 
 
 def _create_entity(config, file_name, file_line_number) -> tuple:
@@ -247,7 +236,8 @@ def _write_hdl_file(config, write_to_file, header, entity, architecture, path_na
             len(str(last_line_number_of_file1)) + 2
         )  # "+2" because of string ": "
         project_manager.size_of_file2_line_number = 0
-        content_with_numbers = _add_line_numbers(content)
+        content_with_numbers1 = _add_line_numbers(content)
+        content_with_numbers2 = ""
     else:
         content1 = "-- Filename: " + name_of_file + "\n"
         content1 += header
@@ -272,7 +262,7 @@ def _write_hdl_file(config, write_to_file, header, entity, architecture, path_na
         project_manager.size_of_file2_line_number = (
             len(str(content_with_numbers.count("\n"))) + 2
         )  # "+2" because of string ": "
-    return content_with_numbers
+    return content_with_numbers1, content_with_numbers2
 
 
 def _get_file_names(config) -> tuple:
