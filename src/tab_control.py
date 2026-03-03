@@ -28,10 +28,10 @@ class TabControl:
         project_manager.module_name = module_name
         module_name.set("")
         module_name_label = ttk.Label(control_frame, text="Module-Name:", padding=5)
-        _module_name_entry = ttk.Entry(control_frame, textvariable=module_name)
+        self.module_name_entry = ttk.Entry(control_frame, textvariable=module_name)
         module_name_label.grid(row=0, column=0, sticky=tk.W)
-        _module_name_entry.grid(row=0, column=1, sticky=(tk.W, tk.E))
-        _module_name_entry.select_clear()
+        self.module_name_entry.grid(row=0, column=1, sticky=(tk.W, tk.E))
+        self.module_name_entry.select_clear()
 
         language = tk.StringVar()
         project_manager.language = language
@@ -93,10 +93,10 @@ class TabControl:
         project_manager.clock_signal_name = clock_signal_name
         clock_signal_name.set("")
         clock_signal_name_label = ttk.Label(control_frame, text="Name of clock input port:", padding=5)
-        _clock_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=clock_signal_name)
-        _clock_signal_name_entry.bind("<Key>", lambda event: undo_handling.update_window_title())
+        self.clock_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=clock_signal_name)
+        self.clock_signal_name_entry.bind("<Key>", lambda event: undo_handling.update_window_title())
         clock_signal_name_label.grid(row=5, column=0, sticky=tk.W)
-        _clock_signal_name_entry.grid(row=5, column=1, sticky=tk.W)
+        self.clock_signal_name_entry.grid(row=5, column=1, sticky=tk.W)
 
         compile_cmd = tk.StringVar()
         project_manager.compile_cmd = compile_cmd
@@ -169,10 +169,10 @@ class TabControl:
         project_manager.notebook.add(control_frame, sticky="nsew", text=GuiTab.CONTROL.value)
 
         project_manager.entry_widgets = [
-            {"stringvar": module_name, "entry": _module_name_entry},
+            {"stringvar": module_name, "entry": self.module_name_entry},
             {"stringvar": generate_path_value, "entry": _generate_path_entry},
             {"stringvar": reset_signal_name, "entry": _reset_signal_name_entry},
-            {"stringvar": clock_signal_name, "entry": _clock_signal_name_entry},
+            {"stringvar": clock_signal_name, "entry": self.clock_signal_name_entry},
             {"stringvar": compile_cmd, "entry": _compile_cmd_entry},
             {"stringvar": edit_cmd, "entry": _edit_cmd_entry},
             {"stringvar": additional_sources_value, "entry": _additional_sources_entry},
@@ -303,3 +303,15 @@ class TabControl:
         if new_color is not None:
             project_manager.canvas.configure(bg=new_color)
             project_manager.diagram_background_color.set(new_color)
+
+    def highlight_item(self, hdl_item_type, *_):
+        """
+        This method must have the same name as the method custom_text.CustomText.highlight_item.
+        It is called, when in the "generated HDL"-tab module-name, the p_states line or
+        the rising_edge-line are clicked per mouse to jump to its declaration.
+        If hdl_item_type == "reset_and_clock_signal_name" then always the clock signal entry is selected.
+        """
+        if hdl_item_type == "module_name":
+            self.module_name_entry.select_range(0, tk.END)
+        elif hdl_item_type == "reset_and_clock_signal_name":
+            self.clock_signal_name_entry.select_range(0, tk.END)

@@ -16,7 +16,6 @@ line-number and file-name are determined and the corresponding entry of the Link
 
 import tkinter as tk
 
-import main_window
 from codegen import hdl_generation
 from codegen.hdl_generation_config import GenerationConfig
 from constants import GuiTab
@@ -47,7 +46,7 @@ class LinkDictionary:
         if hdl_item_type == "Control-Tab":
             self.link_dict[file_name][file_line_number] = {
                 "tab_name": GuiTab.CONTROL,
-                "widget_reference": main_window,  # TODO: das hier ist Quatsch, oder ?!
+                "widget_reference": project_manager.tab_control_ref,
                 "hdl_item_type": hdl_item_name,
                 "object_identifier": "",
                 "number_of_line": "",
