@@ -381,7 +381,8 @@ class CustomText(CodeEditor):
         text = self._add_read_variables_from_case_constructs_to_read_variables_of_all_windows(text)
         text = self._add_read_variables_from_assignments_to_read_variables_of_all_windows(text)
         text = self._add_read_variables_from_always_statements_to_read_variables_of_all_windows(text)
-        CustomText.read_variables_of_all_windows[self] = list(set(CustomText.read_variables_of_all_windows[self]))
+        # use "+=" as _add_to_read_or_written_variables_of_all_windows() already added entries:
+        CustomText.read_variables_of_all_windows[self] += list(set(CustomText.read_variables_of_all_windows[self]))
         # remove remaining "when" of a "case"-statement (left hand side)
         text = re.sub(" when | when$|^when |^when$", "", text, flags=re.I)
         # remove remaining "|" of a "case"-statement
@@ -389,8 +390,9 @@ class CustomText(CodeEditor):
         # remove remaining "else" of an if-clause (left hand side)
         text = re.sub(" else | else$|^else |^else$", "", text, flags=re.I)
 
-        # Store the remaining variable names and remove duplicates from the list:
-        CustomText.written_variables_of_all_windows[self] = list(set(text.split()))
+        # Store the remaining variable names and remove duplicates from the list,
+        # use "+=" as _add_to_read_or_written_variables_of_all_windows() already added entries:
+        CustomText.written_variables_of_all_windows[self] += list(set(text.split()))
         # When the ";" is missing, then the right hand side with "<=" could not be found and erased.
         # So remove "<=" and ":=" from these lists:
         _remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
