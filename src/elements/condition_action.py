@@ -148,11 +148,11 @@ class ConditionAction:
         ids_list = (self.condition_label, self.action_label, self.condition_id, self.action_id)
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
-        for id in ids_list:
+        for single_id in ids_list:
             for seq in seq1_list:
-                id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
+                single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
-                id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+                single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
 
         # Create dictionary for translating the canvas-id of the canvas-window into a reference to this object:
         ConditionAction.ref_dict[self.window_id] = self
@@ -175,12 +175,13 @@ class ConditionAction:
         self.canvas_enter_func_id = project_manager.canvas.bind("<Motion>", lambda event: self._deactivate_frame(), "+")
 
     def _set_borderwidth(self, borderwidth: int, style: str) -> None:
-        diff = self.borderwidth - borderwidth
-        self.borderwidth = borderwidth
-        self.frame_id.configure(borderwidth=borderwidth, style=style)
-        # Compensate for the borderwidth of the frame.
-        pos = project_manager.canvas.coords(self.window_id)
-        project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
+        if project_manager.canvas.find_withtag(self.window_id):  # Delete causes leave-event, but window_id is invalid.
+            diff = self.borderwidth - borderwidth
+            self.borderwidth = borderwidth
+            self.frame_id.configure(borderwidth=borderwidth, style=style)
+            # Compensate for the borderwidth of the frame.
+            pos = project_manager.canvas.coords(self.window_id)
+            project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
 
     def _select_window(self) -> None:
         self._set_borderwidth(1, "WindowSelected.TFrame")

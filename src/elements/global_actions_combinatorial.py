@@ -56,14 +56,14 @@ class GlobalActionsCombinatorial:
             menu_x, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
         )
 
-        self.frame_id.bind("<Enter>", lambda event: self.activate_frame())
-        self.frame_id.bind("<Leave>", lambda event: self.deactivate_frame())
+        self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
+        self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.frame_id, self.window_id),
         )
-        self.label.bind("<Enter>", lambda event: self.activate_window())
-        self.label.bind("<Leave>", lambda event: self.deactivate_window())
+        self.label.bind("<Enter>", lambda event: self._activate_window())
+        self.label.bind("<Leave>", lambda event: self._deactivate_window())
         self.label.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.label, self.window_id),
@@ -82,11 +82,11 @@ class GlobalActionsCombinatorial:
         ids_list = (self.label, self.text_id)
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
-        for id in ids_list:
+        for single_id in ids_list:
             for seq in seq1_list:
-                id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
+                single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
-                id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+                single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
         self.frame_id.lower()
         GlobalActionsCombinatorial.ref_dict[self.window_id] = self
         canvas_modify_bindings.switch_to_move_mode()
@@ -97,36 +97,37 @@ class GlobalActionsCombinatorial:
 
     def update_text(self):
         """Sync text_content from widget for Leave-check and save_in_file."""
-        # Update self.text_content, so that the <Leave>-check in deactivate() does not signal a design-change and
+        # Update self.text_content, so that the <Leave>-check in _deactivate() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
         self.text_content = self.text_id.get("1.0", tk.END)
 
     def _set_borderwidth(self, borderwidth: int, style: str) -> None:
-        diff = self.borderwidth - borderwidth
-        self.borderwidth = borderwidth
-        self.frame_id.configure(borderwidth=borderwidth, style=style)
-        # Compensate for the borderwidth of the frame.
-        pos = project_manager.canvas.coords(self.window_id)
-        project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
+        if project_manager.canvas.find_withtag(self.window_id):  # Delete causes leave-event, but window_id is invalid.
+            diff = self.borderwidth - borderwidth
+            self.borderwidth = borderwidth
+            self.frame_id.configure(borderwidth=borderwidth, style=style)
+            # Compensate for the borderwidth of the frame.
+            pos = project_manager.canvas.coords(self.window_id)
+            project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
 
-    def activate_frame(self) -> None:
+    def _activate_frame(self) -> None:
         """Activate window and cache text for dirty checking."""
-        self.activate_window()
+        self._activate_window()
         self.text_content = self.text_id.get("1.0", tk.END)
 
-    def activate_window(self) -> None:
+    def _activate_window(self) -> None:
         """Show window as selected (border and label style)."""
         self._set_borderwidth(1, "GlobalActionsWindowSelected.TFrame")
         self.label.configure(style="GlobalActionsWindowSelected.TLabel")
 
-    def deactivate_frame(self) -> None:
+    def _deactivate_frame(self) -> None:
         """Deactivate window and mark design changed if text was edited."""
-        self.deactivate_window()
+        self._deactivate_window()
         if self.text_id.get("1.0", tk.END) != self.text_content:
             undo_handling.design_has_changed()
 
-    def deactivate_window(self) -> None:
+    def _deactivate_window(self) -> None:
         """Clear selection style and focus from the combinatorial-actions window."""
         project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="GlobalActionsWindow.TFrame")

@@ -71,14 +71,14 @@ class StateComment:
         self.text_id.grid(column=0, row=1, sticky=(tk.S, tk.W, tk.E))
 
         project_manager.canvas.tag_lower(self.line_id)  # Lines are always "under" anything else.
-        self.frame_id.bind("<Enter>", lambda event: self.activate_frame())
-        self.frame_id.bind("<Leave>", lambda event: self.deactivate_frame())
+        self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
+        self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.frame_id, self.window_id),
         )
-        self.label_id.bind("<Enter>", lambda event: self.activate_window())
-        self.label_id.bind("<Leave>", lambda event: self.deactivate_window())
+        self.label_id.bind("<Enter>", lambda event: self._activate_window())
+        self.label_id.bind("<Leave>", lambda event: self._deactivate_window())
         self.label_id.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.label_id, self.window_id),
@@ -97,11 +97,11 @@ class StateComment:
         ids_list = (self.label_id, self.text_id)
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
-        for id in ids_list:
+        for single_id in ids_list:
             for seq in seq1_list:
-                id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
+                single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
-                id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+                single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
 
         StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
 
@@ -111,36 +111,37 @@ class StateComment:
 
     def update_text(self) -> None:
         """Sync text_content from widget for 'dirty' checking and save_in_file."""
-        # Update self.text_content, so that the <Leave>-check in deactivate_frame() does not signal a design-change and
+        # Update self.text_content, so that the <Leave>-check in _deactivate_frame() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
         self.text_content = self.text_id.get("1.0", tk.END)
 
     def _set_borderwidth(self, borderwidth: int, style: str) -> None:
-        diff = self.borderwidth - borderwidth
-        self.borderwidth = borderwidth
-        self.frame_id.configure(borderwidth=borderwidth, style=style)
-        # Compensate for the borderwidth of the frame.
-        pos = project_manager.canvas.coords(self.window_id)
-        project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
+        if project_manager.canvas.find_withtag(self.window_id):  # Delete causes leave-event, but window_id is invalid.
+            diff = self.borderwidth - borderwidth
+            self.borderwidth = borderwidth
+            self.frame_id.configure(borderwidth=borderwidth, style=style)
+            # Compensate for the borderwidth of the frame.
+            pos = project_manager.canvas.coords(self.window_id)
+            project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
 
-    def activate_frame(self) -> None:
+    def _activate_frame(self) -> None:
         """Activate window and cache text for dirty checking."""
-        self.activate_window()
+        self._activate_window()
         self.text_content = self.text_id.get("1.0", tk.END)
 
-    def activate_window(self) -> None:
+    def _activate_window(self) -> None:
         """Show state-comment window as selected (border and label style)."""
         self._set_borderwidth(1, "StateActionsWindowSelected.TFrame")
         self.label_id.configure(style="StateActionsWindowSelected.TLabel")
 
-    def deactivate_frame(self) -> None:
+    def _deactivate_frame(self) -> None:
         """Deactivate window and mark design changed if text was edited."""
-        self.deactivate_window()
+        self._deactivate_window()
         if self.text_id.get("1.0", tk.END) != self.text_content:
             undo_handling.design_has_changed()
 
-    def deactivate_window(self) -> None:
+    def _deactivate_window(self) -> None:
         """Clear selection style and focus from the state-comment window."""
         project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="StateActionsWindow.TFrame")
