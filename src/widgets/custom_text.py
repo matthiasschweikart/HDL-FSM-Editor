@@ -9,13 +9,14 @@ import subprocess
 import tempfile
 import tkinter as tk
 
-import config
 import constants
 import file_handling
 from codegen import hdl_generation_architecture_state_actions, hdl_generation_library
 from elements import global_actions_combinatorial
 from project_manager import project_manager
-from widgets.code_editor import CodeEditor
+
+from . import config
+from .code_editor import CodeEditor
 
 FUNCTION_DECL_RE = re.compile(r"function\s+(\w+)", re.IGNORECASE)
 VHDL_ATTRIBUTE_RE = re.compile(r"\w+\s+'\s+\w+", re.IGNORECASE)
