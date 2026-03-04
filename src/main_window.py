@@ -10,12 +10,12 @@ import urllib.request
 from pathlib import Path
 from tkinter import ttk
 
-import actions.canvas_editing as canvas_editing
 import constants
-import gui.menu_bar as menu_bar
-import gui.notebook_top as notebook_top
 import link_dictionary
 import linting
+import write_data_creator
+from actions import canvas_editing
+from gui import menu_bar, notebook_top
 from project_manager import project_manager
 
 
@@ -35,6 +35,7 @@ class MainWindow:
         project_manager.highlight_dict_ref = linting.HighLightDict()
         project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
         project_manager.menu_bar_ref = menu_bar.MenuBar(row=0, column=0)
+        project_manager.write_data_creator_ref = write_data_creator.WriteDataCreator(project_manager.state_radius)
 
         # Set the application icon
         try:

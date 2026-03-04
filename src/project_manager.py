@@ -80,6 +80,7 @@ class ProjectManager:
         self._state_name_font = None
         self._highlight_dict_ref = None  #: linting.HighLightDict
         self._abs_zoom_factor = 1.0
+        self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
 
     @property
     def store_events(self):  # -> linting.HighLightDict:
@@ -740,6 +741,16 @@ class ProjectManager:
     def abs_zoom_factor(self, value: float) -> None:
         """Set the absolute zoom factor."""
         self._abs_zoom_factor = value
+
+    @property
+    def write_data_creator_ref(self) -> float:
+        """Get the write_data_creator reference."""
+        return self._write_data_creator_ref
+
+    @write_data_creator_ref.setter
+    def write_data_creator_ref(self, value: float) -> None:
+        """Set the write_data_creator reference."""
+        self._write_data_creator_ref = value
 
     # def get(self, attr_name: str, default=None):
     #     """Get a state attribute."""

@@ -14,6 +14,7 @@ from elements import (
     state_actions_default,
     state_comment,
 )
+from gui import tab_diagram
 from project_manager import project_manager
 
 from . import canvas_modify_bindings

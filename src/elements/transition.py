@@ -7,7 +7,7 @@ import tkinter as tk
 
 import constants
 import undo_handling
-from actions import canvas_delete, canvas_editing, canvas_modify_bindings
+from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
 from elements import condition_action
 from project_manager import project_manager
 from widgets.option_menu import OptionMenu
