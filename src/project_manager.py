@@ -6,8 +6,6 @@ This module provides a simple way to access application state throughout the app
 import tkinter as tk
 from tkinter import ttk
 
-# from project import Project
-
 
 class ProjectManager:
     """Simple project manager - just holds the state and provides access."""
