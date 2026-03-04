@@ -144,27 +144,12 @@ def save_as() -> None:
 
 def save_in_file(save_filename) -> None:  # Called at saving and at every design change (writing to .tmp-file)
     """Serialize project to the given .hfe file (or .tmp)."""
-    allowed_element_names_in_design_dictionary = (
-        "state",
-        "text",
-        "line",
-        "polygon",
-        "rectangle",
-        "window_state_action_block",
-        "window_state_comment",
-        "window_condition_action_block",
-        "window_global_actions",
-        "window_global_actions_combinatorial",
-        "window_state_actions_default",
-    )
     if not save_filename.endswith(".tmp"):
         zoom_factor = project_manager.write_data_creator_ref.zoom_graphic_to_standard_size(project_manager.state_radius)
-    design_dictionary = file_handling_save.save_design_to_dict(allowed_element_names_in_design_dictionary)
+    design_dictionary = file_handling_save.save_design_to_dict()
     if not save_filename.endswith(".tmp"):
         project_manager.write_data_creator_ref.zoom_graphic_back_to_actual_size(zoom_factor)
-        design_dictionary = project_manager.write_data_creator_ref.round_and_sort_data(
-            design_dictionary, allowed_element_names_in_design_dictionary
-        )
+        design_dictionary = project_manager.write_data_creator_ref.round_and_sort_data(design_dictionary)
     old_cursor = project_manager.root.cget(
         "cursor"
     )  # may be different from "arrow" at design changes (writing to .tmp-file)

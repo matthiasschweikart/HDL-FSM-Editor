@@ -15,16 +15,17 @@ from elements import (
     transition,
 )
 from project_manager import project_manager
+from widgets import config
 
 
-def save_design_to_dict(allowed_element_names_in_design_dictionary) -> dict[str, Any]:
+def save_design_to_dict() -> dict[str, Any]:
     """Create a design dictionary containing all necessary information to save the current design."""
     design_dictionary = {}
     _save_control_data(design_dictionary)
     _save_interface_data(design_dictionary)
     _save_internals_data(design_dictionary)
     _save_log_config(design_dictionary)
-    _save_canvas_data(design_dictionary, allowed_element_names_in_design_dictionary)
+    _save_canvas_data(design_dictionary)
     return design_dictionary
 
 
@@ -70,7 +71,7 @@ def _save_log_config(design_dictionary: dict[str, Any]) -> None:
     design_dictionary["regex_file_line_number_quote"] = project_manager.regex_file_line_number_quote
 
 
-def _save_canvas_data(design_dictionary: dict[str, Any], allowed_element_names_in_design_dictionary) -> None:
+def _save_canvas_data(design_dictionary: dict[str, Any]) -> None:
     design_dictionary["diagram_background_color"] = project_manager.diagram_background_color.get()
     design_dictionary["state_number"] = state.States.state_number
     design_dictionary["transition_number"] = transition.TransitionLine.transition_number
@@ -82,7 +83,7 @@ def _save_canvas_data(design_dictionary: dict[str, Any], allowed_element_names_i
     design_dictionary["priority_distance"] = project_manager.priority_distance
     design_dictionary["fontsize"] = project_manager.fontsize
     design_dictionary["label_fontsize"] = project_manager.label_fontsize
-    for element_name in allowed_element_names_in_design_dictionary:
+    for element_name in config.ELEMENT_NAMES_IN_DESIGN_DICTIONARY:
         design_dictionary[element_name] = []
     items = project_manager.canvas.find_all()
     for i in items:

@@ -6,7 +6,8 @@ changed any text/name/contol-information. Any scrolling, zooming
 will not create a different file content.
 """
 
-import actions.canvas_editing as canvas_editing
+from actions import canvas_editing
+from widgets import config
 
 
 class WriteDataCreator:
@@ -34,18 +35,18 @@ class WriteDataCreator:
         """Restore canvas zoom by applying 1/zoom_factor at origin."""
         canvas_editing.canvas_zoom([0, 0], 1 / zoom_factor)
 
-    def round_and_sort_data(self, design_dictionary, allowed_element_names_in_design_dictionary) -> dict[str, list]:
+    def round_and_sort_data(self, design_dictionary) -> dict[str, list]:
         """Sort and round coordinates/parameters in design_dictionary; store as compare object; return updated dict."""
-        used_element_names = self._get_used_element_names(design_dictionary, allowed_element_names_in_design_dictionary)
+        used_element_names = self._get_used_element_names(design_dictionary)
         design_dictionary = self._sort_graphic_elements(design_dictionary, used_element_names)
         design_dictionary = self._round_coordinates(design_dictionary, used_element_names)
         design_dictionary = self._round_parameters(design_dictionary)
         self.store_as_compare_object(design_dictionary)
         return design_dictionary
 
-    def _get_used_element_names(self, design_dictionary, allowed_element_names_in_design_dictionary) -> list:
+    def _get_used_element_names(self, design_dictionary) -> list:
         used_element_names = []
-        for element_name in allowed_element_names_in_design_dictionary:
+        for element_name in config.ELEMENT_NAMES_IN_DESIGN_DICTIONARY:
             if element_name in design_dictionary:
                 used_element_names.append(element_name)
         return used_element_names
