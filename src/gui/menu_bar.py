@@ -5,7 +5,6 @@ import sys
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-import compile_handling
 import constants
 import file_handling
 import undo_handling
@@ -14,6 +13,8 @@ from actions import find_replace
 from codegen import hdl_generation
 from dialogs import help_selection, help_shortcuts
 from project_manager import project_manager
+
+from . import compile_handling
 
 
 class MenuBar:
