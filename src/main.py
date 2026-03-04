@@ -15,15 +15,16 @@ from codegen import hdl_generation
 from project_manager import project_manager
 
 
-def _setup_application_ui() -> None:
+def _setup_application_ui() -> main_window.MainWindow:
     """Set up the main application UI components."""
-    main_window.create_gui()
-    main_window.set_word_boundaries()
+    mainwindow_ref = main_window.MainWindow()
+    mainwindow_ref.set_word_boundaries()
     # Initialize undo/redo system
     undo_handling.design_has_changed()
+    return mainwindow_ref
 
 
-def _parse_and_process_arguments() -> None:
+def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None:
     """Parse command-line arguments and process them."""
     parser = argparse.ArgumentParser(description="HDL-FSM-Editor: A tool for modeling FSMs")
     parser.add_argument("filename", nargs="?", help="HDL-FSM-Editor file (.hfe) to open")
@@ -38,10 +39,11 @@ def _parse_and_process_arguments() -> None:
         args.no_message = True
 
     # Handle version and message checks
+    check_version_result = ""
     if not args.no_version_check:
-        main_window.check_version()
+        check_version_result = mainwindow_ref.check_version()
     if not args.no_message:
-        main_window.read_message()
+        mainwindow_ref.read_message(check_version_result)
 
     # Handle filename
     if args.filename:
@@ -64,7 +66,7 @@ def _parse_and_process_arguments() -> None:
                 file_handling.open_file_with_name(args.filename, is_script_mode=True)
             else:
                 file_handling.open_file_with_name(args.filename, is_script_mode=False)
-            project_manager.canvas.bind("<Visibility>", lambda _event: main_window.view_all_after_window_is_built())
+            project_manager.canvas.bind("<Visibility>", lambda _event: mainwindow_ref.view_all_after_window_is_built())
 
     # Handle batch generation
     if args.generate_hdl:
@@ -75,8 +77,8 @@ def _parse_and_process_arguments() -> None:
 def _main() -> None:
     """Main entry point for HDL-FSM-Editor."""
     print(constants.HEADER_STRING)
-    _setup_application_ui()
-    _parse_and_process_arguments()
+    mainwindow_ref = _setup_application_ui()
+    _parse_and_process_arguments(mainwindow_ref)
     project_manager.root.wm_deiconify()
     project_manager.root.mainloop()
 
