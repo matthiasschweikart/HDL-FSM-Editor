@@ -57,7 +57,7 @@ class UpdateHdlTab:
                         + " (architecture-file) could not be opened for copying into HDL-Tab.",
                     )
             # Create hdl without writing to file for Link-Generation:
-            hdl_generation.run_hdl_generation(write_to_file=False, is_script_mode=False)
+            hdl_generation.HdlGeneration(write_to_file=False, is_script_mode=False)
             UpdateHdlTab.copy_into_hdl_tab(entity, arch)
 
     def __hdl_is_up_to_date(self, path_name, hdlfilename, hdlfilename_architecture, show_message) -> bool:

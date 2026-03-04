@@ -54,9 +54,9 @@ class TabHDL:
         if line_number != self._line_number_under_pointer_hdl_tab:
             project_manager.hdl_frame_text.tag_delete("underline")  # remove previous underline
             config = GenerationConfig.from_main_window()
-            if line_number > hdl_generation.last_line_number_of_file1:
+            if line_number > hdl_generation.HdlGeneration.last_line_number_of_file1:
                 # Cursor is in file 2 (architecture file)
-                line_number_in_file = line_number - hdl_generation.last_line_number_of_file1
+                line_number_in_file = line_number - hdl_generation.HdlGeneration.last_line_number_of_file1
                 selected_file = config.get_architecture_file()
                 start_index = project_manager.size_of_file2_line_number
             else:

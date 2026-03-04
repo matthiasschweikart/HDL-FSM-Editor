@@ -100,7 +100,7 @@ class LinkDictionary:
             gen_config = GenerationConfig.from_main_window()
             file_name_architecture = gen_config.get_architecture_file()
             if file_name_architecture and selected_file == file_name_architecture:
-                file_line_number += hdl_generation.last_line_number_of_file1
+                file_line_number += hdl_generation.HdlGeneration.last_line_number_of_file1
         project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
         project_manager.hdl_frame_text.highlight_item("", "", file_line_number)
         project_manager.hdl_frame_text.config(state="normal")

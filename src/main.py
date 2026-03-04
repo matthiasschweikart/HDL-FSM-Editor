@@ -70,7 +70,7 @@ def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None
 
     # Handle batch generation
     if args.generate_hdl:
-        success = hdl_generation.run_hdl_generation(write_to_file=True, is_script_mode=True)
+        success = hdl_generation.HdlGeneration(write_to_file=True, is_script_mode=True).success
         sys.exit(0 if success else 1)
 
 

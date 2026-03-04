@@ -42,7 +42,7 @@ class MenuBar:
         hdl_menu.add_command(
             label="Generate",
             accelerator="Ctrl+g",
-            command=lambda: hdl_generation.run_hdl_generation(write_to_file=True),
+            command=lambda: hdl_generation.HdlGeneration(write_to_file=True),
             font=("Arial", 10),
         )
         hdl_menu.add_command(
@@ -133,9 +133,7 @@ class MenuBar:
         # Bindings of the menus:
         project_manager.root.bind_all("<Control-o>", lambda event: file_handling.open_file())
         project_manager.root.bind_all("<Control-s>", lambda event: file_handling.save())
-        project_manager.root.bind_all(
-            "<Control-g>", lambda event: hdl_generation.run_hdl_generation(write_to_file=True)
-        )
+        project_manager.root.bind_all("<Control-g>", lambda event: hdl_generation.HdlGeneration(write_to_file=True))
         project_manager.root.bind_all("<Control-n>", lambda event: file_handling.new_design())
         project_manager.root.bind_all("<Control-p>", lambda event: compile_handling.compile_hdl())
         project_manager.root.bind_all("<Control-f>", lambda event: search_string_entry.focus_set())
