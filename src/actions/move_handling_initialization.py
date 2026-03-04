@@ -7,10 +7,7 @@ as the text boxes are Canvas-Windows, for which the Canvas binding is not valid.
 import math
 import tkinter as tk
 
-import canvas_editing
-import move_handling
-import move_handling_canvas_item
-import move_handling_finish
+from actions import canvas_editing, move_handling, move_handling_canvas_item, move_handling_finish
 from elements import transition
 from project_manager import project_manager
 

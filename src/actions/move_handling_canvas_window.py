@@ -2,10 +2,8 @@
 A MoveCanvasWindow object is created, when the user moves a Canvas window object.
 """
 
-import move_handling
-import move_handling_finish
-import move_handling_initialization
 import undo_handling
+from actions import move_handling, move_handling_finish, move_handling_initialization
 from project_manager import project_manager
 
 

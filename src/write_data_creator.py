@@ -6,7 +6,7 @@ changed any text/name/contol-information. Any scrolling, zooming
 will not create a different file content.
 """
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 
 
 class WriteDataCreator:

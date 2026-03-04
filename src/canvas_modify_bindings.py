@@ -3,9 +3,9 @@ This module contains all methods to change the binding of the left mouse-button 
 inserting the different graphical objects.
 """
 
-import canvas_editing
-import move_handling_canvas_item
-import move_handling_initialization
+import actions.canvas_editing as canvas_editing
+import actions.move_handling_canvas_item as move_handling_canvas_item
+import actions.move_handling_initialization as move_handling_initialization
 from elements import (
     connector,
     global_actions_clocked,

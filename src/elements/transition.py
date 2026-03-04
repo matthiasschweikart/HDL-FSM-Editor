@@ -5,11 +5,11 @@ Module handling transitions on the canvas.
 import math
 import tkinter as tk
 
-import canvas_delete
-import canvas_editing
+import actions.canvas_delete as canvas_delete
+import actions.canvas_editing as canvas_editing
+import actions.move_handling_initialization as move_handling_initialization
 import canvas_modify_bindings
 import constants
-import move_handling_initialization
 import undo_handling
 from elements import condition_action
 from project_manager import project_manager

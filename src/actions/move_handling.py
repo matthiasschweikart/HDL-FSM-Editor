@@ -2,8 +2,8 @@
 This module contains a method to decide which graphical object must be moved.
 """
 
-import canvas_editing
 import constants
+from actions import canvas_editing
 from elements import (
     condition_action,
     connector,

@@ -5,7 +5,7 @@ This module contains methods used at HDL generation.
 import re
 import tkinter as tk
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 from elements import condition_action, global_actions_clocked, global_actions_combinatorial, state_comment
 from project_manager import project_manager
 

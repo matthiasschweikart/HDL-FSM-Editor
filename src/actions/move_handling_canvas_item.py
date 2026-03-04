@@ -3,10 +3,8 @@ This module handles the movement of states at the Canvas.
 """
 
 # import canvas_modify_bindings
-import move_handling
-import move_handling_finish
-import move_handling_initialization
 import undo_handling
+from actions import move_handling, move_handling_finish, move_handling_initialization
 from project_manager import project_manager
 
 

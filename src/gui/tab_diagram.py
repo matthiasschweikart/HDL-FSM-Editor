@@ -3,12 +3,10 @@
 import tkinter as tk
 from tkinter import font, ttk
 
-import canvas_delete
-import canvas_editing
 import canvas_modify_bindings
 import grid_drawing
-import move_handling_initialization
 import undo_handling
+from actions import canvas_delete, canvas_editing, move_handling_initialization
 from constants import GuiTab
 from project_manager import project_manager
 from widgets.option_menu import OptionMenu

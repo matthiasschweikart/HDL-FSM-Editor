@@ -6,11 +6,11 @@ This class handles the condition&action box which can be activated for each tran
 import tkinter as tk
 from tkinter import ttk
 
-import canvas_delete
-import canvas_editing
+import actions.canvas_delete as canvas_delete
+import actions.canvas_editing as canvas_editing
+import actions.move_handling_canvas_window as move_handling_canvas_window
 import custom_text
-import move_handling_canvas_window
-import tab_diagram
+import gui.tab_diagram as tab_diagram
 import undo_handling
 from project_manager import project_manager
 

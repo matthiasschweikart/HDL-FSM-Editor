@@ -2,7 +2,7 @@
 Module handling connectors on the canvas.
 """
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 import constants
 import undo_handling
 from elements import transition

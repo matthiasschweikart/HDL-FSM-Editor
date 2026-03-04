@@ -8,9 +8,9 @@ from tkinter import messagebox, ttk
 import compile_handling
 import constants
 import file_handling
-import find_replace
 import undo_handling
 import update_hdl_tab
+from actions import find_replace
 from codegen import hdl_generation
 from dialogs import help_selection, help_shortcuts
 from project_manager import project_manager

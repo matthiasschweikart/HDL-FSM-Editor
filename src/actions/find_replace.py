@@ -6,8 +6,8 @@ import re
 import tkinter as tk
 from tkinter import messagebox
 
-import canvas_editing
 import undo_handling
+from actions import canvas_editing
 from constants import GuiTab
 from elements import (
     condition_action,

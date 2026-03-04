@@ -2,7 +2,7 @@
 
 import tkinter as tk
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 import canvas_modify_bindings
 import undo_handling
 from elements import transition

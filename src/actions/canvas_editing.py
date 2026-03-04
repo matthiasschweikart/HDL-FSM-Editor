@@ -6,8 +6,8 @@ from tkinter import messagebox
 
 import canvas_modify_bindings
 import constants
-import move_handling_initialization
-import tab_diagram
+import gui.tab_diagram as tab_diagram
+from actions import move_handling_initialization
 from elements import (
     condition_action,
     global_actions_clocked,

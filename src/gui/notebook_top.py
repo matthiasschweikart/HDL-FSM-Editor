@@ -4,14 +4,10 @@ This module handling contains all needed methods for the notebook widget.
 
 from tkinter import ttk
 
-import tab_control
-import tab_diagram
-import tab_hdl
-import tab_interface
-import tab_internals
-import tab_log
 from constants import GuiTab
 from project_manager import project_manager
+
+from . import tab_control, tab_diagram, tab_hdl, tab_interface, tab_internals, tab_log
 
 
 class NotebookTop(ttk.Notebook):

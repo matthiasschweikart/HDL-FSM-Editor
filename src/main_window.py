@@ -10,12 +10,12 @@ import urllib.request
 from pathlib import Path
 from tkinter import ttk
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 import constants
+import gui.menu_bar as menu_bar
+import gui.notebook_top as notebook_top
 import link_dictionary
 import linting
-import menu_bar
-import notebook_top
 from project_manager import project_manager
 
 

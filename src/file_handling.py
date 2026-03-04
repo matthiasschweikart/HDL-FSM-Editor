@@ -9,7 +9,7 @@ from tkinter import messagebox
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Any
 
-import canvas_editing
+import actions.canvas_editing as canvas_editing
 import constants
 import custom_text
 import tag_plausibility

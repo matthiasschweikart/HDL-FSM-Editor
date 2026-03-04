@@ -5,11 +5,8 @@ Includes all methods needed, when moving objects ends.
 import math
 import tkinter as tk
 
-import canvas_editing
-import move_handling
-import move_handling_canvas_item
-import move_handling_initialization
 import undo_handling
+from actions import canvas_editing, move_handling, move_handling_canvas_item, move_handling_initialization
 from elements import condition_action, transition
 from project_manager import project_manager
 
