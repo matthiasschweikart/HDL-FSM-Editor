@@ -112,18 +112,3 @@ class LinkDictionary:
         if file_name in self.link_dict:
             # print("clear_link_dict: file_name =", file_name)
             self.link_dict.pop(file_name)
-
-
-_link_dictionary: LinkDictionary | None = None
-
-
-def init_link_dict(root) -> None:
-    """Create and store the global LinkDictionary instance."""
-    global _link_dictionary
-    _link_dictionary = LinkDictionary(root)
-
-
-def link_dict() -> LinkDictionary:
-    """Return the global LinkDictionary instance (must be initialized first)."""
-    assert _link_dictionary is not None
-    return _link_dictionary
