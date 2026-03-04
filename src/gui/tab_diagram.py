@@ -4,12 +4,13 @@ import tkinter as tk
 from tkinter import font, ttk
 
 import canvas_modify_bindings
-import grid_drawing
 import undo_handling
 from actions import canvas_delete, canvas_editing, move_handling_initialization
 from constants import GuiTab
 from project_manager import project_manager
 from widgets.option_menu import OptionMenu
+
+from . import grid_drawing
 
 
 class TabDiagram:
