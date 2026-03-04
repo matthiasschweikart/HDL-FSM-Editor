@@ -81,6 +81,7 @@ class ProjectManager:
         self._label_fontsize = 8
         self._state_name_font = None
         self._highlight_dict_ref = None  #: linting.HighLightDict
+        self._abs_zoom_factor = 1.0
 
     @property
     def store_events(self):  # -> linting.HighLightDict:
@@ -731,6 +732,16 @@ class ProjectManager:
     def previous_file(self, value: str) -> str:
         """Set the previous file path."""
         self._previous_file = value
+
+    @property
+    def abs_zoom_factor(self) -> float:
+        """Get the absolute zoom factor."""
+        return self._abs_zoom_factor
+
+    @abs_zoom_factor.setter
+    def abs_zoom_factor(self, value: float) -> None:
+        """Set the absolute zoom factor."""
+        self._abs_zoom_factor = value
 
     # def get(self, attr_name: str, default=None):
     #     """Get a state attribute."""

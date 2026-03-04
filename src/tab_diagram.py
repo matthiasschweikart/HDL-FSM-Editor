@@ -169,9 +169,9 @@ class TabDiagram:
         scroll_delta = 10.0
         delta = 0.0
         if event.num == 5 or event.delta < 0:  # scroll down
-            delta = -scroll_delta * canvas_editing.abs_zoom_factor
+            delta = -scroll_delta * project_manager.abs_zoom_factor
         elif event.num == 4 or event.delta >= 0:  # scroll up
-            delta = scroll_delta * canvas_editing.abs_zoom_factor
+            delta = scroll_delta * project_manager.abs_zoom_factor
 
         shift_mask = 1 << 0  # Tkinter shift key bit
         scroll_direction = "x" if (event.state & shift_mask) else "y"

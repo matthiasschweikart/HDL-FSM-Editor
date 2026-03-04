@@ -20,8 +20,6 @@ from project_manager import project_manager
 
 # import inspect
 
-abs_zoom_factor: float = 1.0
-
 
 def translate_window_event_coordinates_in_rounded_canvas_coordinates(event) -> list:
     """Return canvas coordinates [x, y] for the event, rounded to the state radius grid."""
@@ -135,14 +133,13 @@ def zoom_minus() -> None:
 
 def canvas_zoom(zoom_center, zoom_factor) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
-    global abs_zoom_factor
     # Modify factor, so that fontsize is always an integer:
     fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
     if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
         fontsize_rounded_down += 1
     if fontsize_rounded_down != 0:
         zoom_factor = fontsize_rounded_down / project_manager.fontsize
-        abs_zoom_factor *= zoom_factor
+        project_manager.abs_zoom_factor *= zoom_factor
         project_manager.canvas.scale(
             "all", 0, 0, zoom_factor, zoom_factor
         )  # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius.
