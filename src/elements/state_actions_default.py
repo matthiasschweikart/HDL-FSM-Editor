@@ -5,12 +5,11 @@ Handles the combinatorial default actions for all states.
 import tkinter as tk
 from tkinter import ttk
 
-import canvas_modify_bindings
 import undo_handling
-import widgets.custom_text as custom_text
-from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_canvas_window
 from gui import tab_diagram
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class StateActionsDefault:

@@ -4,9 +4,7 @@ This module contains method used when the user edits the diagram.
 
 from tkinter import messagebox
 
-import canvas_modify_bindings
 import constants
-import gui.tab_diagram as tab_diagram
 from actions import move_handling_initialization
 from elements import (
     condition_action,
@@ -17,6 +15,8 @@ from elements import (
     state_comment,
 )
 from project_manager import project_manager
+
+from . import canvas_modify_bindings
 
 # import inspect
 

@@ -2,9 +2,8 @@
 
 import tkinter as tk
 
-import actions.canvas_editing as canvas_editing
-import canvas_modify_bindings
 import undo_handling
+from actions import canvas_editing, canvas_modify_bindings
 from elements import transition
 from project_manager import project_manager
 
