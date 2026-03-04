@@ -40,7 +40,10 @@ def new_design() -> bool:
             # Check if save was successful (current_file is not empty)
             if project_manager.current_file == "":
                 return False
-    _clear_design()
+    clear_design()
+    project_manager.root.title("unnamed")
+    project_manager.grid_drawer.draw_grid()
+    project_manager.write_data_creator_ref.store_as_compare_object(None)
     return True
 
 
@@ -80,7 +83,8 @@ def save() -> None:
         )  # Wait for the handling of all possible events.
 
 
-def _clear_design():
+def clear_design():
+    """Clear the current design from canvas and all variables; reset to initial state."""
     project_manager.current_file = ""
     project_manager.module_name.set("")
     project_manager.reset_signal_name.set("")
@@ -119,9 +123,6 @@ def _clear_design():
     project_manager.label_fontsize = 8
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
     project_manager.include_timestamp_in_output.set(True)
-    project_manager.root.title("unnamed")
-    project_manager.grid_drawer.draw_grid()
-    project_manager.write_data_creator_ref.store_as_compare_object(None)
 
 
 def save_as() -> None:
@@ -228,8 +229,6 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
     undo_handling.stack_write_pointer = 0
     project_manager.undo_button.config(state="disabled")
 
-    # Put the read design into stack[0]:
-    undo_handling.design_has_changed()  # Initialize the stack with the read design.
     project_manager.root.update()
     dir_name, file_name = os.path.split(read_filename)
     project_manager.root.title(f"{file_name} ({dir_name})")
@@ -245,6 +244,8 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
         project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
         project_manager.root.after_idle(canvas_editing.view_all)
+    # Put the read design into stack[0] (after view_all):
+    project_manager.root.after_idle(undo_handling.design_has_changed)  # Initialize the stack with the read design.
     project_manager.root.config(cursor="arrow")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
         if is_script_mode:

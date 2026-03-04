@@ -46,7 +46,6 @@ class TabControl:
 
         generate_path_value = tk.StringVar(value="")
         project_manager.generate_path_value = generate_path_value
-        generate_path_value.trace_add("write", lambda *args: self._show_path_has_changed())
         generate_path_label = ttk.Label(control_frame, text="Directory for generated HDL:", padding=5)
         _generate_path_entry = ttk.Entry(control_frame, textvariable=generate_path_value, width=80)
         generate_path_button = ttk.Button(control_frame, text="Select...", command=self._set_path, style="Path.TButton")
@@ -70,6 +69,7 @@ class TabControl:
         )
         include_timestamp_in_output = tk.BooleanVar(value=True)
         project_manager.include_timestamp_in_output = include_timestamp_in_output
+        # TODO: dieser Trace wirkt wohl nicht, wenn "set" verwendet wird, um wert zu ändern (was bei file_handling_load.load_design passiert):
         include_timestamp_in_output.trace_add("write", lambda *args: undo_handling.update_window_title())
         include_timestamp_checkbox = ttk.Checkbutton(_select_file_number_frame, variable=include_timestamp_in_output)
         include_timestamp_label = ttk.Label(
@@ -125,7 +125,6 @@ class TabControl:
 
         additional_sources_value = tk.StringVar(value="")
         project_manager.additional_sources_value = additional_sources_value
-        additional_sources_value.trace_add("write", lambda *args: self._show_path_has_changed())
         additional_sources_label = ttk.Label(
             control_frame,
             text="Additional sources:\n(used only by HDL-SCHEM-Editor, must\nbe added manually to compile command)",
@@ -141,7 +140,6 @@ class TabControl:
 
         working_directory_value = tk.StringVar(value="")
         project_manager.working_directory_value = working_directory_value
-        working_directory_value.trace_add("write", lambda *args: self._show_path_has_changed())
         working_directory_label = ttk.Label(control_frame, text="Working directory:", padding=5)
         _working_directory_entry = ttk.Entry(control_frame, textvariable=working_directory_value, width=80)
         working_directory_button = ttk.Button(
@@ -165,6 +163,11 @@ class TabControl:
         _diagram_background_color_error = ttk.Label(control_frame, text="", padding=5)
         project_manager.diagram_background_color_error = _diagram_background_color_error
         _diagram_background_color_error.grid(row=12, column=1, sticky=tk.W)
+
+        self._generate_path_trace_id = None
+        self._additional_sources_trace_id = None
+        self._working_directory_trace_id = None
+        self.activate_traces()
 
         project_manager.notebook.add(control_frame, sticky="nsew", text=GuiTab.CONTROL.value)
 
@@ -257,9 +260,6 @@ class TabControl:
 
         custom_text.refresh_highlighting_in_all_declaration_widgets()
 
-    def _show_path_has_changed(self) -> None:
-        undo_handling.design_has_changed()
-
     def _set_path(self) -> None:
         path = askdirectory(title="Select directory for generated HDL")
         if path != "" and not path.isspace():
@@ -315,3 +315,21 @@ class TabControl:
             self.module_name_entry.select_range(0, tk.END)
         elif hdl_item_type == "reset_and_clock_signal_name":
             self.clock_signal_name_entry.select_range(0, tk.END)
+
+    def activate_traces(self) -> None:
+        """Activate the traces for the given StringVars to mark the design as changed when they are modified."""
+        self._generate_path_trace_id = project_manager.generate_path_value.trace_add(
+            "write", lambda *args: undo_handling.design_has_changed()
+        )
+        self._additional_sources_trace_id = project_manager.additional_sources_value.trace_add(
+            "write", lambda *args: undo_handling.design_has_changed()
+        )
+        self._working_directory_trace_id = project_manager.working_directory_value.trace_add(
+            "write", lambda *args: undo_handling.design_has_changed()
+        )
+
+    def deactivate_traces(self) -> None:
+        """Deactivate the traces for the given StringVars."""
+        project_manager.generate_path_value.trace_remove("write", self._generate_path_trace_id)
+        project_manager.additional_sources_value.trace_remove("write", self._additional_sources_trace_id)
+        project_manager.working_directory_value.trace_remove("write", self._working_directory_trace_id)
