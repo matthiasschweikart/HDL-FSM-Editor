@@ -104,11 +104,11 @@ class GenerationConfig:
             errors.append("No module name is specified")
 
         if not self.generate_path or self.generate_path.isspace():
-            errors.append("No output path is specified")
+            errors.append("No generate output path is specified")
         else:
             path = Path(self.generate_path)
             if not path.exists():
-                errors.append(f"Output path does not exist: {self.generate_path}")
+                errors.append(f"Generate output path does not exist: {self.generate_path}")
 
         if not self.reset_signal_name or self.reset_signal_name.isspace():
             errors.append("No reset signal name is specified")
