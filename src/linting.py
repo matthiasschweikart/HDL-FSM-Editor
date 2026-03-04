@@ -5,9 +5,9 @@ Methods needed for highlighting signals, which are not read, not written, not de
 import copy
 
 import constants
-import custom_text
 from elements import global_actions_combinatorial
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class HighLightDict:

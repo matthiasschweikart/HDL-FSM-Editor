@@ -5,12 +5,10 @@ Handles the state action of all states.
 import tkinter as tk
 from tkinter import ttk
 
-import actions.canvas_delete as canvas_delete
-import actions.canvas_editing as canvas_editing
-import actions.move_handling_canvas_window as move_handling_canvas_window
-import custom_text
-import gui.tab_diagram as tab_diagram
 import undo_handling
+import widgets.custom_text as custom_text
+from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from gui import tab_diagram
 from project_manager import project_manager
 
 

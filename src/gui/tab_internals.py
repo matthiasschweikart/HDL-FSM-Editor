@@ -3,10 +3,10 @@
 import tkinter as tk
 from tkinter import ttk
 
-import custom_text
 import undo_handling
 from constants import GuiTab
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class TabInternals:

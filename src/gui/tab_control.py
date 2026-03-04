@@ -7,11 +7,11 @@ from tkinter import ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
 import constants
-import custom_text
 import undo_handling
 from constants import GuiTab
 from dialogs.color_changer import ColorChanger
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class TabControl:

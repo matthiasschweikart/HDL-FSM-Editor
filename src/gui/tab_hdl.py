@@ -4,11 +4,11 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-import custom_text
 from codegen import hdl_generation
 from codegen.hdl_generation_config import GenerationConfig
 from constants import GuiTab
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class TabHDL:

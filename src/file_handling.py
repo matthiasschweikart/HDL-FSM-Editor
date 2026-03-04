@@ -9,13 +9,13 @@ from tkinter import messagebox
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Any
 
-import actions.canvas_editing as canvas_editing
 import constants
-import custom_text
 import tag_plausibility
 import undo_handling
 import update_hdl_tab
+import widgets.custom_text as custom_text
 import write_data_creator
+from actions import canvas_editing
 from constants import GuiTab
 from elements import (
     condition_action,
