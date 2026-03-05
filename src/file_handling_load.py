@@ -4,7 +4,6 @@ import tkinter as tk
 from typing import Any
 
 import constants
-import file_handling
 from constants import GuiTab
 from elements import (
     condition_action,
@@ -126,8 +125,6 @@ def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.fontsize = design_dictionary["fontsize"]
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
     project_manager.label_fontsize = design_dictionary["label_fontsize"]
-    # shift_visible_center_to_window_center(design_dictionary["visible_center"])
-    file_handling.shift_visible_center_to_window_center(file_handling.get_visible_center_as_string())
 
 
 def _load_canvas_elements(design_dictionary: dict[str, Any]) -> None:

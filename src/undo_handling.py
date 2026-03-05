@@ -15,16 +15,6 @@ stack = []
 stack_write_pointer = 0  # pylint: disable=invalid-name # module-level mutable pointer
 
 
-def update_window_title() -> None:
-    """Set window title to 'unnamed' or append '*' if the design is already named."""
-    title = project_manager.root.title()
-    if title == "tk":
-        project_manager.root.title("unnamed")
-    elif not title.endswith("*"):
-        title += "*"
-        project_manager.root.title(title)
-
-
 def design_has_changed() -> None:
     """Push current design to undo stack, update title, and save to .tmp if file is set."""
     _add_changes_to_design_stack()
@@ -32,6 +22,38 @@ def design_has_changed() -> None:
     if project_manager.current_file != "" and not project_manager.root.title().startswith("unnamed"):
         # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
         file_handling.save_in_file(project_manager.current_file + ".tmp")
+
+
+def _add_changes_to_design_stack() -> None:
+    global stack_write_pointer
+    _remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
+    new_design = file_handling_save.save_design_to_dict()
+    visible_center = _get_visible_center()
+    stack.append([new_design, visible_center])
+    stack_write_pointer += 1
+    if stack_write_pointer > 1:
+        project_manager.undo_button.config(state="enabled")
+    project_manager.redo_button.config(state="disabled")
+
+
+def _remove_stack_entries_from_write_pointer_to_the_end_of_the_stack() -> None:
+    if len(stack) > stack_write_pointer:
+        del stack[stack_write_pointer:]
+
+
+def _get_visible_center() -> list[float, float]:
+    """Return the canvas visible center coordinates as a space-separated string."""
+    visible_rectangle = [
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    visible_center = [
+        (visible_rectangle[0] + visible_rectangle[2]) / 2,
+        (visible_rectangle[1] + visible_rectangle[3]) / 2,
+    ]
+    return visible_center
 
 
 def undo() -> None:
@@ -60,6 +82,35 @@ def undo() -> None:
         project_manager.redo_button.config(state="enabled")
 
 
+def _set_diagram_to_version_selected_by_stack_pointer() -> None:
+    # Remove the old design:
+    file_handling.clear_design()
+    project_manager.notebook.show_tab(GuiTab.DIAGRAM)
+    design, visible_center = stack[stack_write_pointer]
+    project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
+    file_handling_load.load_design_from_dict(design)
+    project_manager.tab_control_ref.activate_traces()
+    # project_manager.canvas.after(1000, _shift_visible_center_to_window_center, visible_center)
+    _shift_visible_center_to_window_center(visible_center)
+    project_manager.grid_drawer.draw_grid()
+
+
+def _shift_visible_center_to_window_center(visible_center) -> None:
+    """Pan canvas so the given center string becomes the current window center."""
+    actual_visible_rectangle = [
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    actual_visible_center = [
+        (actual_visible_rectangle[0] + actual_visible_rectangle[2]) / 2,
+        (actual_visible_rectangle[1] + actual_visible_rectangle[3]) / 2,
+    ]
+    project_manager.canvas.scan_mark(int(visible_center[0]), int(visible_center[1]))
+    project_manager.canvas.scan_dragto(int(actual_visible_center[0]), int(actual_visible_center[1]), gain=1)
+
+
 def redo() -> None:
     """Restore diagram to next version from stack (ignored when focus is on custom text)."""
     global stack_write_pointer
@@ -74,29 +125,11 @@ def redo() -> None:
         project_manager.redo_button.config(state="disabled")
 
 
-def _add_changes_to_design_stack() -> None:
-    global stack_write_pointer
-    _remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
-    # new_design = _get_complete_design_as_text_object()
-    new_design = file_handling_save.save_design_to_dict()
-    stack.append(new_design)
-    stack_write_pointer += 1
-    if stack_write_pointer > 1:
-        project_manager.undo_button.config(state="enabled")
-    project_manager.redo_button.config(state="disabled")
-
-
-def _remove_stack_entries_from_write_pointer_to_the_end_of_the_stack() -> None:
-    if len(stack) > stack_write_pointer:
-        del stack[stack_write_pointer:]
-
-
-def _set_diagram_to_version_selected_by_stack_pointer() -> None:
-    # Remove the old design:
-    file_handling.clear_design()
-    project_manager.notebook.show_tab(GuiTab.DIAGRAM)
-    design = stack[stack_write_pointer]
-    project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
-    file_handling_load.load_design_from_dict(design)
-    project_manager.tab_control_ref.activate_traces()
-    project_manager.grid_drawer.draw_grid()
+def update_window_title() -> None:
+    """Set window title to 'unnamed' or append '*' if the design is already named."""
+    title = project_manager.root.title()
+    if title == "tk":
+        project_manager.root.title("unnamed")
+    elif not title.endswith("*"):
+        title += "*"
+        project_manager.root.title(title)

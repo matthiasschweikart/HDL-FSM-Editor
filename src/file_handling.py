@@ -222,13 +222,7 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
     file_handling_load.load_design_from_dict(design_dictionary)
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
         os.remove(f"{read_filename}.tmp")
-
-    # Final cleanup
-    undo_handling.stack = []
-    # Loading the design created by "traces" some stack-entries, which are removed here:
-    undo_handling.stack_write_pointer = 0
     project_manager.undo_button.config(state="disabled")
-
     project_manager.root.update()
     dir_name, file_name = os.path.split(read_filename)
     project_manager.root.title(f"{file_name} ({dir_name})")
@@ -243,8 +237,11 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
         project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
         project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
+    if not is_script_mode:
         project_manager.root.after_idle(canvas_editing.view_all)
-    # Put the read design into stack[0] (after view_all):
+    # Loading the design created by "traces" some stack-entries, which are removed here:
+    undo_handling.stack = []
+    undo_handling.stack_write_pointer = 0
     project_manager.root.after_idle(undo_handling.design_has_changed)  # Initialize the stack with the read design.
     project_manager.root.config(cursor="arrow")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
@@ -259,41 +256,3 @@ def _show_load_error(is_script_mode: bool, print_msg: str, msgbox_msg: str) -> N
         print(print_msg)
     else:
         messagebox.showerror("Error", msgbox_msg)
-
-
-def get_visible_center_as_string() -> str:
-    """Return the canvas visible center coordinates as a space-separated string."""
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),
-        project_manager.canvas.canvasy(0),
-        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-    ]
-    visible_center = [
-        (visible_rectangle[0] + visible_rectangle[2]) / 2,
-        (visible_rectangle[1] + visible_rectangle[3]) / 2,
-    ]
-    visible_center_string = ""
-    for value in visible_center:
-        visible_center_string += str(value) + " "
-    return visible_center_string
-
-
-def shift_visible_center_to_window_center(new_visible_center_string) -> None:
-    """Pan canvas so the given center string becomes the current window center."""
-    new_visible_center = []
-    new_visible_center_string_array = new_visible_center_string.split()
-    for entry in new_visible_center_string_array:
-        new_visible_center.append(float(entry))
-    actual_visible_rectangle = [
-        project_manager.canvas.canvasx(0),
-        project_manager.canvas.canvasy(0),
-        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-    ]
-    actual_visible_center = [
-        (actual_visible_rectangle[0] + actual_visible_rectangle[2]) / 2,
-        (actual_visible_rectangle[1] + actual_visible_rectangle[3]) / 2,
-    ]
-    project_manager.canvas.scan_mark(int(new_visible_center[0]), int(new_visible_center[1]))
-    project_manager.canvas.scan_dragto(int(actual_visible_center[0]), int(actual_visible_center[1]), gain=1)
