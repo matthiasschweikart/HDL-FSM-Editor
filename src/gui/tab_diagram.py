@@ -4,7 +4,13 @@ import tkinter as tk
 from tkinter import font, ttk
 
 import undo_handling
-from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
+from actions import (
+    canvas_delete,
+    canvas_editing,
+    canvas_modify_bindings,
+    canvas_view_rectangle,
+    move_handling_initialization,
+)
 from constants import GuiTab
 from project_manager import project_manager
 from widgets.option_menu import OptionMenu
@@ -132,7 +138,7 @@ class TabDiagram:
         canvas.bind("<MouseWheel>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-4>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-5>", TabDiagram.scroll_wheel)
-        canvas.bind("<Button-3>", canvas_editing.start_view_rectangle)
+        canvas.bind("<Button-3>", canvas_view_rectangle.start_view_rectangle)
         canvas.bind("<Configure>", self._check_for_window_resize)
 
         self._create_font_for_state_names()

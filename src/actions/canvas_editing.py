@@ -5,7 +5,6 @@ This module contains method used when the user edits the diagram.
 from tkinter import messagebox
 
 import constants
-from actions import move_handling_initialization
 from elements import (
     condition_action,
     global_actions_clocked,
@@ -14,7 +13,6 @@ from elements import (
     state_actions_default,
     state_comment,
 )
-from gui import tab_diagram
 from project_manager import project_manager
 
 from . import canvas_modify_bindings
@@ -36,25 +34,6 @@ def translate_window_event_coordinates_in_exact_canvas_coordinates(event) -> lis
         project_manager.canvas.canvasy(event.y),
     )
     return [canvas_grid_x_coordinate, canvas_grid_y_coordinate]
-
-
-def start_view_rectangle(event) -> None:
-    """Begin drawing a view rectangle from the current event position."""
-    [event_x, event_y] = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    rectangle_id = project_manager.canvas.create_rectangle(event_x, event_y, event_x, event_y, dash=(3, 5))
-    project_manager.canvas.tag_raise(rectangle_id, "all")
-    # The binding for 'Motion' must be added with '+', as 'store_mouse_position' is also bound to 'Motion':
-    funcid_canvas_draw_view_rectangle = project_manager.canvas.bind(
-        "<Motion>", lambda event: _draw_view_rectangle(event, rectangle_id), "+"
-    )
-    project_manager.canvas.bind(
-        "<ButtonRelease-1>",
-        lambda event: _view_area_after_button1_release(rectangle_id, funcid_canvas_draw_view_rectangle),
-    )
-    project_manager.canvas.bind(
-        "<ButtonRelease-3>",
-        lambda event: _view_area_after_button3_release(rectangle_id, funcid_canvas_draw_view_rectangle),
-    )
 
 
 def view_rectangle(complete_rectangle, check_fit) -> None:
@@ -198,51 +177,6 @@ def _calculate_zoom_factor(complete_rectangle, visible_rectangle):
     scale_y = visible_height / complete_height
     factor = min(scale_x, scale_y)
     return factor
-
-
-def _draw_view_rectangle(event, rectangle_id) -> None:  # Called by Motion-event.
-    [event_x, event_y] = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    rectangle_coords = project_manager.canvas.coords(rectangle_id)
-    if event_x > rectangle_coords[0] and event_y > rectangle_coords[1]:
-        project_manager.canvas.coords(rectangle_id, rectangle_coords[0], rectangle_coords[1], event_x, event_y)
-
-
-def _view_area_after_button1_release(
-    rectangle_id, funcid_canvas_draw_view_rectangle
-) -> None:  # Called by Button-1("view area"-button) or Button-3(view area per right mouse-button)-Release-Event.
-    project_manager.grid_drawer.remove_grid()
-    complete_rectangle = project_manager.canvas.coords(rectangle_id)
-    view_rectangle(complete_rectangle, check_fit=False)
-    project_manager.canvas.delete(rectangle_id)
-    _restore_binding(funcid_canvas_draw_view_rectangle)
-    project_manager.grid_drawer.draw_grid()
-
-
-def _view_area_after_button3_release(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
-    rectangle_coords = project_manager.canvas.coords(rectangle_id)
-    if rectangle_coords[0] != rectangle_coords[2] and rectangle_coords[1] != rectangle_coords[3]:
-        _view_area_after_button1_release(rectangle_id, funcid_canvas_draw_view_rectangle)
-    else:
-        project_manager.canvas.delete(rectangle_id)
-        overlapping_canvas_ids = project_manager.canvas.find_overlapping(
-            rectangle_coords[0] - 5, rectangle_coords[1] - 5, rectangle_coords[0] + 5, rectangle_coords[1] + 5
-        )
-        item_found = False
-        for canvas_id in overlapping_canvas_ids:
-            tags = project_manager.canvas.gettags(canvas_id)
-            if "grid_line" not in tags:
-                item_found = True
-        if not item_found:
-            tab_diagram.TabDiagram.show_canvas_background_menu(rectangle_coords)
-        _restore_binding(funcid_canvas_draw_view_rectangle)
-
-
-def _restore_binding(funcid_canvas_draw_view_rectangle):
-    project_manager.canvas.unbind("<Motion>", funcid_canvas_draw_view_rectangle)
-    project_manager.canvas.unbind("<ButtonRelease-1>")
-    project_manager.canvas.unbind("<ButtonRelease-3>")
-    # Restore the original binding (Button-1 is bound to start_view_rectangle(), when "view area"-Button was used):
-    project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
 
 
 def _decrement_font_size_if_window_is_too_wide() -> None:
