@@ -81,6 +81,7 @@ class ProjectManager:
         self._highlight_dict_ref = None  #: linting.HighLightDict
         self._abs_zoom_factor = 1.0
         self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
+        self._undo_handling_ref = None  #: undo_handling.UndoHandling
 
     @property
     def store_events(self):  # -> linting.HighLightDict:
@@ -752,12 +753,21 @@ class ProjectManager:
         """Set the write_data_creator reference."""
         self._write_data_creator_ref = value
 
-    # def get(self, attr_name: str, default=None):
-    #     """Get a state attribute."""
-    #     return getattr(self._project, attr_name, default)
+    @abs_zoom_factor.setter
+    def abs_zoom_factor(self, value: float) -> None:
+        """Set the absolute zoom factor."""
+        self._abs_zoom_factor = value
 
-    # def set(self, attr_name: str, value) -> None:
-    #     """Set a state attribute."""
+    @property
+    def undo_handling_ref(self) -> float:
+        """Get the undo_handling reference."""
+        return self._undo_handling_ref
+
+    @undo_handling_ref.setter
+    def undo_handling_ref(self, value: float) -> None:
+        """Set the undo_handling reference."""
+        self._undo_handling_ref = value
+
     #     setattr(self._project, attr_name, value)
 
     # def update(self, **kwargs) -> None:

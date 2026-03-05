@@ -2,7 +2,6 @@
 This module handles the movement of states at the Canvas.
 """
 
-import undo_handling
 from actions import move_handling, move_handling_finish, move_handling_initialization
 from project_manager import project_manager
 
@@ -56,4 +55,4 @@ class MoveHandlingCanvasItem:
             move_to_grid=True,
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()

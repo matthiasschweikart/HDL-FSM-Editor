@@ -5,7 +5,6 @@ Handles the global actions window in the diagram.
 import tkinter as tk
 from tkinter import ttk
 
-import undo_handling
 from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_canvas_window
 from gui import tab_diagram
 from project_manager import project_manager
@@ -97,7 +96,9 @@ class GlobalActionsClocked:
         self.text_before_id.bind("<Control-e>", lambda event: self._edit_before_in_external_editor())
         self.text_before_id.bind("<Control-s>", lambda event: self.update_before())
         self.text_before_id.bind("<Control-g>", lambda event: self.update_before())
-        self.text_before_id.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        self.text_before_id.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         self.text_before_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
         self.text_before_id.bind(
             "<FocusOut>",
@@ -108,7 +109,9 @@ class GlobalActionsClocked:
         self.text_after_id.bind("<Control-e>", lambda event: self._edit_after_in_external_editor())
         self.text_after_id.bind("<Control-s>", lambda event: self.update_after())
         self.text_after_id.bind("<Control-g>", lambda event: self.update_after())
-        self.text_after_id.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        self.text_after_id.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         self.text_after_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
         self.text_after_id.bind(
             "<FocusOut>",
@@ -172,9 +175,9 @@ class GlobalActionsClocked:
         """Deactivate window and mark design changed if before/after text was edited."""
         self._deactivate_window()
         if self.text_before_id.get("1.0", tk.END) != self.text_before_content:
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
         if self.text_after_id.get("1.0", tk.END) != self.text_after_content:
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _deactivate_window(self) -> None:
         """Clear selection style and focus from the clocked-actions window."""
@@ -219,4 +222,4 @@ class GlobalActionsClocked:
             padding=1,
             tags=("global_actions1",),
         )
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()

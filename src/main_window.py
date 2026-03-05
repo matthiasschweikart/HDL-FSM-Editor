@@ -13,6 +13,7 @@ from tkinter import ttk
 import constants
 import link_dictionary
 import linting
+import undo_handling
 import write_data_creator
 from actions import canvas_editing
 from gui import menu_bar, notebook_top
@@ -31,6 +32,7 @@ class MainWindow:
         root.grid()
         project_manager.root = root
         self._configure_gui_style(root)
+        project_manager.undo_handling_ref = undo_handling.UndoHandling()
         project_manager.link_dict_ref = link_dictionary.LinkDictionary()
         project_manager.highlight_dict_ref = linting.HighLightDict()
         project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)

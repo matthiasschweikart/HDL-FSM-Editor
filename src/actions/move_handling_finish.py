@@ -5,7 +5,6 @@ Includes all methods needed, when moving objects ends.
 import math
 import tkinter as tk
 
-import undo_handling
 from actions import canvas_editing, move_handling, move_handling_canvas_item, move_handling_initialization
 from elements import condition_action, transition
 from project_manager import project_manager
@@ -38,7 +37,7 @@ def move_finish(event, move_list, move_do_funcid) -> None:
         )
         _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transition_id, transition_point)
     move_finish_for_transitions(move_list)
-    undo_handling.design_has_changed()
+    project_manager.undo_handling_ref.design_has_changed()
 
 
 def move_finish_for_transitions(move_list):

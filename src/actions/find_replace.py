@@ -6,7 +6,6 @@ import re
 import tkinter as tk
 from tkinter import messagebox
 
-import undo_handling
 from actions import canvas_editing
 from constants import GuiTab
 from elements import (
@@ -52,7 +51,7 @@ class FindReplace:
             if not continue_search:
                 return
         if replace:
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
             messagebox.showinfo("HDL-FSM-Editor", "Number of replacements = " + str(self.number_of_hits_all))
         else:
             messagebox.showinfo("HDL-FSM-Editor", "Number of hits = " + str(self.number_of_hits_all))

@@ -6,7 +6,6 @@ import math
 import tkinter as tk
 
 import constants
-import undo_handling
 from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
 from elements import condition_action
 from project_manager import project_manager
@@ -204,7 +203,7 @@ class TransitionLine:
         listbox.destroy()
         project_manager.canvas.delete(window)
         if design_was_changed:
-            undo_handling.design_has_changed()  # It must be waited until the window for the menu is deleted.
+            project_manager.undo_handling_ref.design_has_changed()  # It must be waited until the window for the menu is deleted.
 
     def _close_menu(self, _event, window, listbox) -> None:
         listbox.destroy()
@@ -242,7 +241,7 @@ class TransitionLine:
         text_box.destroy()
         project_manager.canvas.tag_raise(transition_tag + "rectangle", transition_tag)
         project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()
         project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
@@ -731,7 +730,7 @@ class TransitionLine:
             cls._end_inserting_transition(transition_id, transition_draw_funcid)
             TransitionLine(transition_coords, tags, unused_priority, new_transition=True)
             TransitionLine.hide_priority_of_single_outgoing_transitions()
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
     def _end_inserting_transition(cls, transition_id, transition_draw_funcid) -> None:

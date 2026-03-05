@@ -5,7 +5,6 @@ Handles the state action of all states.
 import tkinter as tk
 from tkinter import ttk
 
-import undo_handling
 import widgets.custom_text as custom_text
 from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from gui import tab_diagram
@@ -83,7 +82,7 @@ class StateAction:
         self.text_id.bind("<Control-e>", lambda event: self._edit_in_external_editor())
         self.text_id.bind("<Control-s>", lambda event: self.update_text())
         self.text_id.bind("<Control-g>", lambda event: self.update_text())
-        self.text_id.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        self.text_id.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.text_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
         self.text_id.bind(
             "<FocusOut>",
@@ -134,7 +133,7 @@ class StateAction:
         """Deactivate window and mark design changed if text was edited."""
         self._deactivate_window()
         if self.text_id.get("1.0", tk.END) != self.text_content:
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _deactivate_window(self) -> None:
         """Clear selection style and focus from the state-action window."""

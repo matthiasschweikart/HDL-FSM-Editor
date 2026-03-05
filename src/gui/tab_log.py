@@ -4,7 +4,6 @@ import re
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-import undo_handling
 from constants import GuiTab
 from dialogs.regex_dialog import RegexDialog
 from project_manager import project_manager
@@ -91,7 +90,7 @@ class TabLog:
             project_manager.regex_file_line_number_quote = result.line_number_group
             self._debug_active.set(2 if result.debug_active else 1)
 
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
             self._regex_error_happened = False
 
     def _cursor_move_log_tab(self, *_) -> None:

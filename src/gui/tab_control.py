@@ -7,7 +7,6 @@ from tkinter import ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
 import constants
-import undo_handling
 from constants import GuiTab
 from dialogs.color_changer import ColorChanger
 from project_manager import project_manager
@@ -70,7 +69,9 @@ class TabControl:
         include_timestamp_in_output = tk.BooleanVar(value=True)
         project_manager.include_timestamp_in_output = include_timestamp_in_output
         # TODO: dieser Trace wirkt wohl nicht, wenn "set" verwendet wird, um wert zu ändern (was bei file_handling_load.load_design passiert):
-        include_timestamp_in_output.trace_add("write", lambda *args: undo_handling.update_window_title())
+        include_timestamp_in_output.trace_add(
+            "write", lambda *args: project_manager.undo_handling_ref.update_window_title()
+        )
         include_timestamp_checkbox = ttk.Checkbutton(_select_file_number_frame, variable=include_timestamp_in_output)
         include_timestamp_label = ttk.Label(
             _select_file_number_frame, text="Include timestamp in generated HDL files", width=40
@@ -85,7 +86,7 @@ class TabControl:
         reset_signal_name.set("")
         reset_signal_name_label = ttk.Label(control_frame, text="Name of asynchronous reset input port:", padding=5)
         _reset_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=reset_signal_name)
-        _reset_signal_name_entry.bind("<Key>", lambda event: undo_handling.update_window_title())
+        _reset_signal_name_entry.bind("<Key>", lambda event: project_manager.undo_handling_ref.update_window_title())
         reset_signal_name_label.grid(row=4, column=0, sticky=tk.W)
         _reset_signal_name_entry.grid(row=4, column=1, sticky=tk.W)
 
@@ -94,7 +95,9 @@ class TabControl:
         clock_signal_name.set("")
         clock_signal_name_label = ttk.Label(control_frame, text="Name of clock input port:", padding=5)
         self.clock_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=clock_signal_name)
-        self.clock_signal_name_entry.bind("<Key>", lambda event: undo_handling.update_window_title())
+        self.clock_signal_name_entry.bind(
+            "<Key>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         clock_signal_name_label.grid(row=5, column=0, sticky=tk.W)
         self.clock_signal_name_entry.grid(row=5, column=1, sticky=tk.W)
 
@@ -319,13 +322,13 @@ class TabControl:
     def activate_traces(self) -> None:
         """Activate the traces for the given StringVars to mark the design as changed when they are modified."""
         self._generate_path_trace_id = project_manager.generate_path_value.trace_add(
-            "write", lambda *args: undo_handling.design_has_changed()
+            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
         )
         self._additional_sources_trace_id = project_manager.additional_sources_value.trace_add(
-            "write", lambda *args: undo_handling.design_has_changed()
+            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
         )
         self._working_directory_trace_id = project_manager.working_directory_value.trace_add(
-            "write", lambda *args: undo_handling.design_has_changed()
+            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
         )
 
     def deactivate_traces(self) -> None:

@@ -10,7 +10,6 @@ from tkinter import messagebox
 import constants
 import file_handling
 import main_window
-import undo_handling
 from codegen import hdl_generation
 from project_manager import project_manager
 
@@ -20,7 +19,7 @@ def _setup_application_ui() -> main_window.MainWindow:
     mainwindow_ref = main_window.MainWindow()
     mainwindow_ref.set_word_boundaries()
     # Initialize undo/redo system
-    undo_handling.design_has_changed()
+    project_manager.undo_handling_ref.design_has_changed()
     return mainwindow_ref
 
 

@@ -11,7 +11,6 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 import file_handling_load
 import file_handling_save
 import tag_plausibility
-import undo_handling
 import update_hdl_tab
 from actions import canvas_editing
 from constants import GuiTab
@@ -240,9 +239,8 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
     if not is_script_mode:
         project_manager.root.after_idle(canvas_editing.view_all)
     # Loading the design created by "traces" some stack-entries, which are removed here:
-    undo_handling.stack = []
-    undo_handling.stack_write_pointer = 0
-    project_manager.root.after_idle(undo_handling.design_has_changed)  # Initialize the stack with the read design.
+    project_manager.undo_handling_ref.clear_stack()
+    project_manager.root.after_idle(project_manager.undo_handling_ref.design_has_changed)
     project_manager.root.config(cursor="arrow")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
         if is_script_mode:

@@ -5,7 +5,6 @@ all its connected parts.
 
 from tkinter import messagebox
 
-import undo_handling
 from elements import (
     condition_action,
     connector,
@@ -34,7 +33,7 @@ class CanvasDelete:
             self._delete_item(canvas_id)
         if self.item_was_deleted:
             # Must be called only after all involved items have been completely deleted:
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _find_items_to_delete(self):
         ids = project_manager.canvas.find_overlapping(

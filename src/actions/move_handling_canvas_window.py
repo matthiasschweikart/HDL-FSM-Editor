@@ -2,7 +2,6 @@
 A MoveCanvasWindow object is created, when the user moves a Canvas window object.
 """
 
-import undo_handling
 from actions import move_handling, move_handling_finish, move_handling_initialization
 from project_manager import project_manager
 
@@ -80,4 +79,4 @@ class MoveHandlingCanvasWindow:
             move_to_grid=False,  # Only used by the line to a window.
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()

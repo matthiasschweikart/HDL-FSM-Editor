@@ -4,7 +4,6 @@ Module handling connectors on the canvas.
 
 import actions.canvas_editing as canvas_editing
 import constants
-import undo_handling
 from elements import transition
 from project_manager import project_manager
 
@@ -72,7 +71,7 @@ class ConnectorInstance:
             event_y + project_manager.state_radius / 4,
         )
         ConnectorInstance(coords, tag)
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
     def move_to(cls, event_x, event_y, rectangle_id, first, last) -> None:

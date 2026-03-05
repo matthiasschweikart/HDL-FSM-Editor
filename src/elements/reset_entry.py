@@ -2,7 +2,6 @@
 
 import tkinter as tk
 
-import undo_handling
 from actions import canvas_editing, canvas_modify_bindings
 from elements import transition
 from project_manager import project_manager
@@ -129,7 +128,7 @@ class ResetEntry:
             canvas_grid_coordinates_of_the_event, reset_entry_polygon_coords
         )
         cls(reset_entry_polygon_coords, tags=("reset_entry",))
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
 
     @classmethod

@@ -10,7 +10,6 @@ import actions.canvas_editing as canvas_editing
 import actions.move_handling_canvas_item as move_handling_canvas_item
 import actions.move_handling_initialization as move_handling_initialization
 import constants
-import undo_handling
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
@@ -118,7 +117,7 @@ class States:
                 state_tag = t[:-5]
                 self._show_new_state_name(new_text)
                 self._resize_state(state_tag)
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()
         project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         tags = project_manager.canvas.gettags(state_tag)
@@ -165,7 +164,7 @@ class States:
                     line_tags=line_tags,
                     increment=True,
                 )
-                undo_handling.design_has_changed()
+                project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "add comment":
             tags = project_manager.canvas.gettags(self.state_id)
             for tag in tags:
@@ -190,11 +189,11 @@ class States:
                             (state_coords[3] + state_coords[1]) / 2,
                         ],
                     )
-                    undo_handling.design_has_changed()
+                    project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "change color":
             new_color = ColorChanger(constants.STATE_COLOR).ask_color()
             project_manager.canvas.itemconfigure(self.state_id, fill=new_color)
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _abort_edit_text(self, text_box, old_text) -> None:
         project_manager.canvas.delete("entry-window")
@@ -386,7 +385,7 @@ class States:
         )
         # design_has_changed cannot be called by state.States, because state.States must be called
         # when an Undo is performed, which shall not create a new entry in the Undo-Stack.
-        undo_handling.design_has_changed()
+        project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
     def state_overlaps(cls, event_x, event_y) -> bool:

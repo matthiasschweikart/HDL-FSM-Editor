@@ -7,7 +7,6 @@ from tkinter import messagebox, ttk
 
 import constants
 import file_handling
-import undo_handling
 import update_hdl_tab
 from actions import find_replace
 from codegen import hdl_generation
@@ -151,8 +150,8 @@ class MenuBar:
 
     def _enable_undo_redo_if_diagram_tab_is_active_else_disable(self) -> None:
         if project_manager.notebook.index(project_manager.notebook.select()) == 3:
-            project_manager.canvas.bind_all("<Control-z>", lambda event: undo_handling.undo())
-            project_manager.canvas.bind_all("<Control-Z>", lambda event: undo_handling.redo())
+            project_manager.canvas.bind_all("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
+            project_manager.canvas.bind_all("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
         else:
             project_manager.canvas.unbind_all(
                 "<Control-z>"

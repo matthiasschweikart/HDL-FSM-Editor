@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-import undo_handling
 from constants import GuiTab
 from project_manager import project_manager
 from widgets import custom_text
@@ -34,7 +33,9 @@ class TabInterface:
         )
         interface_package_text.bind("<Control-Z>", lambda event: interface_package_text.edit_redo())
         interface_package_text.bind("<Control-e>", lambda event: interface_package_text.edit_in_external_editor())
-        interface_package_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        interface_package_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         _interface_package_scroll = ttk.Scrollbar(
             self.interface_package_frame, orient=tk.VERTICAL, cursor="arrow", command=interface_package_text.yview
         )
@@ -59,7 +60,9 @@ class TabInterface:
         project_manager.interface_generics_text = interface_generics_text
         interface_generics_text.bind("<Control-Z>", lambda event: interface_generics_text.edit_redo())
         interface_generics_text.bind("<Control-e>", lambda event: interface_generics_text.edit_in_external_editor())
-        interface_generics_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        interface_generics_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         interface_generics_scroll = ttk.Scrollbar(
             interface_generics_frame, orient=tk.VERTICAL, cursor="arrow", command=interface_generics_text.yview
         )
@@ -85,7 +88,9 @@ class TabInterface:
         interface_ports_text.bind("<Control-z>", lambda event: interface_ports_text.undo())
         interface_ports_text.bind("<Control-Z>", lambda event: interface_ports_text.redo())
         interface_ports_text.bind("<Control-e>", lambda event: interface_ports_text.edit_in_external_editor())
-        interface_ports_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        interface_ports_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         interface_ports_scroll = ttk.Scrollbar(
             interface_ports_frame, orient=tk.VERTICAL, cursor="arrow", command=interface_ports_text.yview
         )

@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-import undo_handling
 from constants import GuiTab
 from project_manager import project_manager
 from widgets import custom_text
@@ -32,7 +31,9 @@ class TabInternals:
         project_manager.internals_package_text = internals_package_text
         internals_package_text.bind("<Control-Z>", lambda event: internals_package_text.edit_redo())
         internals_package_text.bind("<Control-e>", lambda event: internals_package_text.edit_in_external_editor())
-        internals_package_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        internals_package_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         _internals_package_scroll = ttk.Scrollbar(
             self.internals_package_frame, orient=tk.VERTICAL, cursor="arrow", command=internals_package_text.yview
         )
@@ -64,7 +65,9 @@ class TabInternals:
         internals_architecture_text.bind(
             "<Control-e>", lambda event: internals_architecture_text.edit_in_external_editor()
         )
-        internals_architecture_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        internals_architecture_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         internals_architecture_scroll = ttk.Scrollbar(
             internals_architecture_frame, orient=tk.VERTICAL, cursor="arrow", command=internals_architecture_text.yview
         )
@@ -96,7 +99,9 @@ class TabInternals:
         internals_process_clocked_text.bind(
             "<Control-e>", lambda event: internals_process_clocked_text.edit_in_external_editor()
         )
-        internals_process_clocked_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        internals_process_clocked_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         internals_process_clocked_scroll = ttk.Scrollbar(
             internals_process_clocked_frame,
             orient=tk.VERTICAL,
@@ -140,7 +145,9 @@ class TabInternals:
         internals_process_combinatorial_text.bind(
             "<Control-e>", lambda event: internals_process_combinatorial_text.edit_in_external_editor()
         )
-        internals_process_combinatorial_text.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        internals_process_combinatorial_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         internals_process_combinatorial_scroll = ttk.Scrollbar(
             internals_process_combinatorial_frame,
             orient=tk.VERTICAL,

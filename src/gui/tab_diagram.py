@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import font, ttk
 
-import undo_handling
 from actions import (
     canvas_delete,
     canvas_editing,
@@ -58,11 +57,19 @@ class TabDiagram:
         # Implement the buttons of the drawing area:
         undo_redo_frame = ttk.Frame(button_frame, borderwidth=2)
         undo_button = ttk.Button(
-            undo_redo_frame, text="Undo (Ctrl-z)", command=undo_handling.undo, style="Undo.TButton", state="disabled"
+            undo_redo_frame,
+            text="Undo (Ctrl-z)",
+            command=project_manager.undo_handling_ref.undo,
+            style="Undo.TButton",
+            state="disabled",
         )
         project_manager.undo_button = undo_button
         redo_button = ttk.Button(
-            undo_redo_frame, text="Redo(Ctrl-Z)", command=undo_handling.redo, style="Redo.TButton", state="disabled"
+            undo_redo_frame,
+            text="Redo(Ctrl-Z)",
+            command=project_manager.undo_handling_ref.redo,
+            style="Redo.TButton",
+            state="disabled",
         )
         project_manager.redo_button = redo_button
         undo_button.grid(row=0, column=0)

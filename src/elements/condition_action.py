@@ -6,7 +6,6 @@ This class handles the condition&action box which can be activated for each tran
 import tkinter as tk
 from tkinter import ttk
 
-import undo_handling
 import widgets.custom_text as custom_text
 from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from gui import tab_diagram
@@ -124,7 +123,9 @@ class ConditionAction:
         self.condition_id.bind("<Control-z>", lambda event: self.condition_id.undo())
         self.condition_id.bind("<Control-Z>", lambda event: self.condition_id.redo())
         self.condition_id.bind("<Control-e>", lambda event: self._edit_condition_in_external_editor())
-        self.condition_id.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        self.condition_id.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
         self.condition_id.bind("<Control-s>", lambda event: self._update_condition())  # Update self.text at "save".
         self.condition_id.bind("<Control-g>", lambda event: self._update_condition())  # Update self.text at "generate".
         self.condition_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
@@ -135,7 +136,7 @@ class ConditionAction:
         self.action_id.bind("<Control-z>", lambda event: self.action_id.undo())
         self.action_id.bind("<Control-Z>", lambda event: self.action_id.redo())
         self.action_id.bind("<Control-e>", lambda event: self._edit_action_in_external_editor())
-        self.action_id.bind("<<TextModified>>", lambda event: undo_handling.update_window_title())
+        self.action_id.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.action_id.bind("<Control-s>", lambda event: self._update_action())  # Update self.text at "save".
         self.action_id.bind("<Control-g>", lambda event: self._update_action())  # Update self.text at "generate".
         self.action_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
@@ -225,7 +226,7 @@ class ConditionAction:
             self.condition_id.get("1.0", tk.END) != self.condition_text
             or self.action_id.get("1.0", tk.END) != self.action_text
         ):
-            undo_handling.design_has_changed()
+            project_manager.undo_handling_ref.design_has_changed()
         if self.condition_id.get("1.0", tk.END) == "\n" and self.action_id.get("1.0", tk.END) != "\n":
             self.condition_label.grid_forget()
             self.condition_id.grid_forget()
