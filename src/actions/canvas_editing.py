@@ -6,7 +6,7 @@ from tkinter import messagebox
 
 from project_manager import project_manager
 
-from . import canvas_font_sizes, canvas_modify_bindings
+from . import canvas_font_sizes
 
 # import inspect
 
@@ -14,13 +14,11 @@ from . import canvas_font_sizes, canvas_modify_bindings
 def view_all() -> None:
     """Fit all canvas content in view and optionally adjust font size."""
     project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if complete_rectangle is not None:
         view_rectangle(complete_rectangle, check_fit=True)
-    project_manager.canvas.update_idletasks()  # helps to get "after_idle" in view_rectangle() ready?!
-    project_manager.canvas.after_idle(
-        project_manager.grid_drawer.draw_grid
-    )  # "after_idle" is needed because view_rectangle calls decrement_font_size_if_window_is_too_wide after idle.
+    project_manager.grid_drawer.draw_grid()
 
 
 def view_rectangle(complete_rectangle, check_fit) -> None:
@@ -34,6 +32,7 @@ def view_rectangle(complete_rectangle, check_fit) -> None:
         ]
         factor = _calculate_zoom_factor(complete_rectangle, visible_rectangle)
         too_big = False
+        project_manager.canvas.update_idletasks()  # to get correct results from bbox
         actual_rectangle = project_manager.canvas.bbox("all")
         for coord in actual_rectangle:
             # The Canvas which is used, has a scrollregion +/-100000, so here this limit
@@ -46,10 +45,10 @@ def view_rectangle(complete_rectangle, check_fit) -> None:
             _move_canvas_point_from_to(complete_center, visible_center)
             canvas_zoom(complete_center, factor)
             if check_fit:
-                project_manager.canvas.after_idle(_decrement_font_size_if_window_is_too_wide)
+                _decrement_font_size_if_window_is_too_wide()
         else:
             messagebox.showerror("Fatal", "Zoom factor is too big.")
-    canvas_modify_bindings.switch_to_move_mode()
+    # canvas_modify_bindings.switch_to_move_mode()
 
 
 def _calculate_zoom_factor(complete_rectangle, visible_rectangle):
@@ -89,6 +88,20 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
         canvas_font_sizes.adapt_global_size_variables(zoom_factor)
 
 
+def _scroll_canvas_to_show_the_zoom_center(zoom_center, zoom_factor) -> None:
+    new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
+    project_manager.canvas.scan_mark(
+        int(new_position_of_zoom_center[0]), int(new_position_of_zoom_center[1])
+    )  # Mark the point of the canvas, which serves as anchor for the shift.
+    project_manager.canvas.scan_dragto(int(zoom_center[0]), int(zoom_center[1]), gain=1)
+
+
+def _adapt_scroll_bars(factor) -> None:
+    scrollregion_strings = project_manager.canvas.cget("scrollregion").split()
+    scrollregion_scaled = [int(float(x) * factor) for x in scrollregion_strings]
+    project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+
+
 def _decrement_font_size_if_window_is_too_wide() -> None:
     visible_rectangle = [
         project_manager.canvas.canvasx(0),
@@ -96,6 +109,7 @@ def _decrement_font_size_if_window_is_too_wide() -> None:
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     ]
+    project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if (
         (
@@ -111,7 +125,7 @@ def _decrement_font_size_if_window_is_too_wide() -> None:
         _move_canvas_point_from_to(complete_center, visible_center)
         zoom_factor = (project_manager.fontsize - 1) / project_manager.fontsize
         canvas_zoom(complete_center, zoom_factor)
-        project_manager.canvas.after_idle(_decrement_font_size_if_window_is_too_wide)
+        _decrement_font_size_if_window_is_too_wide()
 
 
 def translate_window_event_coordinates_in_rounded_canvas_coordinates(event) -> list:
@@ -179,7 +193,7 @@ def zoom_wheel(event) -> None:
     zoom_center = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
-    canvas_modify_bindings.switch_to_move_mode()
+    # canvas_modify_bindings.switch_to_move_mode()
 
 
 def zoom_wheel_window_item(event, canvas_id) -> None:
@@ -195,24 +209,11 @@ def zoom_wheel_window_item(event, canvas_id) -> None:
     elif event.num == 4 or event.delta >= 0:  # scroll up
         factor = 1.1
     window_coor = project_manager.canvas.coords(canvas_id)
+    project_manager.canvas.update_idletasks()  # to get correct results from bbox
     window_bbox = project_manager.canvas.bbox(canvas_id)
     zoom_center_x = window_coor[0] + event.x
     zoom_center_y = window_coor[1] - (window_bbox[3] - window_bbox[1]) / 2 + event.y
     zoom_center = (zoom_center_x, zoom_center_y)
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
-    canvas_modify_bindings.switch_to_move_mode()
-
-
-def _scroll_canvas_to_show_the_zoom_center(zoom_center, zoom_factor) -> None:
-    new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
-    project_manager.canvas.scan_mark(
-        int(new_position_of_zoom_center[0]), int(new_position_of_zoom_center[1])
-    )  # Mark the point of the canvas, which serves as anchor for the shift.
-    project_manager.canvas.scan_dragto(int(zoom_center[0]), int(zoom_center[1]), gain=1)
-
-
-def _adapt_scroll_bars(factor) -> None:
-    scrollregion_strings = project_manager.canvas.cget("scrollregion").split()
-    scrollregion_scaled = [int(float(x) * factor) for x in scrollregion_strings]
-    project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+    # canvas_modify_bindings.switch_to_move_mode()
