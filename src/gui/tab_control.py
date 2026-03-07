@@ -68,7 +68,6 @@ class TabControl:
         )
         include_timestamp_in_output = tk.BooleanVar(value=True)
         project_manager.include_timestamp_in_output = include_timestamp_in_output
-        # TODO: dieser Trace wirkt wohl nicht, wenn "set" verwendet wird, um wert zu ändern (was bei file_handling_load.load_design passiert):
         include_timestamp_in_output.trace_add(
             "write", lambda *args: project_manager.undo_handling_ref.update_window_title()
         )
