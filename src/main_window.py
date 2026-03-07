@@ -146,4 +146,4 @@ class MainWindow:
         project_manager.log_frame_text.insert(
             "1.0", constants.HEADER_STRING + "\n" + check_version_result + "\n" + _read_message_result + "\n"
         )
-        project_manager.log_frame_text.config(state=tk.NORMAL)
+        project_manager.log_frame_text.config(state=tk.DISABLED)
