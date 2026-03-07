@@ -203,7 +203,7 @@ class TransitionLine:
         listbox.destroy()
         project_manager.canvas.delete(window)
         if design_was_changed:
-            project_manager.undo_handling_ref.design_has_changed()  # It must be waited until the window for the menu is deleted.
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _close_menu(self, _event, window, listbox) -> None:
         listbox.destroy()
