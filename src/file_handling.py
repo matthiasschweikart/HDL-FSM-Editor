@@ -116,8 +116,6 @@ def clear_design():
     project_manager.state_radius = 20.0
     project_manager.priority_distance = 14
     project_manager.reset_entry_size = 40
-    canvas_editing.canvas_x_coordinate = 0
-    canvas_editing.canvas_y_coordinate = 0
     project_manager.fontsize = 10
     project_manager.label_fontsize = 8
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
