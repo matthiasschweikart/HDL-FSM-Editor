@@ -14,7 +14,11 @@ if str(_src) not in sys.path:
     sys.path.insert(0, str(_src))
 
 
-from utils.var_expansion import expand_variables, expand_variables_in_list  # noqa: E402
+from utils.var_expansion import (  # noqa: E402
+    expand_generate_path,
+    expand_variables,
+    expand_variables_in_list,
+)
 from utils.var_expansion_helpers import find_git_root  # noqa: E402
 
 
@@ -155,3 +159,47 @@ class TestFindGitRoot:
         result = find_git_root("/nonexistent/dir/xyz")
         # May return None if we're not under a git repo, or the repo containing cwd
         assert result is None or (Path(result) / ".git").exists()
+
+
+class TestExpandGeneratePath:
+    """Tests for expand_generate_path()."""
+
+    def test_empty_string(self):
+        assert expand_generate_path("") == ""
+
+    def test_no_variables(self):
+        assert expand_generate_path("/some/path") == "/some/path"
+
+    def test_env_var_expanded(self):
+        os.environ["_GEN_PATH_TEST"] = "/env/dir"
+        try:
+            assert expand_generate_path("$_GEN_PATH_TEST/build") == "/env/dir/build"
+        finally:
+            os.environ.pop("_GEN_PATH_TEST", None)
+
+    def test_git_root_expanded_when_under_repo(self, project_root):
+        """$git_root is expanded when hfe_file_path is under a git repo."""
+        hfe_under_repo = str(project_root / "tests" / "dummy.hfe")
+        result = expand_generate_path("$git_root/out", hfe_under_repo)
+        assert result == f"{project_root.as_posix()}/out"
+
+    def test_git_root_not_expanded_when_no_hfe_path(self):
+        """Without hfe path, $git_root is left as-is."""
+        assert expand_generate_path("$git_root/out", None) == "$git_root/out"
+
+    def test_git_root_not_expanded_when_not_under_repo(self):
+        """When path is not under a git repo, $git_root is left as-is."""
+        result = expand_generate_path("$git_root/out", "/nonexistent/dir/file.hfe")
+        assert result == "$git_root/out"
+
+    def test_mixed_env_and_git_root(self, project_root):
+        os.environ["_BUILD"] = "build"
+        try:
+            hfe = str(project_root / "x.hfe")
+            result = expand_generate_path("$git_root/$_BUILD", hfe)
+            assert result == f"{project_root.as_posix()}/build"
+        finally:
+            os.environ.pop("_BUILD", None)
+
+    def test_unresolved_left_as_is(self):
+        assert expand_generate_path("$UNKNOWN/path", None) == "$UNKNOWN/path"
