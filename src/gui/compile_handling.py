@@ -13,6 +13,7 @@ from tkinter import messagebox
 
 from constants import GuiTab
 from project_manager import project_manager
+from utils.hdl_paths import get_hdl_output_paths
 from utils.var_expansion import expand_variables_in_list
 from utils.var_expansion_helpers import find_git_root
 
@@ -121,30 +122,29 @@ def _get_internal_variables():
 
     file_mode = project_manager.select_file_number_text.get()
     language = project_manager.language.get()
-    extension = ".vhd" if language == "VHDL" else (".v" if language == "Verilog" else ".sv")
-    # TODO: This should support variable expansion too.
     base_path = project_manager.generate_path_value.get()
     module_name = project_manager.module_name.get()
     hfe_file_path = project_manager.current_file
 
     internal_vars["git_root"] = lambda _: find_git_root(hfe_file_path)
 
-    if file_mode == 1:
-        file_name = f"{base_path}/{module_name}{extension}"
-        internal_vars["file"] = file_name
-        if not exists(file_name):
-            messagebox.showerror("Error", "Compile is not possible, HDL file " + file_name + " does not exist.")
+    paths = get_hdl_output_paths(base_path, module_name, language, file_mode)
+    if not paths:
+        messagebox.showerror("Error", "Compile is not possible: invalid output path or module name.")
+        return None
+    if len(paths) == 1:
+        internal_vars["file"] = paths[0]
+        if not exists(paths[0]):
+            messagebox.showerror("Error", "Compile is not possible, HDL file " + paths[0] + " does not exist.")
             return None
     else:
-        file1 = f"{base_path}/{module_name}_e{extension}"
-        file2 = f"{base_path}/{module_name}_fsm{extension}"
-        internal_vars["file1"] = file1
-        internal_vars["file2"] = file2
-        if not exists(file1):
-            messagebox.showerror("Error", "Compile is not possible, as HDL file " + file1 + " does not exist.")
+        internal_vars["file1"] = paths[0]
+        internal_vars["file2"] = paths[1]
+        if not exists(paths[0]):
+            messagebox.showerror("Error", "Compile is not possible, as HDL file " + paths[0] + " does not exist.")
             return None
-        if not exists(file2):
-            messagebox.showerror("Error", "Compile is not possible, as HDL file " + file2 + " does not exist.")
+        if not exists(paths[1]):
+            messagebox.showerror("Error", "Compile is not possible, as HDL file " + paths[1] + " does not exist.")
             return None
 
     return internal_vars
