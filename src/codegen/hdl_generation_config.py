@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from project_manager import project_manager
+from utils.hdl_paths import get_hdl_output_paths
 
 
 class GenerationConfig:
@@ -65,23 +66,12 @@ class GenerationConfig:
         Get the list of output file paths based on language and file count settings.
         Returns a list of file paths that will be generated.
         """
-        if not self.module_name or not self.generate_path:
-            return []
-
-        # For Verilog and SystemVerilog, always generate single files
-        if self.language in ["Verilog", "SystemVerilog"]:
-            extension = self.get_file_extension()
-            return [f"{self.generate_path}/{self.module_name}{extension}"]
-
-        # For VHDL, check file count setting
-        if self.select_file_number == 1:
-            # Single file
-            return [f"{self.generate_path}/{self.module_name}.vhd"]
-        # Two files: entity and architecture
-        return [
-            f"{self.generate_path}/{self.module_name}_e.vhd",
-            f"{self.generate_path}/{self.module_name}_fsm.vhd",
-        ]
+        return get_hdl_output_paths(
+            self.generate_path,
+            self.module_name,
+            self.language,
+            self.select_file_number,
+        )
 
     def get_primary_file(self) -> Optional[str]:
         """Get the primary output file path (first file in the list)"""
