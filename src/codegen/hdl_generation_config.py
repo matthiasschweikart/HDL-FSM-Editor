@@ -51,16 +51,6 @@ class GenerationConfig:
         # Verilog, SystemVerilog
         return "//"
 
-    def get_file_extension(self) -> str:
-        """Get the appropriate file extension for the current language"""
-        if self.language == "VHDL":
-            return ".vhd"
-        if self.language == "Verilog":
-            return ".v"
-        if self.language == "SystemVerilog":
-            return ".sv"
-        raise ValueError(f"Unsupported language: {self.language}")
-
     def get_output_files(self) -> list[str]:
         """
         Get the list of output file paths based on language and file count settings.
