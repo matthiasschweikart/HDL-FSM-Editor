@@ -9,6 +9,8 @@ import os
 import re
 from typing import Callable, Optional
 
+from utils.var_expansion_helpers import find_git_root
+
 
 def expand_variables(
     text: str,
@@ -92,3 +94,24 @@ def expand_variables_in_list(
         List of strings with variables expanded
     """
     return [expand_variables(item, internal_vars, error_on_missing, use_environ) for item in items]
+
+
+def expand_generate_path(raw_path: str, hfe_file_path: Optional[str] = None) -> str:
+    """
+    Expand variables in the "Directory for generated HDL" path.
+
+    Supports environment variables and $git_root (resolved from hfe_file_path).
+    Unresolved variables are left as-is. Use for generate_path before
+    get_hdl_output_paths() and when building GenerationConfig.
+    """
+    internal_vars: dict[str, str] = {}
+    if hfe_file_path is not None:
+        git_root = find_git_root(hfe_file_path)
+        if git_root is not None:
+            internal_vars["git_root"] = git_root
+    return expand_variables(
+        raw_path,
+        internal_vars=internal_vars,
+        error_on_missing=False,
+        use_environ=True,
+    )

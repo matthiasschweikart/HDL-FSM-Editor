@@ -13,6 +13,7 @@ from codegen import hdl_generation
 from dialogs import help_selection, help_shortcuts
 from project_manager import project_manager
 from utils.hdl_paths import get_architecture_output_path, get_primary_output_path
+from utils.var_expansion import expand_generate_path
 
 from . import compile_handling
 
@@ -161,7 +162,8 @@ class MenuBar:
 
     def _update_hdl_tab_if_necessary(self) -> None:
         if project_manager.notebook.index(project_manager.notebook.select()) == 4:
-            generate_path = project_manager.generate_path_value.get()
+            raw_path = project_manager.generate_path_value.get()
+            generate_path = expand_generate_path(raw_path, project_manager.current_file)
             module_name = project_manager.module_name.get()
             language = project_manager.language.get()
             file_count = project_manager.select_file_number_text.get()
@@ -186,7 +188,7 @@ class MenuBar:
                         project_manager.language.get(),
                         project_manager.select_file_number_text.get(),
                         project_manager.current_file,
-                        project_manager.generate_path_value.get(),
+                        generate_path,
                         project_manager.module_name.get(),
                     )
                     project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()

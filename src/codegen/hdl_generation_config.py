@@ -7,6 +7,7 @@ from typing import Optional
 
 from project_manager import project_manager
 from utils.hdl_paths import get_hdl_output_paths
+from utils.var_expansion import expand_generate_path
 
 
 class GenerationConfig:
@@ -36,7 +37,10 @@ class GenerationConfig:
         config = cls()
         config.language = project_manager.language.get()
         config.module_name = project_manager.module_name.get()
-        config.generate_path = project_manager.generate_path_value.get()
+        config.generate_path = expand_generate_path(
+            project_manager.generate_path_value.get(),
+            project_manager.current_file,
+        )
         config.select_file_number = project_manager.select_file_number_text.get()
         config.include_timestamp = project_manager.include_timestamp_in_output.get()
         config.clock_signal_name = project_manager.clock_signal_name.get()

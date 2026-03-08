@@ -14,7 +14,7 @@ from tkinter import messagebox
 from constants import GuiTab
 from project_manager import project_manager
 from utils.hdl_paths import get_hdl_output_paths
-from utils.var_expansion import expand_variables_in_list
+from utils.var_expansion import expand_generate_path, expand_variables_in_list
 from utils.var_expansion_helpers import find_git_root
 
 
@@ -122,9 +122,10 @@ def _get_internal_variables():
 
     file_mode = project_manager.select_file_number_text.get()
     language = project_manager.language.get()
-    base_path = project_manager.generate_path_value.get()
-    module_name = project_manager.module_name.get()
+    raw_path = project_manager.generate_path_value.get()
     hfe_file_path = project_manager.current_file
+    base_path = expand_generate_path(raw_path, hfe_file_path)
+    module_name = project_manager.module_name.get()
 
     internal_vars["git_root"] = lambda _: find_git_root(hfe_file_path)
 
