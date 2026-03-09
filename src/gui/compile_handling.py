@@ -17,7 +17,6 @@ from project_manager import project_manager
 
 def compile_hdl() -> None:
     """Run the compile command and show output in the compile message tab."""
-    project_manager.notebook.show_tab(GuiTab.COMPILE_MSG)
     if (
         project_manager.working_directory_value.get() != ""
         and not project_manager.working_directory_value.get().isspace()
@@ -29,6 +28,7 @@ def compile_hdl() -> None:
                 "Error", "The working directory\n" + project_manager.working_directory_value.get() + "\ndoes not exist."
             )
             return
+    project_manager.notebook.show_tab(GuiTab.COMPILE_MSG)
     project_manager.log_frame_text.config(state=tk.NORMAL)
     project_manager.log_frame_text.insert(
         tk.END,
@@ -37,6 +37,7 @@ def compile_hdl() -> None:
         + " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n",
     )
     project_manager.log_frame_text.config(state=tk.DISABLED)
+    project_manager.log_frame_text.see(tk.END)
     start_time = datetime.now()
     commands = _get_command_list()
     # print("compile_handling: commands =", commands)
