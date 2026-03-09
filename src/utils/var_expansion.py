@@ -6,10 +6,9 @@ including environment variables and application-specific internal variables.
 """
 
 import os
+import pathlib
 import re
 from typing import Callable, Optional
-
-from utils.var_expansion_helpers import find_git_root
 
 
 def expand_variables(
@@ -94,6 +93,24 @@ def expand_variables_in_list(
         List of strings with variables expanded
     """
     return [expand_variables(item, internal_vars, error_on_missing, use_environ) for item in items]
+
+
+def find_git_root(start_path: Optional[str] = None) -> Optional[str]:
+    """
+    Search upwards from start_path (or current working dir) for a .git directory or file.
+    Returns the absolute path to the directory containing .git, or None if not found.
+    """
+    path = pathlib.Path.cwd() if start_path is None else pathlib.Path(start_path).resolve()
+    while True:
+        git_path = path / ".git"
+        if git_path.is_dir() or git_path.is_file():
+            return path.as_posix()
+        parent = path.parent
+        if parent == path:
+            # Reached the root directory
+            break
+        path = parent
+    return None
 
 
 def expand_generate_path(raw_path: str, hfe_file_path: Optional[str] = None) -> str:

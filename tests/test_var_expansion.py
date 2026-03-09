@@ -18,8 +18,8 @@ from utils.var_expansion import (  # noqa: E402
     expand_generate_path,
     expand_variables,
     expand_variables_in_list,
+    find_git_root,
 )
-from utils.var_expansion_helpers import find_git_root  # noqa: E402
 
 
 class TestExpandVariables:
@@ -144,19 +144,19 @@ class TestFindGitRoot:
 
     def test_from_project_root_returns_root(self, project_root):
         # project_root is the repo root (parent of tests/)
-        result = find_git_root(project_root)
+        result = find_git_root(project_root.as_posix())
         assert result is not None
         assert (Path(result) / ".git").exists() or (Path(result) / ".git").is_file()
 
     def test_from_tests_dir_returns_same_root(self, project_root):
         tests_dir = project_root / "tests"
-        result = find_git_root(str(tests_dir))
+        result = find_git_root(tests_dir.as_posix())
         assert result is not None
         assert Path(result).resolve() == project_root.resolve()
 
     def test_from_nonexistent_subpath_uses_cwd(self):
         # Passing a path that doesn't exist - abspath still gives something; behavior is path-based
-        result = find_git_root("/nonexistent/dir/xyz")
+        result = find_git_root(Path("/nonexistent/dir/xyz").as_posix())
         # May return None if we're not under a git repo, or the repo containing cwd
         assert result is None or (Path(result) / ".git").exists()
 

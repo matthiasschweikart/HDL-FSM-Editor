@@ -14,8 +14,7 @@ from tkinter import messagebox
 from constants import GuiTab
 from project_manager import project_manager
 from utils.hdl_paths import get_hdl_output_paths
-from utils.var_expansion import expand_generate_path, expand_variables_in_list
-from utils.var_expansion_helpers import find_git_root
+from utils.var_expansion import expand_generate_path, expand_variables_in_list, find_git_root
 
 
 def compile_hdl() -> None:
