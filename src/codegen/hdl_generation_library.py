@@ -835,7 +835,10 @@ def remove_functions(hdl_text):
 def remove_type_declarations(hdl_text):
     """Remove VHDL type declarations from text for signal/constant parsing."""
     text = re.sub(
-        r"(^|\s+)type\s+\w+\s+is\s+.*;", "", hdl_text
+        r"(^|\s+)type\s+\w+\s+is\s+record\s+.*?\send\s+record\s*;", "", hdl_text
+    )  # Regular expression for VHDL and Verilog type declaration
+    text = re.sub(
+        r"(^|\s+)type\s+\w+\s+is\s+.*?;", "", text
     )  # Regular expression for VHDL and Verilog type declaration
     return text
 
