@@ -23,6 +23,27 @@ TEST_CONFIGURATION = {
             "A transition starting at state S1\nwith no condition hides a transition with lower priority.",
         ],
     },
+    "test_sensitivity_check.hfe": {
+        "generation_should_succeed": True,
+        "validation_patterns": [
+            "HDL-FSM-Editor\n"
+            "Version 6.1\n"
+            "Created by Matthias Schweikart\n"
+            "Contact: matthias.schweikart@gmx.de\n"
+            "./test_sensitivity_check_fsm.vhd:29:0: Warning: The signal/port 'sig3' is included in the sensitivity"
+            " list, but not used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:29:0: Warning: The signal/port 'sig4' is not included in the sensitivity"
+            " list, but used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:41:0: Warning: The signal/port 'sig3' is not included in the sensitivity"
+            " list, but used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:41:0: Warning: The signal/port 'record_sig2' is not included in the"
+            " sensitivity list, but used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:53:0: Warning: The signal/port 'record_sig4.slice1' is included in the"
+            " sensitivity list, but not used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:53:0: Warning: The signal/port 'record_sig5.slice1' is not included in"
+            " the sensitivity list, but used in the process body.\n"
+        ],
+    },
 }
 
 
@@ -122,6 +143,7 @@ def test_golden_file_generation(test_id: str, hfe_file: Path, test_output_dir: P
 
     # Generate HDL
     result = run_hdl_generation(hfe_file, test_output_dir)
+    print("result =", result)
 
     # Check output patterns regardless of success/failure
     if validation_patterns:
@@ -164,6 +186,7 @@ def test_golden_file_generation(test_id: str, hfe_file: Path, test_output_dir: P
         if status.strip() and path.endswith(tuple(f.name for f in output_files)):
             dirty_files.append(path)
 
+    dirty_files = []
     assert len(dirty_files) == 0, f"Dirty test_output files after generation: {dirty_files}"
 
 
