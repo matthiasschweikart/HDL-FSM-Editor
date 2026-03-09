@@ -14,7 +14,7 @@
     "interface_generics": "",
     "interface_ports": "res_i : in std_logic;\nclk_i : in std_logic;",
     "internals_package": "library ieee;\nuse ieee.std_logic_1164.all;",
-    "internals_architecture": "signal sig1, sig2, sig3, sig4, sig5: std_logic;\n\ntype t_record1 is record\n    slice1 : std_logic;\nend record;\nsignal record_sig1, record_sig2, record_sig3, record_sig4, record_sig5 : t_record1;",
+    "internals_architecture": "signal sig1, sig2, sig3, sig4, sig5, sig6, sig7: std_logic;\n\ntype t_record1 is record\n    slice1 : std_logic;\nend record;\nsignal record_sig1, record_sig2, record_sig3, record_sig4, record_sig5 : t_record1;",
     "internals_process": "",
     "internals_process_combinatorial": "",
     "regex_message_find": "(.*?):([0-9]+):[0-9]+:.*",
@@ -22,9 +22,9 @@
     "regex_file_line_number_quote": "\\2",
     "diagram_background_color": "white",
     "state_number": 1,
-    "transition_number": 1,
+    "transition_number": 2,
     "connector_number": 0,
-    "conditionaction_id": 1,
+    "conditionaction_id": 2,
     "mytext_id": 0,
     "state_radius": 20.0,
     "reset_entry_size": 40.0,
@@ -41,7 +41,9 @@
             ],
             [
                 "state1",
-                "transition0_end"
+                "transition0_end",
+                "transition1_start",
+                "transition1_end"
             ],
             "cyan"
         ]
@@ -76,6 +78,16 @@
                 "transition0priority"
             ],
             "1"
+        ],
+        [
+            [
+                509.0,
+                199.0
+            ],
+            [
+                "transition1priority"
+            ],
+            "1"
         ]
     ],
     "line": [
@@ -93,6 +105,18 @@
         ],
         [
             [
+                452.0,
+                325.0,
+                528.0,
+                176.0
+            ],
+            [
+                "ca_connection2",
+                "connected_to_transition1"
+            ]
+        ],
+        [
+            [
                 260.0,
                 160.0,
                 520.0,
@@ -103,6 +127,24 @@
                 "coming_from_reset_entry",
                 "going_to_state1",
                 "ca_connection1_end"
+            ]
+        ],
+        [
+            [
+                528.0,
+                176.0,
+                427.0,
+                303.0,
+                642.0,
+                333.0,
+                550.0,
+                177.0
+            ],
+            [
+                "transition1",
+                "coming_from_state1",
+                "going_to_state1",
+                "ca_connection2_end"
             ]
         ]
     ],
@@ -137,6 +179,17 @@
             [
                 "transition0rectangle"
             ]
+        ],
+        [
+            [
+                503.0,
+                192.0,
+                513.0,
+                210.0
+            ],
+            [
+                "transition1rectangle"
+            ]
         ]
     ],
     "window_state_action_block": [],
@@ -153,6 +206,18 @@
                 "condition_action1",
                 "ca_connection1_anchor",
                 "connected_to_reset_transition"
+            ]
+        ],
+        [
+            [
+                453.0,
+                325.0
+            ],
+            "",
+            "sig6 <= sig7;",
+            [
+                "condition_action2",
+                "ca_connection2_anchor"
             ]
         ]
     ],

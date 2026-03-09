@@ -6,7 +6,7 @@ use ieee.std_logic_1164.all;
 architecture fsm of test_sensitivity_check is
     type t_state is (S1);
     signal state : t_state;
-    signal sig1, sig2, sig3, sig4, sig5: std_logic;
+    signal sig1, sig2, sig3, sig4, sig5, sig6, sig7: std_logic;
     
     type t_record1 is record
         slice1 : std_logic;
@@ -21,6 +21,7 @@ begin
             -- State Machine:
             case state is
                 when S1 =>
+                    sig6 <= sig7;
             end case;
         end if;
     end process;
