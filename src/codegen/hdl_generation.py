@@ -4,6 +4,7 @@ Methods needed for HDL generation
 
 import os
 import re
+import tkinter as tk
 import traceback
 from datetime import datetime
 from tkinter import messagebox
@@ -11,13 +12,13 @@ from tkinter import messagebox
 import file_handling
 import tag_plausibility
 import update_hdl_tab
-from codegen import hdl_generation_architecture, hdl_generation_library, hdl_generation_module
-from codegen.hdl_generation_config import GenerationConfig
 from constants import GuiTab
 from elements import state_comment
 from project_manager import project_manager
 
+from . import hdl_generation_architecture, hdl_generation_library, hdl_generation_module, sensitivity_check_hfe
 from .exceptions import GenerationError
+from .hdl_generation_config import GenerationConfig
 from .list_separation_check import ListSeparationCheck
 
 
@@ -32,7 +33,7 @@ class HdlGeneration:
         state_tag_list_sorted = self._create_sorted_state_tag_list(is_script_mode)
         self._success = False
         try:
-            self._generate_hdl(config, write_to_file, state_tag_list_sorted)
+            self._generate_hdl(config, write_to_file, state_tag_list_sorted, is_script_mode)
             self._success = True
         except GenerationError as e:
             if is_script_mode:
@@ -49,7 +50,9 @@ class HdlGeneration:
         """Get the success status of the HDL generation."""
         return self._success
 
-    def _generate_hdl(self, config: GenerationConfig, write_to_file: bool, state_tag_list_sorted: list) -> None:
+    def _generate_hdl(
+        self, config: GenerationConfig, write_to_file: bool, state_tag_list_sorted: list, is_script_mode: bool
+    ) -> None:
         errors = config.validate()
         if errors:
             raise GenerationError("Error in HDL-FSM-Editor", errors)
@@ -68,9 +71,9 @@ class HdlGeneration:
         else:
             header = f"// Created by HDL-FSM-Editor{at_timestamp}\n"
 
-        self._create_hdl(config, header, write_to_file, state_tag_list_sorted)
+        self._create_hdl(config, header, write_to_file, state_tag_list_sorted, is_script_mode)
 
-    def _create_hdl(self, config, header, write_to_file, state_tag_list_sorted) -> None:
+    def _create_hdl(self, config, header, write_to_file, state_tag_list_sorted, is_script_mode) -> None:
         file_name, file_name_architecture = self._get_file_names(config)
 
         project_manager.link_dict_ref.clear_link_dict(file_name)
@@ -105,6 +108,17 @@ class HdlGeneration:
                 project_manager.date_of_hdl_file2_shown_in_hdl_tab = os.path.getmtime(file_name_architecture)
             update_hdl_tab.UpdateHdlTab.copy_into_hdl_tab(ent, arch)
             project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
+            if not is_script_mode:
+                project_manager.log_frame_text.config(state=tk.NORMAL)
+                project_manager.log_frame_text.insert(
+                    tk.END,
+                    "\n++++++++++++++++++++++++++++++++++++++ "
+                    + datetime.today().ctime()
+                    + " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+                    + "HDL generation finished.\n",
+                )
+                project_manager.log_frame_text.config(state=tk.DISABLED)
+            sensitivity_check_hfe.SensitivityCheckHfe(is_script_mode)
 
     def _create_entity(self, config, file_name, file_line_number) -> tuple:
         entity = ""

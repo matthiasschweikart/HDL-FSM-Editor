@@ -15,6 +15,7 @@ line-number and file-name are determined and the corresponding entry of the Link
 """
 
 import tkinter as tk
+from tkinter import messagebox
 
 from codegen import hdl_generation
 from codegen.hdl_generation_config import GenerationConfig
@@ -78,6 +79,15 @@ class LinkDictionary:
                     "object_identifier": "",
                     "number_of_line": text_line_number,
                 }
+        elif hdl_item_type == "":  # Used at sensitivity list of state action process
+            for text_line_number in range(1, number_of_lines + 1):
+                self.link_dict[file_name][file_line_number + text_line_number - 1] = {
+                    "tab_name": None,  # No tab to jump to, because this line is not entered by the user
+                    "widget_reference": "",  # As there is no tab, there is also no widget to jump to.
+                    "hdl_item_type": "",
+                    "object_identifier": "",
+                    "number_of_line": text_line_number,
+                }
 
     def has_link(self, file_name: str, file_line_number: int) -> bool:
         """Check if a link exists for the given file and line."""
@@ -88,11 +98,17 @@ class LinkDictionary:
         # print("jump_to_source", selected_file, file_line_number)
         tab_to_show = self.link_dict[selected_file][file_line_number]["tab_name"]
         widget = self.link_dict[selected_file][file_line_number]["widget_reference"]
-        hdl_item_type = self.link_dict[selected_file][file_line_number]["hdl_item_type"]
-        object_identifier = self.link_dict[selected_file][file_line_number]["object_identifier"]
-        number_of_line = self.link_dict[selected_file][file_line_number]["number_of_line"]
-        project_manager.notebook.show_tab(tab_to_show)
-        widget.highlight_item(hdl_item_type, object_identifier, number_of_line)
+        if widget == "":  # The code line is not entered by the user and there is no source to jump to.
+            messagebox.showinfo(
+                "HDL-FSM-Editor",
+                "No source is available for this code line.\nBut you can jump to HDL by Alt-mouse-click.",
+            )
+        else:
+            hdl_item_type = self.link_dict[selected_file][file_line_number]["hdl_item_type"]
+            object_identifier = self.link_dict[selected_file][file_line_number]["object_identifier"]
+            number_of_line = self.link_dict[selected_file][file_line_number]["number_of_line"]
+            project_manager.notebook.show_tab(tab_to_show)
+            widget.highlight_item(hdl_item_type, object_identifier, number_of_line)
 
     def jump_to_hdl(self, selected_file, file_line_number) -> None:
         """Switch to Generated HDL output tab and highlight the given file/line."""
