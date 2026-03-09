@@ -768,8 +768,6 @@ class ProjectManager:
         """Set the undo_handling reference."""
         self._undo_handling_ref = value
 
-    #     setattr(self._project, attr_name, value)
-
     # def update(self, **kwargs) -> None:
     #     """Update multiple state attributes."""
     #     for key, value in kwargs.items():
