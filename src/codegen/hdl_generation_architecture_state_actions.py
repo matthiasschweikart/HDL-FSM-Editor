@@ -21,7 +21,7 @@ def create_state_action_process(file_name, file_line_number, state_tag_list_sort
     if default_state_actions == "" and _state_actions_contain_only_null_for_each_state(state_action_list):
         return "", file_line_number
     # Get from Interface/Ports and from Internals/Architecture Declarations:
-    all_possible_sensitivity_entries = _create_a_list_with_all_possible_sensitivity_entries()
+    all_possible_sensitivity_entries = create_a_list_with_all_possible_sensitivity_entries()
     variable_declarations = hdl_generation_library.get_text_from_text_widget(
         project_manager.internals_process_combinatorial_text
     )
@@ -61,6 +61,13 @@ def _create_state_action_process_for_vhdl(
     state_action_process = "p_state_actions: process "
     state_action_process += (
         _create_sensitivity_list(state_action_list, default_state_actions, all_possible_sensitivity_entries) + "\n"
+    )
+    project_manager.link_dict_ref.add(
+        file_name,
+        file_line_number,
+        "",
+        1,
+        None,
     )
     file_line_number += 1
 
@@ -184,7 +191,8 @@ def _create_state_action_process_for_verilog(
     return state_action_process, file_line_number
 
 
-def _create_a_list_with_all_possible_sensitivity_entries() -> list:
+def create_a_list_with_all_possible_sensitivity_entries() -> list:
+    """Returns a list with all possible sensitivity list entries."""
     all_port_declarations = project_manager.interface_ports_text.get("1.0", tk.END).lower()
     readable_ports_list = get_all_readable_ports(all_port_declarations, check=True)
     all_signal_declarations = project_manager.internals_architecture_text.get("1.0", tk.END).lower()
@@ -215,22 +223,25 @@ def _create_state_action_list(state_tag_list_sorted):
 
 
 def _create_sensitivity_list(state_action_list, default_state_actions, all_possible_sensitivity_entries) -> str:
-    sensitivity_list = "("
     default_state_actions_separated = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(
         default_state_actions
     )
     default_state_actions_separated = _remove_left_hand_sides(default_state_actions_separated)
     default_state_actions_separated = _remove_record_element_names(default_state_actions_separated)
+    added_entries = []
+    sensitivity_list = "("
     for entry in all_possible_sensitivity_entries:
         if " " + entry + " " in default_state_actions_separated:
             sensitivity_list += entry + ", "
+            added_entries.append(entry)
     for list_entry in state_action_list:
         state_action_separated = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(list_entry[1])
         state_action_separated = _remove_left_hand_sides(state_action_separated)
         state_action_separated = _remove_record_element_names(state_action_separated)
         for entry in all_possible_sensitivity_entries:
-            if " " + entry + " " in state_action_separated and entry + ", " not in sensitivity_list:
+            if " " + entry + " " in state_action_separated and entry not in added_entries:
                 sensitivity_list += entry + ", "
+                added_entries.append(entry)
     sensitivity_list += "state)"
     return sensitivity_list
 
