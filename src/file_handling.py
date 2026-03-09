@@ -236,15 +236,21 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
     if not is_script_mode:
         project_manager.root.after_idle(canvas_editing.view_all)
-    # Loading the design created by "traces" some stack-entries, which are removed here:
-    project_manager.undo_handling_ref.clear_stack()
-    project_manager.root.after_idle(project_manager.undo_handling_ref.design_has_changed)
+    project_manager.root.after_idle(_init_undo_stack)
     project_manager.root.config(cursor="arrow")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
         if is_script_mode:
             print("Error: File " + read_filename + " has wrong format.")
         else:
             messagebox.showerror("Error", f"File \n{read_filename}\nhas wrong format.")
+
+
+def _init_undo_stack():
+    # Loading the design created by "traces" some stack-entries, which are removed here:
+    project_manager.undo_handling_ref.clear_stack()
+    project_manager.undo_handling_ref.design_has_changed()  # Add first entry at the stack
+    title = project_manager.root.title()
+    project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
 
 
 def _show_load_error(is_script_mode: bool, print_msg: str, msgbox_msg: str) -> None:
