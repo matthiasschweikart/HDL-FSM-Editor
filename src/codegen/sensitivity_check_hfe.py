@@ -60,7 +60,13 @@ class SensitivityCheckHfe:
             line_number = hdl[:char_number].count("\n") + 1
             process_sensitivity = hdl_generation_library.remove_comments_and_returns(process_match.group(1))
             process_body = hdl_generation_library.remove_comments_and_returns(process_match.group(2))
-            process_sensitivities_and_bodies.append(
-                {"line_number": line_number, "process_sensitivity": process_sensitivity, "process_body": process_body}
-            )
+            clocked_process = re.search(r"\s*'\s*event", process_body, re.IGNORECASE)
+            if "rising_edge" not in process_body and "falling_edge" not in process_body and clocked_process is None:
+                process_sensitivities_and_bodies.append(
+                    {
+                        "line_number": line_number,
+                        "process_sensitivity": process_sensitivity,
+                        "process_body": process_body,
+                    }
+                )
         return process_sensitivities_and_bodies
