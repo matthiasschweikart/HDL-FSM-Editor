@@ -5,7 +5,7 @@ All methods needed for the state action process in VHDL or Verilog
 import re
 import tkinter as tk
 
-from codegen import hdl_generation_library
+from codegen import hdl_generation_library, sensitivity_check
 from elements import state_action, state_actions_default
 from project_manager import project_manager
 
@@ -247,14 +247,11 @@ def _create_sensitivity_list(state_action_list, default_state_actions, all_possi
 
 
 def _remove_left_hand_sides(state_action_text) -> str:
-    # Insert ";" for the search pattern later:
-    state_action_text = ";" + state_action_text
-    state_action_text = re.sub(" begin ", " ; ", state_action_text, flags=re.I)
-    state_action_text = re.sub(" then ", " ; ", state_action_text, flags=re.I)
-    state_action_text = re.sub(" else ", " ; ", state_action_text, flags=re.I)
-    # Replace the left sides:
-    state_action_text = re.sub(r";\s*[^\s]+\s*<=", "; <=", state_action_text)
-    return state_action_text
+    if project_manager.language.get() == "VHDL":
+        new_list = sensitivity_check.SensitivityCheck.replace_targets_in_vhdl_body(state_action_text.split())
+    else:
+        new_list = sensitivity_check.SensitivityCheck.replace_targets_in_verilog_body(state_action_text.split())
+    return " ".join(new_list)
 
 
 def _remove_record_element_names(state_action_text) -> str:
