@@ -66,7 +66,10 @@ class GlobalActionsClocked:
         self.window_id = project_manager.canvas.create_window(
             menu_x, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
         )
+        GlobalActionsClocked.ref_dict[self.window_id] = self
+        self.text_before_id.insert("1.0", before)
         self.text_before_id.format(None)
+        self.text_after_id.insert("1.0", after)
         self.text_after_id.format(None)
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
@@ -122,7 +125,6 @@ class GlobalActionsClocked:
                 single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
-        GlobalActionsClocked.ref_dict[self.window_id] = self
 
     def _edit_before_in_external_editor(self):
         self.text_before_id.edit_in_external_editor()
