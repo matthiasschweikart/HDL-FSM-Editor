@@ -3,6 +3,7 @@ This module implements all methods executes the compile command stored in the Co
 """
 
 import os
+import pathlib
 import re
 import shlex
 import subprocess
@@ -127,6 +128,7 @@ def _get_internal_variables():
     module_name = project_manager.module_name.get()
 
     internal_vars["git_root"] = lambda _: find_git_root(hfe_file_path)
+    internal_vars["hfe_file_dir"] = lambda _: pathlib.Path(hfe_file_path).parent.as_posix()
 
     paths = get_hdl_output_paths(base_path, module_name, language, file_mode)
     if not paths:

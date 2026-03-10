@@ -203,3 +203,19 @@ class TestExpandGeneratePath:
 
     def test_unresolved_left_as_is(self):
         assert expand_generate_path("$UNKNOWN/path", None) == "$UNKNOWN/path"
+
+    def test_hfe_file_dir_expanded_when_hfe_path_given(self):
+        """$hfe_file_dir is the directory containing the .hfe file."""
+        hfe_path = "/some/project/designs/foo.hfe"
+        result = expand_generate_path("$hfe_file_dir/out", hfe_path)
+        assert result == "/some/project/designs/out"
+
+    def test_hfe_file_dir_not_expanded_when_no_hfe_path(self):
+        """Without hfe path, $hfe_file_dir is left as-is."""
+        assert expand_generate_path("$hfe_file_dir/out", None) == "$hfe_file_dir/out"
+
+    def test_hfe_file_dir_with_trailing_slash_normalized(self):
+        """hfe_file_path with trailing slash still yields parent dir without file."""
+        result = expand_generate_path("$hfe_file_dir", "/a/b/bar.hfe/")
+        # Path(...).parent on "/a/b/bar.hfe/" resolves to /a/b
+        assert result == "/a/b"

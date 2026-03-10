@@ -117,7 +117,8 @@ def expand_generate_path(raw_path: str, hfe_file_path: Optional[str] = None) -> 
     """
     Expand variables in the "Directory for generated HDL" path.
 
-    Supports environment variables and $git_root (resolved from hfe_file_path).
+    Supports environment variables, $git_root (resolved from hfe_file_path),
+    and $hfe_file_dir (directory containing the .hfe file, when hfe_file_path is set).
     Unresolved variables are left as-is. Use for generate_path before
     get_hdl_output_paths() and when building GenerationConfig.
     """
@@ -126,6 +127,7 @@ def expand_generate_path(raw_path: str, hfe_file_path: Optional[str] = None) -> 
         git_root = find_git_root(hfe_file_path)
         if git_root is not None:
             internal_vars["git_root"] = git_root
+        internal_vars["hfe_file_dir"] = pathlib.Path(hfe_file_path).parent.as_posix()
     return expand_variables(
         raw_path,
         internal_vars=internal_vars,
