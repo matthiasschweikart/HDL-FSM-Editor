@@ -74,7 +74,10 @@ class HdlGeneration:
         self._create_hdl(config, header, write_to_file, state_tag_list_sorted, is_script_mode)
 
     def _create_hdl(self, config, header, write_to_file, state_tag_list_sorted, is_script_mode) -> None:
-        file_name, file_name_architecture = self._get_file_names(config)
+        # Use same path source as UI (GenerationConfig.get_primary_file / get_architecture_file)
+        # so link dict keys match has_link() lookups in tab_hdl and tab_log.
+        file_name = config.get_primary_file()
+        file_name_architecture = config.get_architecture_file() or ""
 
         project_manager.link_dict_ref.clear_link_dict(file_name)
         if file_name_architecture:
@@ -284,22 +287,6 @@ class HdlGeneration:
                 len(str(content_with_numbers.count("\n"))) + 2
             )  # "+2" because of string ": "
         return content_with_numbers1, content_with_numbers2
-
-    def _get_file_names(self, config) -> tuple:
-        # For Verilog and SystemVerilog, always generate single files regardless of number_of_files setting
-        if config.language in ["Verilog", "SystemVerilog"]:
-            file_type = ".v" if config.language == "Verilog" else ".sv"
-            file_name = config.generate_path + "/" + config.module_name + file_type
-            file_name_architecture = ""
-        elif config.select_file_number == 1:
-            # VHDL single file
-            file_name = config.generate_path + "/" + config.module_name + ".vhd"
-            file_name_architecture = ""
-        else:
-            # VHDL two files
-            file_name = config.generate_path + "/" + config.module_name + "_e.vhd"
-            file_name_architecture = config.generate_path + "/" + config.module_name + "_fsm.vhd"
-        return file_name, file_name_architecture
 
     def _add_line_numbers(self, text) -> str:
         text_lines = text.split("\n")
