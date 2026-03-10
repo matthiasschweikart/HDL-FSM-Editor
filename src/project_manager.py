@@ -79,7 +79,7 @@ class ProjectManager:
         self._label_fontsize = 8
         self._state_name_font = None
         self._highlight_dict_ref = None  #: linting.HighLightDict
-        self._abs_zoom_factor = 1.0
+        self._abs_zoom_factor = 5.0
         self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
         self._undo_handling_ref = None  #: undo_handling.UndoHandling
 
@@ -752,11 +752,6 @@ class ProjectManager:
     def write_data_creator_ref(self, value: float) -> None:
         """Set the write_data_creator reference."""
         self._write_data_creator_ref = value
-
-    @abs_zoom_factor.setter
-    def abs_zoom_factor(self, value: float) -> None:
-        """Set the absolute zoom factor."""
-        self._abs_zoom_factor = value
 
     @property
     def undo_handling_ref(self) -> float:
