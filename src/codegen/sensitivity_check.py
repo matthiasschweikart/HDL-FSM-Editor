@@ -79,9 +79,9 @@ class SensitivityCheck:
         for sensitivity_and_body_entry in process_sensitivities_and_bodies:
             process_body_list = sensitivity_and_body_entry["process_body"]
             process_body_list = (
-                self._replace_targets_in_vhdl_body(process_body_list)
+                SensitivityCheck.replace_targets_in_vhdl_body(process_body_list)
                 if self.language == "VHDL"
-                else self._replace_targets_in_verilog_body(process_body_list)
+                else SensitivityCheck.replace_targets_in_verilog_body(process_body_list)
             )
             sensitivity_and_body_lists.append(
                 {
@@ -175,7 +175,24 @@ class SensitivityCheck:
             list_of_words[index] = re.sub(r"\..*", "", word)
         return list_of_words
 
-    def _replace_targets_in_vhdl_body(self, process_body_list: list[str]) -> list[str]:
+    def _create_message(self, line_number: int, readable_sig: str, found_in_sensitivity_list: bool) -> str:
+        if found_in_sensitivity_list:
+            message = (
+                f"{self.file_name}:{line_number}:0: "
+                f"Warning: The signal/port '{readable_sig}' is included in the "
+                f"sensitivity list, but not used in the process body."
+            )
+        else:  # found_in_process_body_list is True
+            message = (
+                f"{self.file_name}:{line_number}:0: "
+                f"Warning: The signal/port '{readable_sig}' is not included in the sensitivity list, "
+                f"but used in the process body."
+            )
+        return message
+
+    @classmethod
+    def replace_targets_in_vhdl_body(cls, process_body_list: list[str]) -> list[str]:
+        """Replaces all targets of assignments in the process body by "t-a-r-g-e-t"."""
         remove_target = False
         line_end_hit = False
         in_bracket = 0
@@ -197,7 +214,9 @@ class SensitivityCheck:
             new_process_body_list.append(word)
         return list(reversed(new_process_body_list))
 
-    def _replace_targets_in_verilog_body(self, process_body_list: list[str]) -> list[str]:
+    @classmethod
+    def replace_targets_in_verilog_body(cls, process_body_list: list[str]) -> list[str]:
+        """Replaces all targets of assignments in the process body by "t-a-r-g-e-t"."""
         remove_target = False
         line_end_hit = False
         in_bracket = 0
@@ -223,18 +242,3 @@ class SensitivityCheck:
                     remove_target = True
             new_process_body_list.append(word)
         return list(reversed(new_process_body_list))
-
-    def _create_message(self, line_number: int, readable_sig: str, found_in_sensitivity_list: bool) -> str:
-        if found_in_sensitivity_list:
-            message = (
-                f"{self.file_name}:{line_number}:0: "
-                f"Warning: The signal/port '{readable_sig}' is included in the "
-                f"sensitivity list, but not used in the process body."
-            )
-        else:  # found_in_process_body_list is True
-            message = (
-                f"{self.file_name}:{line_number}:0: "
-                f"Warning: The signal/port '{readable_sig}' is not included in the sensitivity list, "
-                f"but used in the process body."
-            )
-        return message
