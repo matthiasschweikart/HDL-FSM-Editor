@@ -100,7 +100,7 @@ class CustomText(CodeEditor):
         # But as inserting the character takes a while, format() will still find the old text,
         # so it must be delayed until the character was inserted:
         self.bind(
-            "<Key>", lambda event: self.format_after_idle()
+            "<Key>", self.format_after_idle
         )  # This binding will be overwritten for the CustomText objects in Interface/Internals tab.
         self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
@@ -149,16 +149,16 @@ class CustomText(CodeEditor):
             os.unlink(tmp_name)
         self.delete("1.0", tk.END)
         self.insert("1.0", new_text)
-        self.format()
+        self.format(None)
 
-    def format_after_idle(self) -> None:
+    def format_after_idle(self, event) -> None:
         """Schedule format() after 200 ms idle (except for log text)."""
         if self.text_type != "log":
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
-            self.format_after_id = self.after(200, self.format)
+            self.format_after_id = self.after(200, self.format, event)
 
-    def format(self) -> None:
+    def format(self, event) -> None:
         """Update text box size and highlighting."""
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
@@ -170,6 +170,21 @@ class CustomText(CodeEditor):
             self.update_custom_text_class_generics_list()
         self._update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows()
         self._update_highlighting_in_all_texts()
+        if event is not None and event.keysym == "BackSpace":
+            # In order to keep the mouse-pointer inside the shrinking window:
+            self._move_mouse_to_insert_cursor()
+
+    def _move_mouse_to_insert_cursor(self) -> None:
+        bbox_char = self.bbox("insert")
+        if bbox_char is None:
+            return
+        x, y, _, height = bbox_char
+        self.event_generate(
+            "<Motion>",
+            warp=True,
+            x=x,
+            y=y + height // 2,
+        )
 
     def _update_size_of_text_box(self, text) -> None:
         nr_of_lines = 0
@@ -313,12 +328,12 @@ class CustomText(CodeEditor):
     def undo(self) -> None:
         """Undoes the last action and formats the text."""
         # self.edit_undo() # causes a second "undo", as Ctrl-z automatically starts edit_undo()
-        self.format_after_idle()
+        self.format_after_idle(None)
 
     def redo(self) -> None:
         """Redoes the last undone action and formats the text."""
         self.edit_redo()
-        self.format_after_idle()
+        self.format_after_idle(None)
 
     def update_custom_text_class_signals_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""

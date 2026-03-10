@@ -41,7 +41,7 @@ class CodeEditor(tk.Text):
         self.bind("<Control-bracketleft>", lambda event: self.unindent_selection())
         self.bind("<Control-bracketright>", lambda event: self.indent_selection())
 
-    def format_after_idle(self) -> None:
+    def format_after_idle(self, event) -> None:
         """Override in subclass to trigger formatting after indent/unindent. No-op by default."""
 
     def _handle_normal_selection(self, direction: str) -> str:
@@ -169,7 +169,7 @@ class CodeEditor(tk.Text):
             self.delete(target_pos, current_pos)
         else:
             self.delete(current_pos, target_pos)
-        self.format_after_idle()
+        self.format_after_idle(None)
         return "break"
 
     def delete_word_backward(self) -> str:
@@ -190,7 +190,7 @@ class CodeEditor(tk.Text):
             end_line = start_line
         for line_num in range(start_line, end_line + 1):
             line_action(line_num)
-        self.format_after_idle()
+        self.format_after_idle(None)
 
     def indent_selection(self) -> str:
         """Indents the line or all lines in the selection by inserting 4 blanks at the beginning of each line."""

@@ -90,9 +90,9 @@ class ConditionAction:
         project_manager.canvas.tag_lower(self.line_id)
 
         self.condition_id.insert("1.0", self.condition_text)
-        self.condition_id.format()
+        self.condition_id.format(None)
         self.action_id.insert("1.0", self.action_text)
-        self.action_id.format()
+        self.action_id.format(None)
         self._show_condition_and_action()
 
         # The method _deactivate_frame() can not be bound to the Frame-leave-Event, because otherwise at moving the

@@ -312,7 +312,7 @@ def _load_window_elements(
                 )
                 action_ref.text_content = text + "\n"
                 action_ref.text_id.insert("1.0", text)
-                action_ref.text_id.format()
+                action_ref.text_id.format(None)
 
     # Load state comments
     for definition in design_dictionary.get("window_state_comment", []):
@@ -326,7 +326,7 @@ def _load_window_elements(
         project_manager.canvas.itemconfigure(comment_ref.window_id, tag=tags)
         comment_ref.text_content = text + "\n"
         comment_ref.text_id.insert("1.0", text)
-        comment_ref.text_id.format()
+        comment_ref.text_id.format(None)
 
     _load_condition_action_blocks(design_dictionary, condition_action_line_dictionary)
 
@@ -341,10 +341,10 @@ def _load_window_elements(
         )
         global_actions_ref.text_before_id.text_before_content = text_before + "\n"
         global_actions_ref.text_before_id.insert("1.0", text_before)
-        global_actions_ref.text_before_id.format()
+        global_actions_ref.text_before_id.format(None)
         global_actions_ref.text_after_id.text_after_content = text_after + "\n"
         global_actions_ref.text_after_id.insert("1.0", text_after)
-        global_actions_ref.text_after_id.format()
+        global_actions_ref.text_after_id.format(None)
 
     # Load global actions combinatorial
     for definition in design_dictionary["window_global_actions_combinatorial"]:
@@ -356,7 +356,7 @@ def _load_window_elements(
         )
         action_ref.text_content = text + "\n"
         action_ref.text_id.insert("1.0", text)
-        action_ref.text_id.format()
+        action_ref.text_id.format(None)
 
     # Load state actions default
     for definition in design_dictionary["window_state_actions_default"]:
@@ -368,7 +368,7 @@ def _load_window_elements(
         )
         action_ref.text_content = text + "\n"
         action_ref.text_id.insert("1.0", text)
-        action_ref.text_id.format()
+        action_ref.text_id.format(None)
 
     _update_window_element_button_states()
 

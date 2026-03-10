@@ -189,7 +189,7 @@ class FindReplace:
                     elif text_field["tab"] == GuiTab.INTERNALS:
                         text_field["ref"].update_custom_text_class_signals_list()
                     elif text_field["tab"] == GuiTab.DIAGRAM:
-                        text_field["ref"].format_after_idle()
+                        text_field["ref"].format_after_idle(None)
                 else:
                     break
             else:
