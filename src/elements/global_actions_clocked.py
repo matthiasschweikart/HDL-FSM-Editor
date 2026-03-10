@@ -19,9 +19,9 @@ class GlobalActionsClocked:
     global_actions_number = 1
     ref_dict = {}
 
-    def __init__(self, menu_x, menu_y, height, width, padding, tags) -> None:
-        self.text_before_content = None
-        self.text_after_content = None
+    def __init__(self, menu_x, menu_y, padding, tags, before, after) -> None:
+        self.text_before_content = before
+        self.text_after_content = after
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
@@ -47,8 +47,6 @@ class GlobalActionsClocked:
         self.text_before_id = custom_text.CustomText(
             self.frame_id,
             text_type="action",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
@@ -56,8 +54,6 @@ class GlobalActionsClocked:
         self.text_after_id = custom_text.CustomText(
             self.frame_id,
             text_type="action",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
@@ -70,7 +66,8 @@ class GlobalActionsClocked:
         self.window_id = project_manager.canvas.create_window(
             menu_x, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
         )
-
+        self.text_before_id.format(None)
+        self.text_after_id.format(None)
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(
@@ -216,10 +213,10 @@ class GlobalActionsClocked:
         GlobalActionsClocked(
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
-            height=1,
-            width=8,
             padding=1,
             tags=("global_actions1",),
+            before="",
+            after="",
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
