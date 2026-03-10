@@ -24,7 +24,13 @@ class TabInterface:
             self.interface_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
         interface_package_text = custom_text.CustomText(
-            self.interface_package_frame, text_type="package", height=3, width=10, undo=True, font=("Courier", 10)
+            self.interface_package_frame,
+            text_type="package",
+            height=3,
+            width=10,
+            undo=True,
+            font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.interface_package_text = interface_package_text
         interface_package_text.insert("1.0", "library ieee;\nuse ieee.std_logic_1164.all;")
@@ -55,7 +61,13 @@ class TabInterface:
         project_manager.interface_generics_label = _interface_generics_label
         interface_generics_info = ttk.Label(interface_generics_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5)
         interface_generics_text = custom_text.CustomText(
-            interface_generics_frame, text_type="generics", height=3, width=10, undo=True, font=("Courier", 10)
+            interface_generics_frame,
+            text_type="generics",
+            height=3,
+            width=10,
+            undo=True,
+            font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.interface_generics_text = interface_generics_text
         interface_generics_text.bind("<Control-Z>", lambda event: interface_generics_text.edit_redo())
@@ -82,7 +94,7 @@ class TabInterface:
         project_manager.interface_ports_label = _interface_ports_label
         interface_ports_info = ttk.Label(interface_ports_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5)
         interface_ports_text = custom_text.CustomText(
-            interface_ports_frame, text_type="ports", height=3, width=10, undo=True, font=("Courier", 10)
+            interface_ports_frame, text_type="ports", height=3, width=10, undo=True, font=("Courier", 10), wrap=tk.WORD
         )
         project_manager.interface_ports_text = interface_ports_text
         interface_ports_text.bind("<Control-z>", lambda event: interface_ports_text.undo())

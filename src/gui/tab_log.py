@@ -25,7 +25,7 @@ class TabLog:
         log_frame.rowconfigure(1, weight=1)
 
         log_frame_button_frame = ttk.Frame(log_frame)
-        log_frame_text = custom_text.CustomText(log_frame, text_type="log", undo=False)
+        log_frame_text = custom_text.CustomText(log_frame, text_type="log", undo=False, wrap=tk.WORD)
         project_manager.log_frame_text = log_frame_text
         log_frame_button_frame.grid(row=0, column=0, sticky="ew")
         log_frame_text.grid(row=1, column=0, sticky="nsew")

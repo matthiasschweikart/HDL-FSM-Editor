@@ -23,7 +23,9 @@ class TabHDL:
         hdl_frame.columnconfigure(0, weight=1)
         hdl_frame.rowconfigure(0, weight=1)
 
-        hdl_frame_text = custom_text.CustomText(hdl_frame, text_type="generated", undo=False, font=("Courier", 10))
+        hdl_frame_text = custom_text.CustomText(
+            hdl_frame, text_type="generated", undo=False, font=("Courier", 10), wrap=tk.WORD
+        )
         project_manager.hdl_frame_text = hdl_frame_text
         hdl_frame_text.grid(row=0, column=0, sticky="nsew")
         hdl_frame_text.columnconfigure((0, 0), weight=1)

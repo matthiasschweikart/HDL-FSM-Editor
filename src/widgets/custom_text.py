@@ -75,9 +75,9 @@ class CustomText(CodeEditor):
     read_variables_of_all_windows = {}
     written_variables_of_all_windows = {}
 
-    def __init__(self, *args, text_type, **kwargs) -> None:
+    def __init__(self, *args, text_type, wrap=tk.NONE, **kwargs) -> None:
         """A text widget that report on internal widget commands"""
-        super().__init__(*args, wrap=tk.NONE, **kwargs)
+        super().__init__(*args, wrap=wrap, **kwargs)
         self.text_type = text_type
         # text_type is in:
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
@@ -156,7 +156,7 @@ class CustomText(CodeEditor):
         if self.text_type != "log":
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
-            self.format_after_id = self.after(200, self.format, event)
+            self.format_after_id = self.after(100, self.format, event)
 
     def format(self, event) -> None:
         """Update text box size and highlighting."""

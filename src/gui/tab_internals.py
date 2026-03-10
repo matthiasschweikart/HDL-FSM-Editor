@@ -26,7 +26,13 @@ class TabInternals:
             self.internals_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
         internals_package_text = custom_text.CustomText(
-            self.internals_package_frame, text_type="package", height=3, width=10, undo=True, font=("Courier", 10)
+            self.internals_package_frame,
+            text_type="package",
+            height=3,
+            width=10,
+            undo=True,
+            font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.internals_package_text = internals_package_text
         internals_package_text.bind("<Control-Z>", lambda event: internals_package_text.edit_redo())
@@ -57,7 +63,13 @@ class TabInternals:
             internals_architecture_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
         internals_architecture_text = custom_text.CustomText(
-            internals_architecture_frame, text_type="declarations", height=3, width=10, undo=True, font=("Courier", 10)
+            internals_architecture_frame,
+            text_type="declarations",
+            height=3,
+            width=10,
+            undo=True,
+            font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.internals_architecture_text = internals_architecture_text
         internals_architecture_text.bind("<Control-z>", lambda event: internals_architecture_text.undo())
@@ -91,7 +103,13 @@ class TabInternals:
             internals_process_clocked_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
         internals_process_clocked_text = custom_text.CustomText(
-            internals_process_clocked_frame, text_type="variable", height=3, width=10, undo=True, font=("Courier", 10)
+            internals_process_clocked_frame,
+            text_type="variable",
+            height=3,
+            width=10,
+            undo=True,
+            font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.internals_process_clocked_text = internals_process_clocked_text
         internals_process_clocked_text.bind("<Control-z>", lambda event: internals_process_clocked_text.undo())
@@ -134,6 +152,7 @@ class TabInternals:
             width=10,
             undo=True,
             font=("Courier", 10),
+            wrap=tk.WORD,
         )
         project_manager.internals_process_combinatorial_text = internals_process_combinatorial_text
         internals_process_combinatorial_text.bind(
