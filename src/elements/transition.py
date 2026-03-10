@@ -140,8 +140,6 @@ class TransitionLine:
                     menu_x,
                     menu_y,
                     connected_to_reset_entry,
-                    height=1,
-                    width=8,
                     padding=1,
                     tags=tags,
                     condition="",

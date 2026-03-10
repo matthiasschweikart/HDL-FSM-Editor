@@ -393,8 +393,6 @@ def _load_condition_action_blocks(
                     coords[0],
                     coords[1],
                     connected_to_reset_entry,
-                    height=1,
-                    width=8,
                     padding=1,
                     tags=tags,
                     condition=condition,
