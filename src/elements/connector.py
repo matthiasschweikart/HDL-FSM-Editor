@@ -48,7 +48,7 @@ class ConnectorInstance:
         del ConnectorInstance.ref_dict[self.connector_id]
 
     @classmethod
-    def create_connector(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create a new connector at event position if no other item overlaps; mark design changed."""
         # Translate the window coordinate into the canvas coordinate (the Canvas is bigger than the window):
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)

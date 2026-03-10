@@ -599,7 +599,7 @@ class TransitionLine:
         return [x0 - delta0_x * modify0, y0 - delta0_y * modify0, x1 + delta1_x * modify1, y1 + delta1_y * modify1]
 
     @classmethod
-    def transition_start(cls, event) -> None:
+    def create(cls, event) -> None:
         """Begin new transition from item under cursor (state/reset/connector); bind Motion and ButtonRelease."""
         [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
         ids = project_manager.canvas.find_overlapping(event_x, event_y, event_x, event_y)
@@ -737,7 +737,7 @@ class TransitionLine:
         project_manager.canvas.delete(transition_id)
         # Restore bindings:
         project_manager.canvas.unbind("<Motion>", transition_draw_funcid)
-        project_manager.canvas.bind("<Button-1>", cls.transition_start)
+        project_manager.canvas.bind("<Button-1>", cls.create)
         project_manager.root.bind_all("<Escape>", lambda event: canvas_modify_bindings.switch_to_move_mode())
 
     @classmethod

@@ -149,7 +149,7 @@ class GlobalActionsCombinatorial:
         project_manager.global_action_combinatorial_button.config(state=tk.NORMAL)
 
     @classmethod
-    def insert_global_actions_combinatorial(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create combinatorial global-actions window at event position."""
         project_manager.global_action_combinatorial_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (

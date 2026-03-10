@@ -153,7 +153,7 @@ class StateActionsDefault:
         project_manager.state_action_default_button.config(state=tk.NORMAL)
 
     @classmethod
-    def insert_state_actions_default(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create state-actions-default window at event position and disable insert button."""
         project_manager.state_action_default_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (

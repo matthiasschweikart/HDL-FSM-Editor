@@ -23,7 +23,7 @@ def switch_to_state_insertion() -> None:
     move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs = False
     # From now on states can be inserted by left mouse button (this ends with the escape key):
     project_manager.root.config(cursor="circle")
-    project_manager.canvas.bind("<Button-1>", state.States.insert_state)
+    project_manager.canvas.bind("<Button-1>", state.States.create)
 
 
 def switch_to_transition_insertion() -> None:
@@ -31,7 +31,7 @@ def switch_to_transition_insertion() -> None:
     move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs = True
     # From now on transitions can be inserted by left mouse button (this ends with the escape key):
     project_manager.root.config(cursor="cross")
-    project_manager.canvas.bind("<Button-1>", transition.TransitionLine.transition_start)
+    project_manager.canvas.bind("<Button-1>", transition.TransitionLine.create)
 
 
 def switch_to_connector_insertion() -> None:
@@ -39,7 +39,7 @@ def switch_to_connector_insertion() -> None:
     move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs = False
     #    print("switch_to_connector_insertion")
     project_manager.root.config(cursor="dot")
-    project_manager.canvas.bind("<Button-1>", connector.ConnectorInstance.create_connector)
+    project_manager.canvas.bind("<Button-1>", connector.ConnectorInstance.create)
 
 
 def switch_to_reset_entry_insertion() -> None:
@@ -48,7 +48,7 @@ def switch_to_reset_entry_insertion() -> None:
     #    print("switch_to_reset_entry_insertion")
     if project_manager.canvas.find_withtag("reset_entry") == ():  # Only 1 reset entry is allowed.
         project_manager.root.config(cursor="center_ptr")
-        project_manager.canvas.bind("<Button-1>", reset_entry.ResetEntry.insert_reset_entry)
+        project_manager.canvas.bind("<Button-1>", reset_entry.ResetEntry.create)
 
 
 def switch_to_state_action_default_insertion() -> None:
@@ -57,9 +57,7 @@ def switch_to_state_action_default_insertion() -> None:
     #    print("switch_to_state_action_default_insertion")
     if project_manager.canvas.find_withtag("state_actions_default") == ():  # Only 1 global action is allowed.
         project_manager.root.config(cursor="bogosity")
-        project_manager.canvas.bind(
-            "<Button-1>", state_actions_default.StateActionsDefault.insert_state_actions_default
-        )
+        project_manager.canvas.bind("<Button-1>", state_actions_default.StateActionsDefault.create)
 
 
 def switch_to_global_action_clocked_insertion() -> None:
@@ -68,9 +66,7 @@ def switch_to_global_action_clocked_insertion() -> None:
     #    print("switch_to_global_action_clocked_insertion")
     if project_manager.canvas.find_withtag("global_actions1") == ():  # Only 1 global action is allowed.
         project_manager.root.config(cursor="bogosity")
-        project_manager.canvas.bind(
-            "<Button-1>", global_actions_clocked.GlobalActionsClocked.insert_global_actions_clocked
-        )
+        project_manager.canvas.bind("<Button-1>", global_actions_clocked.GlobalActionsClocked.create)
 
 
 def switch_to_global_action_combinatorial_insertion() -> None:
@@ -79,9 +75,7 @@ def switch_to_global_action_combinatorial_insertion() -> None:
     #    print("switch_to_global_action_combinatorial_insertion")
     if project_manager.canvas.find_withtag("global_actions_combinatorial1") == ():  # Only 1 global action is allowed.
         project_manager.root.config(cursor="bogosity")
-        project_manager.canvas.bind(
-            "<Button-1>", global_actions_combinatorial.GlobalActionsCombinatorial.insert_global_actions_combinatorial
-        )
+        project_manager.canvas.bind("<Button-1>", global_actions_combinatorial.GlobalActionsCombinatorial.create)
 
 
 def switch_to_move_mode() -> None:

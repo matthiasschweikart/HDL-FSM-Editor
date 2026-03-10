@@ -208,7 +208,7 @@ class GlobalActionsClocked:
         project_manager.global_action_clocked_button.config(state=tk.NORMAL)
 
     @classmethod
-    def insert_global_actions_clocked(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create clocked global-actions window at event position."""
         project_manager.global_action_clocked_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (

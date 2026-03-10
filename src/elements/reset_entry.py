@@ -117,7 +117,7 @@ class ResetEntry:
         project_manager.canvas.coords("reset_text", *new_center)
 
     @classmethod
-    def insert_reset_entry(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create reset entry at event position."""
         project_manager.reset_entry_button.config(state=tk.DISABLED)
         canvas_grid_coordinates_of_the_event = (

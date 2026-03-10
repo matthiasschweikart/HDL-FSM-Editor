@@ -361,7 +361,7 @@ class States:
         return (state_coords[2] - state_coords[0]) / 2
 
     @classmethod
-    def insert_state(cls, event) -> None:
+    def create(cls, event) -> None:
         """Create state at event position if not overlapping; warn and abort otherwise."""
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
         if cls.state_overlaps(event_x, event_y):
