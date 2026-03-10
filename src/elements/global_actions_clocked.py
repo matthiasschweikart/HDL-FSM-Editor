@@ -126,7 +126,6 @@ class GlobalActionsClocked:
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
         GlobalActionsClocked.ref_dict[self.window_id] = self
-        canvas_modify_bindings.switch_to_move_mode()
 
     def _edit_before_in_external_editor(self):
         self.text_before_id.edit_in_external_editor()
@@ -223,3 +222,4 @@ class GlobalActionsClocked:
             tags=("global_actions1",),
         )
         project_manager.undo_handling_ref.design_has_changed()
+        canvas_modify_bindings.switch_to_move_mode()

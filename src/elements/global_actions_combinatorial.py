@@ -85,7 +85,6 @@ class GlobalActionsCombinatorial:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
         self.frame_id.lower()
         GlobalActionsCombinatorial.ref_dict[self.window_id] = self
-        canvas_modify_bindings.switch_to_move_mode()
 
     def _edit_in_external_editor(self):
         self.text_id.edit_in_external_editor()
@@ -164,3 +163,4 @@ class GlobalActionsCombinatorial:
             tags=("global_actions_combinatorial1"),
         )
         project_manager.undo_handling_ref.design_has_changed()
+        canvas_modify_bindings.switch_to_move_mode()

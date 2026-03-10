@@ -85,7 +85,6 @@ class StateActionsDefault:
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
         StateActionsDefault.ref_dict[self.window_id] = self
-        canvas_modify_bindings.switch_to_move_mode()
 
     def tag(self) -> None:
         """Set window tag to state_actions_default."""
@@ -168,3 +167,4 @@ class StateActionsDefault:
             tags=("state_actions_default",),
         )
         project_manager.undo_handling_ref.design_has_changed()
+        canvas_modify_bindings.switch_to_move_mode()
