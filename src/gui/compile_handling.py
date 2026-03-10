@@ -14,6 +14,7 @@ from tkinter import messagebox
 
 from constants import GuiTab
 from project_manager import project_manager
+from utils.exec_like_bash import parse_command_string, run_command_list
 from utils.hdl_paths import get_hdl_output_paths
 from utils.var_expansion import expand_generate_path, expand_variables_in_list, find_git_root
 
@@ -46,7 +47,7 @@ def compile_hdl() -> None:
     if commands is None:
         messagebox.showerror("Error", "Unbalanced braces in compile command: missing '}' or unexpected '}'.")
         return
-    _run_command_list(commands)
+    run_command_list(commands, execute=_execute)
     end_time = datetime.now()
     project_manager.log_frame_text.config(state=tk.NORMAL)
     _insert_line_in_log("Finished user commands from Control-Tab after " + str(end_time - start_time) + ".\n")
@@ -82,153 +83,10 @@ def _execute(command) -> bool:
     return True
 
 
-def _run_command_list(commands: list[tuple[str | None, str | list]]) -> bool:
-    """Run parsed command list. Returns success of last executed command (or True if none run)."""
-    last_success = True
-    for op, cmd in commands:
-        run = (
-            op is None
-            or op == _TOKEN_SEMICOLON
-            or (op == _TOKEN_AND_AND and last_success)
-            or (op == _TOKEN_OR_OR and not last_success)
-        )
-        if run:
-            last_success = _execute(cmd) if isinstance(cmd, str) else _run_command_list(cmd)
-    return last_success
-
-
-# Token kinds for compile command parsing
-_TOKEN_TEXT = "TEXT"
-_TOKEN_SEMICOLON = ";"
-_TOKEN_AND_AND = "&&"
-_TOKEN_OR_OR = "||"
-_TOKEN_LBRACE = "{"
-_TOKEN_RBRACE = "}"
-
-
-def _tokenize_compile_command(s: str) -> list[tuple[str, str | None]]:
-    """Tokenize the compile command string. Respects single- and double-quoted strings.
-    Returns list of (kind, value) where kind is TEXT/;/&&/||/{/} and value is the text for TEXT else None.
-    """
-    tokens: list[tuple[str, str | None]] = []
-    buffer: list[str] = []
-    i = 0
-    in_double = False
-    in_single = False
-
-    def flush_text() -> None:
-        nonlocal buffer
-        text = "".join(buffer).strip()
-        tokens.append((_TOKEN_TEXT, text if text else None))
-        buffer = []
-
-    while i < len(s):
-        if in_double:
-            if s[i] == "\\" and i + 1 < len(s):
-                buffer.append(s[i + 1])
-                i += 2
-            elif s[i] == '"':
-                buffer.append(s[i])
-                in_double = False
-                i += 1
-            else:
-                buffer.append(s[i])
-                i += 1
-        elif in_single:
-            if s[i] == "'":
-                buffer.append(s[i])
-                in_single = False
-                i += 1
-            else:
-                buffer.append(s[i])
-                i += 1
-        else:
-            if s[i : i + 2] == "&&":
-                flush_text()
-                tokens.append((_TOKEN_AND_AND, None))
-                i += 2
-            elif s[i : i + 2] == "||":
-                flush_text()
-                tokens.append((_TOKEN_OR_OR, None))
-                i += 2
-            elif s[i] == ";":
-                flush_text()
-                tokens.append((_TOKEN_SEMICOLON, None))
-                i += 1
-            elif s[i] == "{":
-                flush_text()
-                tokens.append((_TOKEN_LBRACE, None))
-                i += 1
-            elif s[i] == "}":
-                flush_text()
-                tokens.append((_TOKEN_RBRACE, None))
-                i += 1
-            elif s[i] == '"':
-                buffer.append(s[i])
-                in_double = True
-                i += 1
-            elif s[i] == "'":
-                buffer.append(s[i])
-                in_single = True
-                i += 1
-            else:
-                buffer.append(s[i])
-                i += 1
-    flush_text()
-    return tokens
-
-
-def _parse_compile_commands(
-    tokens: list[tuple[str, str | None]], pos: list[int], stop_at_rbrace: bool
-) -> list[tuple[str | None, str | list]]:
-    """Parse token list into list of (op, cmd). cmd is str or list of (op, cmd) for groups.
-    pos is mutable index; stop_at_rbrace means stop at first RBRACE (for group).
-    """
-    result: list[tuple[str | None, str | list]] = []
-    op: str | None = None
-    while pos[0] < len(tokens):
-        kind, value = tokens[pos[0]]
-        if kind == _TOKEN_RBRACE:
-            if stop_at_rbrace:
-                break
-            raise ValueError("Unbalanced braces in compile command: unexpected '}'")
-        if kind == _TOKEN_LBRACE:
-            pos[0] += 1
-            group = _parse_compile_commands(tokens, pos, stop_at_rbrace=True)
-            if pos[0] < len(tokens) and tokens[pos[0]][0] == _TOKEN_RBRACE:
-                pos[0] += 1
-            else:
-                raise ValueError("Unbalanced braces in compile command: missing '}'")
-            result.append((op, group))
-            op = None
-        elif kind == _TOKEN_TEXT:
-            cmd_text = value
-            pos[0] += 1
-            if cmd_text is not None and cmd_text != "":
-                result.append((op, cmd_text))
-            op = None
-        else:
-            pos[0] += 1
-            continue
-        # next token may be operator
-        if pos[0] < len(tokens):
-            k, _ = tokens[pos[0]]
-            if k in (_TOKEN_SEMICOLON, _TOKEN_AND_AND, _TOKEN_OR_OR):
-                op = k
-                pos[0] += 1
-    return result
-
-
 def _get_command_list() -> list[tuple[str | None, str | list]] | None:
     """Parse compile command into list of (op, cmd). op is None/';'/'&&'/'||', cmd is str or list (group).
     Returns None on parse error (e.g. unbalanced braces)."""
-    command_string = project_manager.compile_cmd.get()
-    tokens = _tokenize_compile_command(command_string)
-    pos = [0]
-    try:
-        return _parse_compile_commands(tokens, pos, stop_at_rbrace=False)
-    except ValueError:
-        return None
+    return parse_command_string(project_manager.compile_cmd.get())
 
 
 def _replace_variables(command_array) -> list | None:
