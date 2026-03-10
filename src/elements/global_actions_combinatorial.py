@@ -18,8 +18,8 @@ class GlobalActionsCombinatorial:
 
     ref_dict = {}
 
-    def __init__(self, menu_x, menu_y, height, width, padding, tags) -> None:
-        self.text_content = None
+    def __init__(self, menu_x, menu_y, padding, tags, actions) -> None:
+        self.text_content = actions
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
@@ -39,8 +39,6 @@ class GlobalActionsCombinatorial:
         self.text_id = custom_text.CustomText(
             self.frame_id,
             text_type="action",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
@@ -51,7 +49,9 @@ class GlobalActionsCombinatorial:
         self.window_id = project_manager.canvas.create_window(
             menu_x, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
         )
-
+        GlobalActionsCombinatorial.ref_dict[self.window_id] = self
+        self.text_id.insert("1.0", actions)
+        self.text_id.format(None)
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(
@@ -84,7 +84,6 @@ class GlobalActionsCombinatorial:
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
         self.frame_id.lower()
-        GlobalActionsCombinatorial.ref_dict[self.window_id] = self
 
     def _edit_in_external_editor(self):
         self.text_id.edit_in_external_editor()
@@ -157,10 +156,9 @@ class GlobalActionsCombinatorial:
         GlobalActionsCombinatorial(
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
-            height=1,
-            width=8,
             padding=1,
             tags=("global_actions_combinatorial1"),
+            actions="",
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()

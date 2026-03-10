@@ -346,11 +346,8 @@ def _load_window_elements(
         text = definition[1]
         tags = definition[2]
         action_ref = global_actions_combinatorial.GlobalActionsCombinatorial(
-            coords[0], coords[1], height=1, width=8, padding=1, tags=tags
+            coords[0], coords[1], padding=1, tags=tags, actions=text
         )
-        action_ref.text_content = text + "\n"
-        action_ref.text_id.insert("1.0", text)
-        action_ref.text_id.format(None)
 
     # Load state actions default
     for definition in design_dictionary["window_state_actions_default"]:
