@@ -177,8 +177,6 @@ class States:
                     state_comment.StateComment(
                         menu_x,
                         menu_y,
-                        height=1,
-                        width=8,
                         padding=1,
                         tags=[state_identifier + "_comment", state_identifier + "_comment_line_start"],
                         line_coords=[
@@ -187,6 +185,7 @@ class States:
                             (state_coords[2] + state_coords[0]) / 2,
                             (state_coords[3] + state_coords[1]) / 2,
                         ],
+                        comment="",
                     )
                     project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "change color":

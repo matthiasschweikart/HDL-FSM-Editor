@@ -5,10 +5,10 @@ This class handles "state-comments".
 import tkinter as tk
 from tkinter import ttk
 
-import widgets.custom_text as custom_text
 from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from gui import tab_diagram
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class StateComment:
@@ -18,17 +18,8 @@ class StateComment:
 
     ref_dict = {}
 
-    def __init__(
-        self,
-        menu_x,
-        menu_y,
-        height,
-        width,
-        padding,
-        tags,
-        line_coords,
-    ) -> None:
-        self.text_content = None
+    def __init__(self, coord_x, coord_y, padding, tags, line_coords, comment) -> None:
+        self.text_content = comment
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
@@ -48,25 +39,26 @@ class StateComment:
         self.text_id = custom_text.CustomText(
             self.frame_id,
             text_type="comment",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
             foreground="blue",
         )
+        self.label_id.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E))
+        self.text_id.grid(column=0, row=1, sticky=(tk.S, tk.W, tk.E))
+        # Create canvas window for the frame (containing label and text):
+        self.window_id = project_manager.canvas.create_window(
+            coord_x + 100, coord_y, window=self.frame_id, anchor=tk.W, tags=tags
+        )
+        StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
+        self.text_id.insert("1.0", comment)
+        self.text_id.format(None)
+
         self.line_id = project_manager.canvas.create_line(  # Line starts at comment, ends at state
             line_coords,
             tags=tags[0] + "_line",
             dash=(2, 2),
         )
-        # Create canvas window for the frame (containing label and text):
-        self.window_id = project_manager.canvas.create_window(
-            menu_x + 100, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
-        )
-        self.label_id.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E))
-        self.text_id.grid(column=0, row=1, sticky=(tk.S, tk.W, tk.E))
-
         project_manager.canvas.tag_lower(self.line_id)  # Lines are always "under" anything else.
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
@@ -99,8 +91,6 @@ class StateComment:
                 single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
-
-        StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
 
     def _edit_in_external_editor(self):
         self.text_id.edit_in_external_editor()

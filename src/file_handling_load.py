@@ -316,13 +316,9 @@ def _load_window_elements(
         text = definition[1]
         tags = definition[2]
         line_coords = state_comment_line_dictionary[tags[0]]["coords"]
-        comment_ref = state_comment.StateComment(
-            coords[0] - 100, coords[1], height=1, width=8, padding=1, tags=tags, line_coords=line_coords
+        state_comment.StateComment(
+            coords[0] - 100, coords[1], padding=1, tags=tags, line_coords=line_coords, comment=text
         )
-        project_manager.canvas.itemconfigure(comment_ref.window_id, tag=tags)
-        comment_ref.text_content = text + "\n"
-        comment_ref.text_id.insert("1.0", text)
-        comment_ref.text_id.format(None)
 
     _load_condition_action_blocks(design_dictionary, condition_action_line_dictionary)
 
