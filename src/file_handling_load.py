@@ -299,7 +299,7 @@ def _load_window_elements(
                 line_tag = t[:-6]
                 line_coords = state_action_line_dictionary[line_tag]["coords"]
                 line_tags = state_action_line_dictionary[line_tag]["tags"]
-                action_ref = state_action.StateAction(
+                state_action.StateAction(
                     coords[0],
                     coords[1],
                     padding=1,
@@ -341,7 +341,7 @@ def _load_window_elements(
         coords = definition[0]
         text = definition[1]
         tags = definition[2]
-        action_ref = global_actions_combinatorial.GlobalActionsCombinatorial(
+        global_actions_combinatorial.GlobalActionsCombinatorial(
             coords[0], coords[1], padding=1, tags=tags, actions=text
         )
 
@@ -350,12 +350,7 @@ def _load_window_elements(
         coords = definition[0]
         text = definition[1]
         tags = definition[2]
-        action_ref = state_actions_default.StateActionsDefault(
-            coords[0], coords[1], height=1, width=8, padding=1, tags=tags
-        )
-        action_ref.text_content = text + "\n"
-        action_ref.text_id.insert("1.0", text)
-        action_ref.text_id.format(None)
+        state_actions_default.StateActionsDefault(coords[0], coords[1], padding=1, tags=tags, action=text)
 
     _update_window_element_button_states()
 

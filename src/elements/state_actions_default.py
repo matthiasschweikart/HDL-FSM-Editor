@@ -18,8 +18,8 @@ class StateActionsDefault:
 
     ref_dict = {}
 
-    def __init__(self, menu_x, menu_y, height, width, padding, tags) -> None:
-        self.text_content = None
+    def __init__(self, coord_x, coord_y, padding, tags, action) -> None:
+        self.text_content = action
         self.difference_x = 0
         self.difference_y = 0
         self.move_rectangle = None
@@ -41,12 +41,20 @@ class StateActionsDefault:
         self.text_id = custom_text.CustomText(
             self.frame_id,
             text_type="action",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
         )
+        self.label.grid(row=0, column=0, sticky=(tk.N, tk.W, tk.E))
+        self.text_id.grid(row=1, column=0, sticky=(tk.E, tk.W))
+        # Create canvas window for frame and text:
+        self.window_id = project_manager.canvas.create_window(
+            coord_x, coord_y, window=self.frame_id, anchor=tk.W, tags=tags
+        )
+        StateActionsDefault.ref_dict[self.window_id] = self
+        self.text_id.insert("1.0", action)
+        self.text_id.format(None)
+
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(
@@ -70,12 +78,6 @@ class StateActionsDefault:
             "<FocusOut>",
             lambda event: project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete()),
         )
-        self.label.grid(row=0, column=0, sticky=(tk.N, tk.W, tk.E))
-        self.text_id.grid(row=1, column=0, sticky=(tk.E, tk.W))
-        # Create canvas window for frame and text:
-        self.window_id = project_manager.canvas.create_window(
-            menu_x, menu_y, window=self.frame_id, anchor=tk.W, tags=tags
-        )
         ids_list = (self.label, self.text_id)
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
@@ -84,7 +86,6 @@ class StateActionsDefault:
                 single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
-        StateActionsDefault.ref_dict[self.window_id] = self
 
     def tag(self) -> None:
         """Set window tag to state_actions_default."""
@@ -161,10 +162,9 @@ class StateActionsDefault:
         StateActionsDefault(
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
-            height=1,
-            width=8,
             padding=1,
             tags=("state_actions_default",),
+            action="",
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
