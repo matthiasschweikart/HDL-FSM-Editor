@@ -156,13 +156,12 @@ class States:
                 state_action.StateAction(
                     menu_x + 100,
                     menu_y,
-                    height=1,
-                    width=8,
                     padding=1,
                     tags=state_action_tags,
                     line_coords=line_coords,
                     line_tags=line_tags,
                     increment=True,
+                    action="",
                 )
                 project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "add comment":

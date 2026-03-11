@@ -302,17 +302,13 @@ def _load_window_elements(
                 action_ref = state_action.StateAction(
                     coords[0],
                     coords[1],
-                    height=1,
-                    width=8,
                     padding=1,
                     tags=tags,
                     line_coords=line_coords,
                     line_tags=line_tags,
                     increment=False,
+                    action=text,
                 )
-                action_ref.text_content = text + "\n"
-                action_ref.text_id.insert("1.0", text)
-                action_ref.text_id.format(None)
 
     # Load state comments
     for definition in design_dictionary.get("window_state_comment", []):

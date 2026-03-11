@@ -21,17 +21,16 @@ class StateAction:
         self,
         coord_x,
         coord_y,
-        height,
-        width,
         padding,
         tags,
         line_coords,
         line_tags,
         increment,
+        action,
     ) -> None:
         if increment is True:
             StateAction.state_action_id += 1
-        self.text_content = None
+        self.text_content = action
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
@@ -51,8 +50,6 @@ class StateAction:
         self.text_id = custom_text.CustomText(
             self.frame_id,
             text_type="action",
-            height=height,
-            width=width,
             undo=True,
             maxundo=-1,
             font=("Courier", int(project_manager.fontsize)),
@@ -62,6 +59,9 @@ class StateAction:
         self.window_id = project_manager.canvas.create_window(
             coord_x, coord_y, window=self.frame_id, anchor=tk.W, tags=tags
         )
+        StateAction.ref_dict[self.window_id] = self
+        self.text_id.insert("1.0", action)
+        self.text_id.format(None)
         self.line_id = project_manager.canvas.create_line(line_coords, dash=(2, 2), tags=line_tags)
         project_manager.canvas.tag_lower(self.line_id)
 
@@ -96,7 +96,6 @@ class StateAction:
                 single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
-        StateAction.ref_dict[self.window_id] = self
 
     def _edit_in_external_editor(self):
         self.text_id.edit_in_external_editor()
