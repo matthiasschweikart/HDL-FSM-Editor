@@ -8,6 +8,7 @@ from tkinter import messagebox
 
 from codegen import hdl_generation
 from project_manager import project_manager
+from utils.hdl_paths import get_architecture_output_path, get_primary_output_path
 
 
 class UpdateHdlTab:
@@ -19,16 +20,8 @@ class UpdateHdlTab:
     def __init__(self, language, number_of_files, readfile, generate_path, module_name) -> None:
         self.date_of_hdl_file = 0.0  # Default-Value, used when hdl-file not exists.
         self.date_of_hdl_file2 = 0.0  # Default-Value, used when hdl-file not exists.
-        if language == "VHDL":
-            if number_of_files == 1:
-                hdlfilename = generate_path + "/" + module_name + ".vhd"
-                hdlfilename_architecture = None
-            else:
-                hdlfilename = generate_path + "/" + module_name + "_e.vhd"
-                hdlfilename_architecture = generate_path + "/" + module_name + "_fsm.vhd"
-        else:  # verilog
-            hdlfilename = generate_path + "/" + module_name + ".v"
-            hdlfilename_architecture = None
+        hdlfilename = get_primary_output_path(generate_path, module_name, language, number_of_files)
+        hdlfilename_architecture = get_architecture_output_path(generate_path, module_name, language, number_of_files)
         UpdateHdlTab.clear_hdl_tab()
         entity = ""
         arch = ""

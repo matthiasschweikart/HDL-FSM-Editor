@@ -25,6 +25,7 @@ from elements import (
     transition,
 )
 from project_manager import project_manager
+from utils.var_expansion import expand_generate_path
 
 
 def new_design() -> bool:
@@ -224,11 +225,15 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
     dir_name, file_name = os.path.split(read_filename)
     project_manager.root.title(f"{file_name} ({dir_name})")
     if not is_script_mode:
+        generate_path = expand_generate_path(
+            design_dictionary["generate_path"],
+            read_filename,
+        )
         update_ref = update_hdl_tab.UpdateHdlTab(
             design_dictionary["language"],
             design_dictionary["number_of_files"],
             read_filename,
-            design_dictionary["generate_path"],
+            generate_path,
             design_dictionary["modulename"],
         )
         project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
