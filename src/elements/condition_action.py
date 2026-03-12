@@ -35,8 +35,8 @@ class ConditionAction:
             ConditionAction.conditionaction_id += 1
         self.difference_x = 0
         self.difference_y = 0
-        self.action_text = action
-        self.condition_text = condition
+        self.action_text = action  # Stores the text without a trailing "return"
+        self.condition_text = condition  # Stores the text without a trailing "return"
         self.borderwidth = 0
         self.frame_id = ttk.Frame(
             project_manager.canvas, relief=tk.FLAT, borderwidth=self.borderwidth, padding=padding, style="Window.TFrame"
@@ -88,6 +88,7 @@ class ConditionAction:
         self.action_id.insert("1.0", self.action_text)
         self.action_id.format(None)
         self._show_condition_and_action()
+        self._hide_empty_condition_or_action()
 
         # The method _deactivate_frame() can not be bound to the Frame-leave-Event, because otherwise at moving the
         # cursor exactly at the frame would cause a flickering because of toggling between shrinked and full box.
@@ -159,8 +160,8 @@ class ConditionAction:
     def _activate_frame(self) -> None:
         self._select_window()
         self._show_condition_and_action()
-        self.action_text = self.action_id.get("1.0", tk.END)
-        self.condition_text = self.condition_id.get("1.0", tk.END)
+        self.action_text = self.action_id.get("1.0", tk.END + "-1c")
+        self.condition_text = self.condition_id.get("1.0", tk.END + "-1c")
         if self.frame_enter_func_id is not None:
             self.frame_id.unbind("<Enter>", self.frame_enter_func_id)
             self.frame_enter_func_id = None
@@ -203,7 +204,7 @@ class ConditionAction:
         # Update self.condition_text, so that the <Leave>-check in deactivate() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
-        self.condition_text = self.condition_id.get("1.0", tk.END)
+        self.condition_text = self.condition_id.get("1.0", tk.END + "-1c")
 
     def _edit_action_in_external_editor(self):
         self.action_id.edit_in_external_editor()
@@ -213,12 +214,12 @@ class ConditionAction:
         # Update self.action_text, so that the <Leave>-check in deactivate() does not signal a design-change and
         # that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
         # To ensure this, save_in_file() waits for idle.
-        self.action_text = self.action_id.get("1.0", tk.END)
+        self.action_text = self.action_id.get("1.0", tk.END + "-1c")
 
     def _hide_empty_condition_or_action(self) -> None:
         if (
-            self.condition_id.get("1.0", tk.END) != self.condition_text
-            or self.action_id.get("1.0", tk.END) != self.action_text
+            self.condition_id.get("1.0", tk.END + "-1c") != self.condition_text
+            or self.action_id.get("1.0", tk.END + "-1c") != self.action_text
         ):
             project_manager.undo_handling_ref.design_has_changed()
         if self.condition_id.get("1.0", tk.END) == "\n" and self.action_id.get("1.0", tk.END) != "\n":

@@ -367,7 +367,7 @@ def _load_condition_action_blocks(
                 ca_connection = t[:-7]
                 line_coords = condition_action_line_dictionary[ca_connection]["coords"]
                 line_tags = condition_action_line_dictionary[ca_connection]["tags"]
-                condition_action_ref = condition_action.ConditionAction(
+                condition_action.ConditionAction(
                     coords[0],
                     coords[1],
                     connected_to_reset_entry,
@@ -379,14 +379,7 @@ def _load_condition_action_blocks(
                     line_tags=line_tags,
                     increment=False,
                 )
-                cond_empty = condition_action_ref.condition_id.get("1.0", tk.END) == "\n"
-                action_empty = condition_action_ref.action_id.get("1.0", tk.END) == "\n"
-                if cond_empty and not action_empty:
-                    condition_action_ref.condition_label.grid_forget()
-                    condition_action_ref.condition_id.grid_forget()
-                if not cond_empty and action_empty:
-                    condition_action_ref.action_label.grid_forget()
-                    condition_action_ref.action_id.grid_forget()
+                break
 
 
 def _update_window_element_button_states() -> None:
