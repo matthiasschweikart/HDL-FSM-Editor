@@ -26,7 +26,6 @@ class ProjectManager:
         self._additional_sources_value: tk.StringVar = None
         self._select_file_number_text: tk.IntVar = None
         self._compile_cmd: tk.Entry = None
-        self._compile_cmd_docu: tk.Label = None
         self._edit_cmd: tk.Entry = None
         self._module_name: tk.Entry = None
         self._language: tk.StringVar = None
@@ -617,16 +616,6 @@ class ProjectManager:
     def edit_cmd(self, value: tk.Entry) -> None:
         """Set the edit command Entry widget."""
         self._edit_cmd = value
-
-    @property
-    def compile_cmd_docu(self) -> tk.Label:
-        """Get the compile command documentation Label widget."""
-        return self._compile_cmd_docu
-
-    @compile_cmd_docu.setter
-    def compile_cmd_docu(self, value: tk.Label) -> None:
-        """Set the compile command documentation Label widget."""
-        self._compile_cmd_docu = value
 
     @property
     def compile_cmd(self) -> tk.Entry:
