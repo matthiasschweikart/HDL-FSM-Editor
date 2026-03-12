@@ -5,6 +5,7 @@ The code was copied and extended from https://stackoverflow.com/questions/406175
 import os
 import platform
 import re
+import shlex
 import subprocess
 import tempfile
 import tkinter as tk
@@ -141,7 +142,7 @@ class CustomText(CodeEditor):
             tf.write(self.get("1.0", "end-1c"))
             tmp_name = tf.name
         try:
-            cmd = project_manager.edit_cmd.get().split() + [tmp_name]
+            cmd = shlex.split(project_manager.edit_cmd.get()) + [tmp_name]
             subprocess.run(cmd, check=False)  # blocks efficiently
             with open(tmp_name, encoding="utf-8") as f:
                 new_text = f.read()
