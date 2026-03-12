@@ -100,20 +100,20 @@ def clear_design():
     project_manager.hdl_frame_text.delete("1.0", tk.END)
     project_manager.hdl_frame_text.config(state=tk.DISABLED)
     project_manager.canvas.delete("all")
-    state.States.state_number = 0
-    transition.TransitionLine.transition_number = 0
-    project_manager.reset_entry_button.config(state=tk.NORMAL)
-    connector.ConnectorInstance.connector_number = 0
     condition_action.ConditionAction.conditionaction_id = 0
     condition_action.ConditionAction.ref_dict = {}
+    connector.ConnectorInstance.connector_number = 0
+    global_actions_clocked.GlobalActionsClocked.ref_dict = {}
+    global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict = {}
     state_action.StateAction.state_action_id = 0
     state_action.StateAction.ref_dict = {}
     state_actions_default.StateActionsDefault.ref_dict = {}
+    state.States.state_number = 0
+    transition.TransitionLine.transition_number = 0
+    project_manager.reset_entry_button.config(state=tk.NORMAL)
     project_manager.state_action_default_button.config(state=tk.NORMAL)
     project_manager.global_action_clocked_button.config(state=tk.NORMAL)
     project_manager.global_action_combinatorial_button.config(state=tk.NORMAL)
-    global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict = {}
-    global_actions_clocked.GlobalActionsClocked.ref_dict = {}
     project_manager.state_radius = 20.0
     project_manager.priority_distance = 14
     project_manager.reset_entry_size = 40

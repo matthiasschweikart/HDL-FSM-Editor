@@ -84,11 +84,11 @@ class UndoHandling:
             project_manager.redo_button.config(state="enabled")
 
     def _set_diagram_to_version_selected_by_stack_pointer(self) -> None:
+        project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
         # Remove the old design:
         file_handling.clear_design()
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
         design, visible_center = self.stack[self.stack_write_pointer]
-        project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
         file_handling_load.load_design_from_dict(design)
         project_manager.tab_control_ref.activate_traces()
         self._shift_visible_center_to_window_center(visible_center)
