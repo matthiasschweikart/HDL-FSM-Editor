@@ -80,6 +80,14 @@ def _execute(command) -> bool:
             "Error in HDL-FSM-Editor", "FileNotFoundError caused by compile command:\n" + command_string
         )
         return False
+    except Exception:  # pylint: disable=broad-except
+        command_string = ""
+        for word in command_array_new:
+            command_string += word + " "
+        messagebox.showerror(
+            "Error in HDL-FSM-Editor", "An error occurred while executing the compile command:\n" + command_string
+        )
+        return False
     return True
 
 
