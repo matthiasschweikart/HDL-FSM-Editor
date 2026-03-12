@@ -71,10 +71,6 @@ class UndoHandling:
             self.stack_write_pointer -= 2
             self._set_diagram_to_version_selected_by_stack_pointer()
             self.stack_write_pointer += 1
-            if self.stack_write_pointer == 1:
-                title = project_manager.root.title()
-                if title.endswith("*"):
-                    project_manager.root.title(title[:-1])
             if (
                 self.stack_write_pointer == 1
             ):  # 1 is the next free place in the stack, 0 is the empty design, so nothing to undo is left
