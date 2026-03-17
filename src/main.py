@@ -9,8 +9,8 @@ from tkinter import messagebox
 
 import constants
 import file_handling
-import main_window
 from codegen import hdl_generation
+from gui import main_window
 from project_manager import project_manager
 
 
