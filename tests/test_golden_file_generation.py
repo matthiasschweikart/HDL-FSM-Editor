@@ -26,22 +26,18 @@ TEST_CONFIGURATION = {
     "test_sensitivity_check.hfe": {
         "generation_should_succeed": True,
         "validation_patterns": [
-            "HDL-FSM-Editor\n"
-            "Version 6.1\n"
-            "Created by Matthias Schweikart\n"
-            "Contact: matthias.schweikart@gmx.de\n"
-            "./test_sensitivity_check_fsm.vhd:30:0: Warning: The signal/port 'sig3' is included in the sensitivity"
-            " list, but not used in the process body.\n"
-            "./test_sensitivity_check_fsm.vhd:30:0: Warning: The signal/port 'sig4' is not included in the sensitivity"
-            " list, but used in the process body.\n"
-            "./test_sensitivity_check_fsm.vhd:42:0: Warning: The signal/port 'sig3' is not included in the sensitivity"
-            " list, but used in the process body.\n"
-            "./test_sensitivity_check_fsm.vhd:42:0: Warning: The signal/port 'record_sig2' is not included in the"
-            " sensitivity list, but used in the process body.\n"
-            "./test_sensitivity_check_fsm.vhd:54:0: Warning: The signal/port 'record_sig4.slice1' is included in the"
-            " sensitivity list, but not used in the process body.\n"
+            "./test_sensitivity_check_fsm.vhd:30:0: Warning: The signal/port 'sig3' is included in"
+            " the sensitivity list, but not used in the process body.",
+            "./test_sensitivity_check_fsm.vhd:30:0: Warning: The signal/port 'sig4' is not included in"
+            " the sensitivity list, but used in the process body.",
+            "./test_sensitivity_check_fsm.vhd:42:0: Warning: The signal/port 'sig3' is not included in"
+            " the sensitivity list, but used in the process body.",
+            "./test_sensitivity_check_fsm.vhd:42:0: Warning: The signal/port 'record_sig2' is not included in"
+            " the sensitivity list, but used in the process body.",
+            "./test_sensitivity_check_fsm.vhd:54:0: Warning: The signal/port 'record_sig4.slice1' is included in"
+            " the sensitivity list, but not used in the process body.",
             "./test_sensitivity_check_fsm.vhd:54:0: Warning: The signal/port 'record_sig5.slice1' is not included in"
-            " the sensitivity list, but used in the process body.\n"
+            " the sensitivity list, but used in the process body.",
         ],
     },
 }
