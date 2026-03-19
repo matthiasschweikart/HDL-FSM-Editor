@@ -25,7 +25,7 @@ class SensitivityCheck:
         self.readable_sigs = readable_sigs
         self.language = language
         self.file_name = file_name
-        self._convert_process_sensitivities_and_bodies_to_lists_of_words(process_sensitivities_and_bodies)
+        self._convert_process_sensitivities_and_process_bodies_to_lists_of_words(process_sensitivities_and_bodies)
         sensitivity_and_body_lists = self._prepare_process_bodys_for_check(process_sensitivities_and_bodies)
         self.messages = self._check_sensitivity(sensitivity_and_body_lists)
 
@@ -33,7 +33,7 @@ class SensitivityCheck:
         """Return a list of warnings regarding the sensitivity list of the VHDL design."""
         return self.messages
 
-    def _convert_process_sensitivities_and_bodies_to_lists_of_words(
+    def _convert_process_sensitivities_and_process_bodies_to_lists_of_words(
         self, sensitivity_and_body_lists: list[dict[str, Any]]
     ) -> None:
         for index, sensitivity_and_body_entry in enumerate(sensitivity_and_body_lists):

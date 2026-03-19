@@ -22,6 +22,7 @@ class SensitivityCheckHfe:
 
     def __init__(self, is_script_mode):
         language = project_manager.language.get()
+        readable_sigs = hdl_generation_architecture_state_actions.create_a_list_with_all_possible_sensitivity_entries()
         if project_manager.select_file_number_text.get() == 1:
             if language == "VHDL":
                 file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + ".vhd"
@@ -29,7 +30,6 @@ class SensitivityCheckHfe:
                 file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + ".v"
         else:
             file_name = project_manager.generate_path_value.get() + "/" + project_manager.module_name.get() + "_fsm.vhd"
-        readable_sigs = hdl_generation_architecture_state_actions.create_a_list_with_all_possible_sensitivity_entries()
         process_sensitivities_and_bodies = self._collect_process_sensitivities_and_bodies(file_name)
         if process_sensitivities_and_bodies:
             messages = sensitivity_check.SensitivityCheck(
