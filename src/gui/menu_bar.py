@@ -53,11 +53,13 @@ class MenuBar:
 
         tool_title = ttk.Label(menue_frame, text="HDL-FSM-Editor", font=("Arial", 15))
 
+        search_frame = ttk.Frame(menue_frame, borderwidth=2)
         search_string = tk.StringVar()
         search_string.set("")
         replace_string = tk.StringVar()
         replace_string.set("")
-        search_frame = ttk.Frame(menue_frame, borderwidth=2)
+        search_string_entry = ttk.Entry(search_frame, width=23, textvariable=search_string)
+        replace_string_entry = ttk.Entry(search_frame, width=23, textvariable=replace_string)
         search_button = ttk.Button(
             search_frame,
             text="Find",
@@ -70,8 +72,7 @@ class MenuBar:
             command=lambda: find_replace.FindReplace(search_string, replace_string, replace=False, in_hdl=True),
             style="Find.TButton",
         )
-        search_string_entry = ttk.Entry(search_frame, width=23, textvariable=search_string)
-        replace_string_entry = ttk.Entry(search_frame, width=23, textvariable=replace_string)
+        distance_label = ttk.Label(search_frame, text=" ", width=2)
         replace_button = ttk.Button(
             search_frame,
             text="Find & Replace",
@@ -97,8 +98,9 @@ class MenuBar:
         search_string_entry.grid(row=0, column=0)
         search_button.grid(row=0, column=1)
         search_button2.grid(row=0, column=2)
-        replace_string_entry.grid(row=0, column=3)
-        replace_button.grid(row=0, column=4)
+        distance_label.grid(row=0, column=3)
+        replace_string_entry.grid(row=0, column=4)
+        replace_button.grid(row=0, column=5)
 
         help_menu = tk.Menu(project_manager.root, tearoff=0)
         help_menu.add_command(
