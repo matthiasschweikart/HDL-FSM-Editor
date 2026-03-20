@@ -718,9 +718,9 @@ class TransitionLine:
         elif transition_start_object_tag == "reset_entry" and transition_ends_at_connector is True:
             return
         elif end_state_canvas_id == start_state_canvas_id and len(transition_coords) in (4, 6):
-            # Going back to the start state with only 2  points cannot be drawn. The transition point is not accepted.
-            # Going back to the start state with only 3  points creates a transition which cannot be handled
-            # properly. The transition point is not accepted.
+            # A loopback transition with only 2  points cannot be drawn.
+            # A loopback transition with only 3  points creates a transition which cannot be handled properly.
+            # The transition point is not accepted.
             return
         else:
             project_manager.canvas.addtag_withtag(  # Add tag to start object
