@@ -19,6 +19,7 @@ class TransitionLine:
 
     transition_number = 0
     ref_dict = {}
+    diff_dict = {}
 
     def __init__(self, transition_coords, tags, priority, new_transition=False) -> None:
         if new_transition:
@@ -65,7 +66,7 @@ class TransitionLine:
 
     def _determine_position_of_priority_rectangle(self, transition_coords):
         # Determine middle of the priority rectangle position by calculating a shortened transition:
-        priority_middle_x, priority_middle_y, _, _ = TransitionLine.shorten_vector(
+        priority_middle_x, priority_middle_y, _, _ = TransitionLine._shorten_vector(
             project_manager.priority_distance,
             transition_coords[0],
             transition_coords[1],
@@ -175,16 +176,16 @@ class TransitionLine:
             new_coords.append(old_coords[1])
             new_coords.append(old_coords[-2])
             new_coords.append(old_coords[-1])
-            new_coords = TransitionLine.shorten_vector(
+            new_coords = TransitionLine._shorten_vector(
                 start_state_radius, new_coords[0], new_coords[1], end_state_radius, new_coords[2], new_coords[3], 1, 1
             )
             project_manager.canvas.coords(self.transition_id, new_coords)
             # Calculates the position of the priority rectangle by shortening the distance between the first point of
             # the transition and the second point of the transition.
-            [priority_middle_x, priority_middle_y, _, _] = TransitionLine.shorten_vector(
+            [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
                 project_manager.priority_distance, new_coords[0], new_coords[1], 0, new_coords[2], new_coords[3], 1, 0
             )
-            [rectangle_width_half, rectangle_height_half] = TransitionLine.get_rectangle_dimensions(
+            [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
                 transition_tag + "rectangle"
             )
             project_manager.canvas.coords(
@@ -268,11 +269,11 @@ class TransitionLine:
                 ref.delete()
             if transition_tag.startswith("coming_from_"):
                 start_state = transition_tag[12:]
-                TransitionLine.adapt_visibility_of_priority_rectangles_at_state(start_state)
+                TransitionLine._adapt_visibility_of_priority_rectangles_at_state(start_state)
         del TransitionLine.ref_dict[self.transition_id]
 
     @classmethod
-    def adapt_visibility_of_priority_rectangles_at_state(cls, start_state) -> None:
+    def _adapt_visibility_of_priority_rectangles_at_state(cls, start_state) -> None:
         """Hide priority rect/text for the single outgoing transition from start_state; show if multiple."""
         tags_of_start_state = project_manager.canvas.gettags(start_state)
         number_of_outgoing_transitions = 0
@@ -290,35 +291,46 @@ class TransitionLine:
         """Move transition point (start/next_to_start/next_to_end/end) to (event_x, event_y);
         Records the move offset when first is True, else maintains the offset.
         Snaps to grid when last is True."""
-        if project_manager.canvas.type(move_list[0][0]) == "line" and (move_list[0][1] in ("start", "end")):
-            middle_of_line_is_moved = False
-        else:
-            middle_of_line_is_moved = True
-        if middle_of_line_is_moved is True:
-            if first is True:
-                # Calculate the difference between the "anchor" point and the event:
-                coords = project_manager.canvas.coords(transition_id)
-                if point == "start":
-                    point_to_move = [coords[0], coords[1]]
-                elif point == "next_to_start":
-                    point_to_move = [coords[2], coords[3]]
-                elif point == "next_to_end":
-                    point_to_move = [coords[-4], coords[-3]]
-                elif point == "end":
-                    point_to_move = [coords[-2], coords[-1]]
-                else:
-                    print("transition_handling: Fatal, unknown point =", point)
-                    return
-                cls.difference_x, cls.difference_y = -event_x + point_to_move[0], -event_y + point_to_move[1]
-        else:
-            cls.difference_x = 0
-            cls.difference_y = 0
+        if first is True:
+            cls._set_difference(event_x, event_y, transition_id, point, move_list)
         # Keep the distance between event and anchor point constant:
-        event_x, event_y = event_x + cls.difference_x, event_y + cls.difference_y
+        event_x, event_y = event_x + cls.diff_dict[point][0], event_y + cls.diff_dict[point][1]
         if last is True:
             event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
             event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
+        transition_tag = cls._determine_transition_tag(transition_id)
+        project_manager.canvas.tag_lower(transition_tag)
+        transition_coords = cls._move_transition(transition_tag, event_x, event_y, point)
+        cls._move_priority_rectangle(event_x, event_y, transition_tag, transition_coords, point)
+
+    @classmethod
+    def _set_difference(cls, event_x, event_y, transition_id, point, move_list) -> None:
+        """Calculate the difference between the event and the transition point to move, if first is True."""
+        coords = project_manager.canvas.coords(transition_id)
+        if project_manager.canvas.type(move_list[0][0]) == "line" and point in ("start", "end"):
+            # Only start or end point of transition is moved, so the line begin shall jump to the cursor:
+            cls.diff_dict[point] = (0, 0)
+            return
+        # Only a middle point of a transition is moved or
+        # a point of a transition is moved, because it is connected to a moving object:
+        if point == "start":
+            point_to_move = [coords[0], coords[1]]
+        elif point == "next_to_start":
+            point_to_move = [coords[2], coords[3]]
+        elif point == "next_to_end":
+            point_to_move = [coords[-4], coords[-3]]
+        elif point == "end":
+            point_to_move = [coords[-2], coords[-1]]
+        else:
+            print("transition_handling: Fatal, unknown point =", point)
+            return
+        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1])
+
+    @classmethod
+    def _determine_transition_tag(cls, transition_id) -> str:
+        """Determine the transition tag based on the transition_id."""
         all_transition_tags = project_manager.canvas.gettags(transition_id)
+        transition_tag = ""
         for single_transition_tag in all_transition_tags:
             if (
                 single_transition_tag.startswith("transition")
@@ -326,9 +338,15 @@ class TransitionLine:
                 or single_transition_tag.endswith("comment_line")
             ):
                 transition_tag = single_transition_tag
-                project_manager.canvas.tag_lower(transition_tag)
+                break
+        return transition_tag
+
+    @classmethod
+    def _move_transition(cls, transition_tag, event_x, event_y, point) -> list:
+        """Move transition line and connected condition-action line(s) if existing; lower line under states."""
         # Move transition:
         transition_coords = project_manager.canvas.coords(transition_tag)
+        # print("transition_coords before moving:", transition_coords)
         if point == "start":
             project_manager.canvas.coords(transition_tag, event_x, event_y, *transition_coords[2:])
         elif point == "next_to_start":
@@ -347,7 +365,11 @@ class TransitionLine:
             list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
             if list_of_grid_line_canvas_ids:
                 project_manager.canvas.tag_raise(transition_tag, "grid_line")
-        # Move priority rectangle:
+        return project_manager.canvas.coords(transition_tag)
+
+    @classmethod
+    def _move_priority_rectangle(cls, event_x, event_y, transition_tag, transition_coords, point) -> None:
+        """Move priority rectangle."""
         if transition_tag.startswith("transition"):  # There is no priority rectangle at a "connection".
             # The tag "transition_tag + '_start'" is already removed from the old start state when
             #  the transition start-point is moved. In all other cases the tag exists.
@@ -362,7 +384,7 @@ class TransitionLine:
                     start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
                 # Calculates the position of the priority rectangle by shortening the vector from the
                 # event (= first point of transition) to the second point of the transition.
-                [priority_middle_x, priority_middle_y, _, _] = TransitionLine.shorten_vector(
+                [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
                     start_state_radius + project_manager.priority_distance,
                     event_x,
                     event_y,
@@ -379,7 +401,7 @@ class TransitionLine:
                 # Because the transition is already extended to the start-state middle, the length of the
                 # vector must be shortened additionally by the start state radius,
                 # to keep the priority outside of the start-state.
-                [priority_middle_x, priority_middle_y, _, _] = TransitionLine.shorten_vector(
+                [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
                     start_state_radius + project_manager.priority_distance,
                     transition_coords[0],
                     transition_coords[1],
@@ -389,7 +411,7 @@ class TransitionLine:
                     1,
                     0,
                 )
-            [rectangle_width_half, rectangle_height_half] = TransitionLine.get_rectangle_dimensions(
+            [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
                 transition_tag + "rectangle"
             )
             project_manager.canvas.coords(
@@ -427,7 +449,7 @@ class TransitionLine:
         project_manager.canvas.tag_lower(transition_tag, transition_tag + "_end")
 
     @classmethod
-    def determine_priorities_of_outgoing_transitions(cls, start_state_canvas_id) -> dict:
+    def determine_priorities_of_outgoing_transitions(cls, start_state_canvas_id) -> dict[str, str]:
         """Return dict mapping transition_tag -> priority text for all transitions starting at start_state_canvas_id."""
         priority_dict = {}
         all_tags = project_manager.canvas.gettags(start_state_canvas_id)
@@ -461,7 +483,7 @@ class TransitionLine:
             else:
                 start_state_radius = (start_state_coords[2] - start_state_coords[0]) / 2
             end_state_radius = (end_state_coords[2] - end_state_coords[0]) / 2
-            transition_start_coords = TransitionLine.shorten_vector(
+            transition_start_coords = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[0],
                 transition_coords[1],
@@ -471,7 +493,7 @@ class TransitionLine:
                 1,
                 0,
             )
-            transition_end_coords = TransitionLine.shorten_vector(
+            transition_end_coords = TransitionLine._shorten_vector(
                 0,
                 transition_coords[-4],
                 transition_coords[-3],
@@ -485,12 +507,12 @@ class TransitionLine:
             transition_coords[1] = transition_start_coords[1]
             transition_coords[-2] = transition_end_coords[-2]
             transition_coords[-1] = transition_end_coords[-1]
-            transition_coords = TransitionLine.remove_duplicate_points(transition_coords)
+            transition_coords = TransitionLine._remove_duplicate_points(transition_coords)
             project_manager.canvas.coords(transition_tag, transition_coords)
             project_manager.canvas.tag_lower(transition_tag)
             # Move priority rectangle:
             start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
-            [priority_middle_x, priority_middle_y, _, _] = TransitionLine.shorten_vector(
+            [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
                 0 + project_manager.priority_distance,
                 transition_coords[0],
                 transition_coords[1],
@@ -500,7 +522,7 @@ class TransitionLine:
                 1,
                 0,
             )
-            [rectangle_width_half, rectangle_height_half] = TransitionLine.get_rectangle_dimensions(
+            [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
                 transition_tag + "rectangle"
             )
             project_manager.canvas.coords(
@@ -518,7 +540,7 @@ class TransitionLine:
             end_state_coords = project_manager.canvas.coords(end_state_tag)
             end_state_radius = (end_state_coords[2] - end_state_coords[0]) / 2
 
-            transition_end_coords = TransitionLine.shorten_vector(
+            transition_end_coords = TransitionLine._shorten_vector(
                 0,
                 transition_coords[-4],
                 transition_coords[-3],
@@ -534,7 +556,7 @@ class TransitionLine:
             project_manager.canvas.tag_lower(transition_tag)
 
     @classmethod
-    def remove_duplicate_points(cls, transition_coords) -> list:
+    def _remove_duplicate_points(cls, transition_coords) -> list:
         """Return coords list with consecutive duplicate points removed."""
         new_transition_coords = []
         new_transition_coords.append(transition_coords[0])
@@ -549,7 +571,7 @@ class TransitionLine:
         return new_transition_coords
 
     @classmethod
-    def get_rectangle_dimensions(cls, canvas_id) -> list:
+    def _get_rectangle_dimensions(cls, canvas_id) -> list:
         """Return [width_half, height_half] for the rectangle canvas item."""
         rectangle_coords = project_manager.canvas.coords(canvas_id)
         rectangle_width_half = (rectangle_coords[2] - rectangle_coords[0]) / 2
@@ -580,7 +602,7 @@ class TransitionLine:
                         project_manager.canvas.itemconfigure(outgoing_transition_tag + "rectangle", state=tk.NORMAL)
 
     @classmethod
-    def shorten_vector(cls, delta0, x0, y0, delta1, x1, y1, modify0, modify1) -> list:
+    def _shorten_vector(cls, delta0, x0, y0, delta1, x1, y1, modify0, modify1) -> list:
         """Shorten vector x0, y0, x1, y1 by delta0 at start and delta1 at end. modify0, modify1 are either 0 or 1."""
         phi = math.pi / 2 if x1 - x0 == 0 else math.atan((y1 - y0) / (x1 - x0))
         phi = abs(phi)
@@ -618,16 +640,16 @@ class TransitionLine:
                         lambda event, transition_id=transition_id: cls._transition_continue(event, transition_id),
                         add="+",
                     )
-                    transition_start_object_tag = cls._get_tag_of_start_object(canvas_id)
+                    tsotag = cls._get_tag_of_start_object(canvas_id)
                     project_manager.canvas.bind(
                         "<Button-1>",
-                        lambda event, transition_id=transition_id, canvas_id_of_start_item=canvas_id, transition_draw_funcid=transition_draw_funcid, transition_start_object_tag=transition_start_object_tag: (
+                        lambda evt, t_id=transition_id, c_id=canvas_id, tdf_id=transition_draw_funcid, tsotag=tsotag: (
                             cls._handle_next_added_transition_point(
-                                event,
-                                transition_id,
-                                canvas_id_of_start_item,
-                                transition_draw_funcid,
-                                transition_start_object_tag,
+                                evt,
+                                t_id,
+                                c_id,
+                                tdf_id,
+                                tsotag,
                             )
                         ),
                     )
@@ -786,7 +808,7 @@ class TransitionLine:
         if len(start_object_coords) == 10:  # start-state is reset-entry
             start_state_radius = 0
         if len(transition_coords) == 4:
-            vector1 = TransitionLine.shorten_vector(
+            vector1 = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[0],
                 transition_coords[1],
@@ -798,7 +820,7 @@ class TransitionLine:
             )
             vector2 = vector1
         elif len(transition_coords) == 6:
-            vector1 = TransitionLine.shorten_vector(
+            vector1 = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[0],
                 transition_coords[1],
@@ -808,7 +830,7 @@ class TransitionLine:
                 1,
                 0,
             )
-            vector2 = TransitionLine.shorten_vector(
+            vector2 = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[2],
                 transition_coords[3],
@@ -819,7 +841,7 @@ class TransitionLine:
                 1,
             )
         else:  # len(transition_coords)==8
-            vector1 = TransitionLine.shorten_vector(
+            vector1 = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[0],
                 transition_coords[1],
@@ -829,7 +851,7 @@ class TransitionLine:
                 1,
                 0,
             )
-            vector2 = TransitionLine.shorten_vector(
+            vector2 = TransitionLine._shorten_vector(
                 start_state_radius,
                 transition_coords[4],
                 transition_coords[5],

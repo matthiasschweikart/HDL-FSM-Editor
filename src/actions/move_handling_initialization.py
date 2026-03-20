@@ -15,12 +15,10 @@ from project_manager import project_manager
 def move_initialization(event) -> None:
     """Start move on Button-1: find items under cursor, build move list, bind Motion and ButtonRelease-1."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    items_near_mouse_click_location = _create_a_list_of_overlapping_items_near_the_mouse_click_location(
-        event_x, event_y
-    )
-    if _any_item_is_not_allowed_to_be_moved(items_near_mouse_click_location):
+    items_to_be_moved = _create_a_list_of_items_to_be_moved_by_this_event(event_x, event_y)
+    if _no_item_found_to_be_moved(items_to_be_moved):
         return
-    move_list = create_move_list(items_near_mouse_click_location, event_x, event_y)
+    move_list = create_move_list(items_to_be_moved, event_x, event_y)
     # The move_list has an entry for each item, which must be moved.
     # The first entry belongs always to the object, the user wants to move.
     # All following entries are objects, which are "connected" to the object of the first entry and must also be moved.
@@ -66,21 +64,21 @@ def move_initialization(event) -> None:
         )  # move_finish must unbind move_do from "Motion", so it needs the function id.
 
 
-def _any_item_is_not_allowed_to_be_moved(items_near_mouse_click_location):
-    if not items_near_mouse_click_location:
+def _no_item_found_to_be_moved(items_to_be_moved):
+    if not items_to_be_moved:
         return True
-    if _mouse_click_happened_in_state_name(items_near_mouse_click_location):
+    if _mouse_click_happened_in_state_name(items_to_be_moved):
         return True  # The state name shall be changed and no moving is required.
-    if _mouse_click_happened_in_priority_number(items_near_mouse_click_location):
+    if _mouse_click_happened_in_priority_number(items_to_be_moved):
         return True  # The priority shall be changed and no moving is required.
-    if _mouse_click_happened_in_connection_line(items_near_mouse_click_location):
+    if _mouse_click_happened_in_connection_line(items_to_be_moved):
         return True  # No connection-line can be moved.
-    if _mouse_click_happened_in_state_comment_line(items_near_mouse_click_location):
+    if _mouse_click_happened_in_state_comment_line(items_to_be_moved):
         return True  # No state-comment-line can be moved.
-    return _mouse_click_happened_in_grid_line(items_near_mouse_click_location)
+    return _mouse_click_happened_in_grid_line(items_to_be_moved)
 
 
-def _create_a_list_of_overlapping_items_near_the_mouse_click_location(event_x, event_y) -> list:
+def _create_a_list_of_items_to_be_moved_by_this_event(event_x, event_y) -> list:
     # As soon as a mouse click happens inside a canvas-window item, this click does not call move_initialization,
     # as there is no binding inside the canvas-window for this event. If there would be a binding,
     # it would return event coordinates from inside the window, which cannot be easily converted into canvas
@@ -114,22 +112,22 @@ def _create_a_list_of_overlapping_items_near_the_mouse_click_location(event_x, e
     return list_of_overlapping_items
 
 
-def _mouse_click_happened_in_state_name(items_near_mouse_click_location) -> bool:
+def _mouse_click_happened_in_state_name(items_to_be_moved) -> bool:
     list_item_types = []
-    for item_id in items_near_mouse_click_location:
+    for item_id in items_to_be_moved:
         list_item_types.append(project_manager.canvas.type(item_id))
     return "oval" in list_item_types and "text" in list_item_types
 
 
-def _mouse_click_happened_in_priority_number(items_near_mouse_click_location) -> bool:
+def _mouse_click_happened_in_priority_number(items_to_be_moved) -> bool:
     list_item_types = []
-    for item_id in items_near_mouse_click_location:
+    for item_id in items_to_be_moved:
         list_item_types.append(project_manager.canvas.type(item_id))
     return "rectangle" in list_item_types and "text" in list_item_types
 
 
-def _mouse_click_happened_in_connection_line(items_near_mouse_click_location) -> bool:
-    for item_id in items_near_mouse_click_location:
+def _mouse_click_happened_in_connection_line(items_to_be_moved) -> bool:
+    for item_id in items_to_be_moved:
         if project_manager.canvas.type(item_id) == "line":
             tags = project_manager.canvas.gettags(item_id)
             for t in tags:
@@ -138,8 +136,8 @@ def _mouse_click_happened_in_connection_line(items_near_mouse_click_location) ->
     return False
 
 
-def _mouse_click_happened_in_state_comment_line(items_near_mouse_click_location) -> bool:
-    for item_id in items_near_mouse_click_location:
+def _mouse_click_happened_in_state_comment_line(items_to_be_moved) -> bool:
+    for item_id in items_to_be_moved:
         if project_manager.canvas.type(item_id) == "line":
             tags = project_manager.canvas.gettags(item_id)
             for t in tags:
@@ -148,30 +146,26 @@ def _mouse_click_happened_in_state_comment_line(items_near_mouse_click_location)
     return False
 
 
-def _mouse_click_happened_in_grid_line(items_near_mouse_click_location) -> bool:
-    return all("grid_line" in project_manager.canvas.gettags(item_id) for item_id in items_near_mouse_click_location)
+def _mouse_click_happened_in_grid_line(items_to_be_moved) -> bool:
+    return all("grid_line" in project_manager.canvas.gettags(item_id) for item_id in items_to_be_moved)
 
 
-def create_move_list(items_near_mouse_click_location, event_x, event_y) -> list:
+def create_move_list(items_to_be_moved, event_x, event_y) -> list:
     """Build list of [[item_id, point_index], ...] to move.
     Includes connected diagram objects or a single line point."""
     move_list = []
-    move_list_entry_for_diagram_object = _create_move_list_entry_if_a_diagram_object_is_moved(
-        items_near_mouse_click_location
-    )
+    move_list_entry_for_diagram_object = _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved)
     if move_list_entry_for_diagram_object is not None:
         move_list.append(move_list_entry_for_diagram_object)
         _add_lines_connected_to_the_diagram_object_to_the_list(move_list)
     else:  # A Canvas line point is moved.
-        _add_items_for_moving_a_single_line_point_to_the_list(
-            move_list, items_near_mouse_click_location, event_x, event_y
-        )
+        _add_items_for_moving_a_single_line_point_to_the_list(move_list, items_to_be_moved, event_x, event_y)
     return move_list
 
 
-def _create_move_list_entry_if_a_diagram_object_is_moved(items_near_mouse_click_location) -> list | None:
+def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> list | None:
     move_list_entry = None
-    for item_id in items_near_mouse_click_location:
+    for item_id in items_to_be_moved:
         tags_of_item_id = project_manager.canvas.gettags(item_id)
         if (
             tags_of_item_id != ()
@@ -179,7 +173,7 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_near_mouse_click_
             for tag in tags_of_item_id:
                 if tag.startswith("state") and tag.endswith("_name"):
                     # This can happen only if the moving is started by MoveHandlingCanvasItem.
-                    # Then only the canvas-id of the state-name is in the list items_near_mouse_click_location.
+                    # Then only the canvas-id of the state-name is in the list items_to_be_moved.
                     # To be able to create a complete move_list, the canvas-id of the state
                     # must be added to the move_list:
                     state_tag = tag[:-5]
@@ -228,6 +222,7 @@ def _add_lines_connected_to_the_diagram_object_to_the_list(move_list) -> None:
         tag_list_of_object_to_move
     ):  # Check which Canvas lines are "connected" and must be moved together with the diagram object.
         to_be_moved_point_of_connected_line = ""
+        loop_back_transition = False
         if tag.startswith("connection") and tag.endswith("_start"):
             tag_of_connected_line = tag[:-6]  # transition<n>, state<n>_comment_line, connection<n>
             to_be_moved_point_of_connected_line = "start"
@@ -236,6 +231,7 @@ def _add_lines_connected_to_the_diagram_object_to_the_list(move_list) -> None:
             tag_of_connected_line = tag[:-6]  # transition<n>, state<n>_comment_line, connection<n>
             to_be_moved_point_of_connected_line = "start"
             transition.TransitionLine.extend_transition_to_state_middle_points(tag_of_connected_line)
+            loop_back_transition = tag[:-6] + "_end" in tag_list_of_object_to_move
         elif tag.endswith("_comment_line_end"):
             tag_of_connected_line = tag[:-4]
             to_be_moved_point_of_connected_line = "end"
@@ -248,13 +244,13 @@ def _add_lines_connected_to_the_diagram_object_to_the_list(move_list) -> None:
             # So the method find_withtag() returns always a list of length 1:
             id_of_connected_line = project_manager.canvas.find_withtag(tag_of_connected_line)[0]
             move_list.append([id_of_connected_line, to_be_moved_point_of_connected_line])
-            transition.TransitionLine.extend_transition_to_state_middle_points(tag_of_connected_line)
+            if loop_back_transition:
+                move_list.append([id_of_connected_line, "next_to_start"])
+                move_list.append([id_of_connected_line, "next_to_end"])
 
 
-def _add_items_for_moving_a_single_line_point_to_the_list(
-    move_list, items_near_mouse_click_location, event_x, event_y
-) -> None:
-    line_id = _find_the_item_id_of_the_line(items_near_mouse_click_location)
+def _add_items_for_moving_a_single_line_point_to_the_list(move_list, items_to_be_moved, event_x, event_y) -> None:
+    line_id = _find_the_item_id_of_the_line(items_to_be_moved)
     if line_id is None:
         return  # move_list is emtpy in this case.
     transition_tags = _search_for_the_tags_of_a_transition(
@@ -272,8 +268,8 @@ def _add_items_for_moving_a_single_line_point_to_the_list(
                 _remove_tags_and_hide_priority(line_id, tag, transition_tags, moving_point)
 
 
-def _find_the_item_id_of_the_line(items_near_mouse_click_location) -> None:
-    for item_id in items_near_mouse_click_location:
+def _find_the_item_id_of_the_line(items_to_be_moved) -> None:
+    for item_id in items_to_be_moved:
         if project_manager.canvas.type(item_id) == "line" and "grid_line" not in project_manager.canvas.gettags(
             item_id
         ):
