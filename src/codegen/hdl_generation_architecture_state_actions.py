@@ -59,17 +59,21 @@ def _create_state_action_process_for_vhdl(
     variable_declarations,
 ) -> tuple:
     state_action_process = "p_state_actions: process "
-    state_action_process += (
-        _create_sensitivity_list(state_action_list, default_state_actions, all_possible_sensitivity_entries) + "\n"
+    sensitivity_list = (
+        _create_sensitivity_list(
+            len(state_action_process), state_action_list, default_state_actions, all_possible_sensitivity_entries
+        )
+        + "\n"
     )
+    state_action_process += sensitivity_list
     project_manager.link_dict_ref.add(
         file_name,
         file_line_number,
         "",
-        1,
+        sensitivity_list.count("\n"),
         None,
     )
-    file_line_number += 1
+    file_line_number += sensitivity_list.count("\n")
 
     state_action_process += hdl_generation_library.indent_text_by_the_given_number_of_tabs(1, variable_declarations)
     number_of_lines = variable_declarations.count("\n")
@@ -129,11 +133,21 @@ def _create_state_action_process_for_verilog(
     variable_declarations,
 ) -> tuple:
     state_action_process = "always @"
-    state_action_process += _create_sensitivity_list(
-        state_action_list, default_state_actions, all_possible_sensitivity_entries
+    sensitivity_list = (
+        _create_sensitivity_list(
+            len(state_action_process), state_action_list, default_state_actions, all_possible_sensitivity_entries
+        )
+        + " begin: p_state_actions\n"
     )
-    state_action_process += " begin: p_state_actions\n"
-    file_line_number += 1
+    state_action_process += sensitivity_list
+    project_manager.link_dict_ref.add(
+        file_name,
+        file_line_number,
+        "",
+        sensitivity_list.count("\n"),
+        None,
+    )
+    file_line_number += sensitivity_list.count("\n")
 
     if variable_declarations != "":
         state_action_process += hdl_generation_library.indent_text_by_the_given_number_of_tabs(1, variable_declarations)
@@ -222,7 +236,7 @@ def _create_state_action_list(state_tag_list_sorted):
     return state_action_list
 
 
-def _create_sensitivity_list(state_action_list, default_state_actions, all_possible_sensitivity_entries) -> str:
+def _create_sensitivity_list(start, state_action_list, default_state_actions, all_possible_sensitivity_entries) -> str:
     default_state_actions_separated = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(
         default_state_actions
     )
@@ -230,18 +244,27 @@ def _create_sensitivity_list(state_action_list, default_state_actions, all_possi
     default_state_actions_separated = _remove_record_element_names(default_state_actions_separated)
     added_entries = []
     sensitivity_list = "("
+    number_of_characters_added_since_last_new_line = start
     for entry in all_possible_sensitivity_entries:
         if " " + entry + " " in default_state_actions_separated:
-            sensitivity_list += entry + ", "
             added_entries.append(entry)
+            sensitivity_list += entry + ", "
+            number_of_characters_added_since_last_new_line += len(entry) + 2
+            if number_of_characters_added_since_last_new_line > 80:
+                sensitivity_list += "\n"
+                number_of_characters_added_since_last_new_line = 0
     for list_entry in state_action_list:
         state_action_separated = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(list_entry[1])
         state_action_separated = _remove_left_hand_sides(state_action_separated)
         state_action_separated = _remove_record_element_names(state_action_separated)
         for entry in all_possible_sensitivity_entries:
             if " " + entry + " " in state_action_separated and entry not in added_entries:
-                sensitivity_list += entry + ", "
                 added_entries.append(entry)
+                sensitivity_list += entry + ", "
+                number_of_characters_added_since_last_new_line += len(entry) + 2
+                if number_of_characters_added_since_last_new_line > 80:
+                    sensitivity_list += "\n"
+                    number_of_characters_added_since_last_new_line = 0
     sensitivity_list += "state)"
     return sensitivity_list
 
