@@ -7,13 +7,10 @@ from tkinter import messagebox, ttk
 
 import constants
 import file_handling
-import update_hdl_tab
 from actions import find_replace
 from codegen import hdl_generation
 from dialogs import help_selection, help_shortcuts
 from project_manager import project_manager
-from utils.hdl_paths import get_architecture_output_path, get_primary_output_path
-from utils.var_expansion import expand_generate_path
 
 from . import compile_handling
 
@@ -126,8 +123,6 @@ class MenuBar:
             label="About", command=lambda: messagebox.showinfo("About:", constants.HEADER_STRING), font=("Arial", 10)
         )
 
-        project_manager.notebook.bind("<<NotebookTabChanged>>", lambda event: self._handle_notebook_tab_changed_event())
-
         file_menu_button.grid(row=0, column=0)
         hdl_menu_button.grid(row=0, column=1)
         tool_title.grid(row=0, column=2)
@@ -147,60 +142,6 @@ class MenuBar:
         project_manager.root.bind_all("<Control-N>", lambda event: self._capslock_warning("N"))
         project_manager.root.bind_all("<Control-P>", lambda event: self._capslock_warning("P"))
         project_manager.root.bind_all("<Control-F>", lambda event: self._capslock_warning("F"))
-
-    def _handle_notebook_tab_changed_event(self) -> None:
-        self._enable_undo_redo_if_diagram_tab_is_active_else_disable()
-        self._update_hdl_tab_if_necessary()
-        self._if_hdl_tab_set_focus()
-
-    def _enable_undo_redo_if_diagram_tab_is_active_else_disable(self) -> None:
-        if project_manager.notebook.index(project_manager.notebook.select()) == 3:
-            project_manager.canvas.bind_all("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
-            project_manager.canvas.bind_all("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
-        else:
-            project_manager.canvas.unbind_all(
-                "<Control-z>"
-            )  # necessary, because if you type Control-z when another tab is active,
-            project_manager.canvas.unbind_all("<Control-Z>")  # then in the diagram tab an undo would take place.
-
-    def _update_hdl_tab_if_necessary(self) -> None:
-        if project_manager.notebook.index(project_manager.notebook.select()) == 4:
-            raw_path = project_manager.generate_path_value.get()
-            generate_path = expand_generate_path(raw_path, project_manager.current_file)
-            module_name = project_manager.module_name.get()
-            language = project_manager.language.get()
-            file_count = project_manager.select_file_number_text.get()
-            hdlfilename = get_primary_output_path(generate_path, module_name, language, file_count) or ""
-            hdlfilename2 = get_architecture_output_path(generate_path, module_name, language, file_count) or ""
-
-            if (
-                os.path.isfile(hdlfilename)
-                and project_manager.date_of_hdl_file_shown_in_hdl_tab < os.path.getmtime(hdlfilename)
-            ) or (
-                project_manager.select_file_number_text.get() == 2
-                and os.path.isfile(hdlfilename2)
-                and project_manager.date_of_hdl_file2_shown_in_hdl_tab < os.path.getmtime(hdlfilename2)
-            ):
-                answer = messagebox.askquestion(
-                    "Warning in HDL-FSM-Editor3",
-                    "The HDL was modified by another tool. Shall it be reloaded?",
-                    default="yes",
-                )
-                if answer == "yes":
-                    update_ref = update_hdl_tab.UpdateHdlTab(
-                        project_manager.language.get(),
-                        project_manager.select_file_number_text.get(),
-                        project_manager.current_file,
-                        generate_path,
-                        project_manager.module_name.get(),
-                    )
-                    project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
-                    project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
-
-    def _if_hdl_tab_set_focus(self) -> None:
-        selected_tab_index = project_manager.notebook.index(project_manager.notebook.select())
-        if selected_tab_index == 4:  # Index of HDL tab
-            project_manager.hdl_frame_text.focus_set()
 
     def _capslock_warning(self, character):
         messagebox.showwarning(
