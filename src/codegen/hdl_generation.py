@@ -118,7 +118,9 @@ class HdlGeneration:
                     "\n++++++++++++++++++++++++++++++++++++++ "
                     + datetime.today().ctime()
                     + " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-                    + "HDL generation finished.\n",
+                    + "HDL was generated: "
+                    + config.module_name
+                    + "\nHDL generation ready.\n",
                 )
                 project_manager.log_frame_text.config(state=tk.DISABLED)
             sensitivity_check_hfe.SensitivityCheckHfe(is_script_mode)
