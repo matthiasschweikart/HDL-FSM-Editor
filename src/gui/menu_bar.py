@@ -151,6 +151,7 @@ class MenuBar:
     def _handle_notebook_tab_changed_event(self) -> None:
         self._enable_undo_redo_if_diagram_tab_is_active_else_disable()
         self._update_hdl_tab_if_necessary()
+        self._if_hdl_tab_set_focus()
 
     def _enable_undo_redo_if_diagram_tab_is_active_else_disable(self) -> None:
         if project_manager.notebook.index(project_manager.notebook.select()) == 3:
@@ -195,6 +196,11 @@ class MenuBar:
                     )
                     project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
                     project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
+
+    def _if_hdl_tab_set_focus(self) -> None:
+        selected_tab_index = project_manager.notebook.index(project_manager.notebook.select())
+        if selected_tab_index == 4:  # Index of HDL tab
+            project_manager.hdl_frame_text.focus_set()
 
     def _capslock_warning(self, character):
         messagebox.showwarning(

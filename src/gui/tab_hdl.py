@@ -7,6 +7,7 @@ from tkinter import ttk
 from codegen import hdl_generation
 from codegen.hdl_generation_config import GenerationConfig
 from constants import GuiTab
+from dialogs.line_number_dialog import LineNumberDialog
 from project_manager import project_manager
 from widgets import custom_text
 
@@ -38,6 +39,7 @@ class TabHDL:
         hdl_frame_text_scroll.grid(row=0, column=1, sticky="nsew")
 
         hdl_frame_text.bind("<Motion>", self._cursor_move_hdl_tab)
+        hdl_frame_text.bind("<Control-G>", self._jump_to_line)
 
         project_manager.notebook.add(hdl_frame, sticky="nsew", text=GuiTab.GENERATED_HDL.value)
 
@@ -81,3 +83,7 @@ class TabHDL:
                 project_manager.hdl_frame_text.unbind("<Button-1>", self._func_id_jump)
                 self._func_id_jump = None
             self._line_number_under_pointer_hdl_tab = line_number
+
+    def _jump_to_line(self, *_) -> None:
+        LineNumberDialog()
+        return "break"
