@@ -25,13 +25,15 @@ class MainWindow:
 
     def __init__(self) -> None:
         """Build main window, notebook, menu bar, and set project_manager references."""
-        root = tk.Tk()
-        root.withdraw()  # Because it could be batch-mode because of "-generate_hdl" switch.
-        root.columnconfigure(0, weight=1)  # The (only) column shall expand at window resize
-        root.rowconfigure(1, weight=1)  # The row where the notebook is placed shall expand at window resize
-        root.grid()
-        project_manager.root = root
-        self._configure_gui_style(root)
+        self.window_height = 0
+        self.root = tk.Tk()
+        self.root.withdraw()  # Because it could be batch-mode because of "-generate_hdl" switch.
+        self.root.columnconfigure(0, weight=1)  # The (only) column shall expand at window resize
+        self.root.rowconfigure(1, weight=1)  # The row where the notebook is placed shall expand at window resize
+        self.root.grid()
+        self.root.bind("<Configure>", self._check_for_window_resize)
+        project_manager.root = self.root
+        self._configure_gui_style(self.root)
         project_manager.undo_handling_ref = undo_handling.UndoHandling()
         project_manager.link_dict_ref = link_dictionary.LinkDictionary()
         project_manager.highlight_dict_ref = linting.HighLightDict()
@@ -43,11 +45,19 @@ class MainWindow:
         try:
             icon_path = self._get_resource_path("hfe_icon.ico")
             if icon_path.exists():
-                root.iconbitmap(icon_path)
+                self.root.iconbitmap(icon_path)
             else:
                 print(f"Warning: Icon file not found at {icon_path}")
         except Exception as e:  # pylint: disable=broad-except
             print(f"Warning: Could not set application icon: {e}")
+
+    def _check_for_window_resize(self, event) -> None:
+        if event.widget == project_manager.root and self.window_height != event.height:
+            if self.window_height != 0:  # equal 0 at application start, so ignore first event
+                self.root.update_idletasks()  # update geometry information of all widgets
+                project_manager.tab_interface_ref.adjust_sash_positions()
+                project_manager.tab_internals_ref.adjust_sash_positions()
+            self.window_height = event.height
 
     def set_word_boundaries(self) -> None:
         """Configure Tcl word boundaries so double-click selects identifiers (e.g. signal names)."""
