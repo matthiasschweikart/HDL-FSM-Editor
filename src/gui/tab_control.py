@@ -35,6 +35,7 @@ class TabControl:
         self.language = tk.StringVar()
         project_manager.language = self.language
         self.language.set("VHDL")
+        self.last_language = "VHDL"
         language_label = ttk.Label(control_frame, text="Language:", padding=5)
         language_combobox = ttk.Combobox(
             control_frame, textvariable=self.language, values=("VHDL", "Verilog", "SystemVerilog"), state="readonly"
@@ -191,7 +192,8 @@ class TabControl:
     def switch_language_mode(self) -> None:  # also called from file_handling.py
         """Apply current language (VHDL/Verilog): update highlight dict, file count, labels, and layout."""
         new_language = project_manager.language.get()
-        if new_language == "VHDL":
+        if new_language == "VHDL" and self.last_language != "VHDL":
+            self.last_language = "VHDL"
             project_manager.highlight_dict_ref.highlight_pattern_dict = copy.deepcopy(
                 constants.VHDL_HIGHLIGHT_PATTERN_DICT
             )
@@ -221,10 +223,11 @@ class TabControl:
             # Modify compile command:
             project_manager.compile_cmd.set("ghdl -a $file1 $file2; ghdl -e $name; ghdl -r $name")
             self.compile_cmd_docu.config(
-                text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t\
-    = File with Entity and Architecture\n$name\t= Entity Name"
+                text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n$file\t"
+                "= File with Entity and Architecture\n$name\t= Entity Name"
             )
-        else:  # "Verilog" or "SystemVerilog"
+        elif new_language != "VHDL" and self.last_language == "VHDL":
+            self.last_language = new_language  # "Verilog" or "SystemVerilog"
             project_manager.highlight_dict_ref.highlight_pattern_dict = copy.deepcopy(
                 constants.VERILOG_HIGHLIGHT_PATTERN_DICT
             )
