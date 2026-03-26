@@ -203,13 +203,13 @@ class TabControl:
             self._select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.E)
             self._select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.E)
             # Interface: Adapt documentation for generics and ports
-            project_manager.tab_interface_ref.paned_window_interface.insert(
+            project_manager.tab_interface_ref.paned_window.insert(
                 0, project_manager.tab_interface_ref.interface_package_frame, weight=1
             )
             project_manager.interface_generics_label.config(text="Generics:")
             project_manager.interface_ports_label.config(text="Ports:")
             # Internals: Enable VHDL-package text field
-            project_manager.tab_internals_ref.paned_window_internals.insert(
+            project_manager.tab_internals_ref.paned_window.insert(
                 0, project_manager.tab_internals_ref.internals_package_frame, weight=1
             )
             # Internals: Architecture-Declarations (adapt labels to VHDL)
@@ -235,14 +235,14 @@ class TabControl:
             self._select_file_number_radio_button1.grid_forget()
             self._select_file_number_radio_button2.grid_forget()
             # Interface: Remove VHDL-package text field
-            project_manager.tab_interface_ref.paned_window_interface.forget(
+            project_manager.tab_interface_ref.paned_window.forget(
                 project_manager.tab_interface_ref.interface_package_frame
             )
             # Interface: Adapt documentation for generics and ports
             project_manager.interface_generics_label.config(text="Parameters:")
             project_manager.interface_ports_label.config(text="Ports:")
             # Internals: Remove VHDL-package text field
-            project_manager.tab_internals_ref.paned_window_internals.forget(
+            project_manager.tab_internals_ref.paned_window.forget(
                 project_manager.tab_internals_ref.internals_package_frame
             )
             # Internals: Architecture-Declarations (adapt labels to Verilog)

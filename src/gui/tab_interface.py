@@ -14,10 +14,10 @@ class TabInterface:
     """Tab for editing interface packages and signals."""
 
     def __init__(self) -> None:
-        self.paned_window_interface = ttk.PanedWindow(project_manager.notebook, orient=tk.VERTICAL, takefocus=True)
-        self.paned_window_interface_height = None
+        self.paned_window = ttk.PanedWindow(project_manager.notebook, orient=tk.VERTICAL, takefocus=True)
+        self.paned_window_height = None
 
-        self.interface_package_frame = ttk.Frame(self.paned_window_interface)
+        self.interface_package_frame = ttk.Frame(self.paned_window)
         self.interface_package_frame.columnconfigure(0, weight=1)
         self.interface_package_frame.columnconfigure(1, weight=0)
         self.interface_package_frame.rowconfigure(0, weight=0)
@@ -49,7 +49,7 @@ class TabInterface:
         self.interface_package_text.grid(row=1, column=0, sticky="nsew")
         _interface_package_scroll.grid(row=1, column=1, sticky="nsew")
 
-        self.interface_generics_frame = ttk.Frame(self.paned_window_interface)
+        self.interface_generics_frame = ttk.Frame(self.paned_window)
         self.interface_generics_frame.columnconfigure(0, weight=1)
         self.interface_generics_frame.columnconfigure(1, weight=0)
         self.interface_generics_frame.rowconfigure(0, weight=0)
@@ -81,7 +81,7 @@ class TabInterface:
         self.interface_generics_text.grid(row=1, column=0, sticky="nsew")
         interface_generics_scroll.grid(row=1, column=1, sticky="nsew")
 
-        interface_ports_frame = ttk.Frame(self.paned_window_interface)
+        interface_ports_frame = ttk.Frame(self.paned_window)
         interface_ports_frame.columnconfigure(0, weight=1)
         interface_ports_frame.columnconfigure(1, weight=0)
         interface_ports_frame.rowconfigure(0, weight=0)
@@ -102,10 +102,10 @@ class TabInterface:
         self.interface_ports_text.grid(row=1, column=0, sticky="nsew")
         interface_ports_scroll.grid(row=1, column=1, sticky="nsew")
 
-        self.paned_window_interface.add(self.interface_package_frame, weight=1)
-        self.paned_window_interface.add(interface_ports_frame, weight=1)
-        self.paned_window_interface.add(self.interface_generics_frame, weight=1)
-        project_manager.notebook.add(self.paned_window_interface, sticky="nsew", text=GuiTab.INTERFACE.value)
+        self.paned_window.add(self.interface_package_frame, weight=1)
+        self.paned_window.add(interface_ports_frame, weight=1)
+        self.paned_window.add(self.interface_generics_frame, weight=1)
+        project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERFACE.value)
 
         self.interface_package_text.bind("<Control-z>", lambda event: self.interface_package_text.undo())
         self.interface_package_text.bind("<Control-Z>", lambda event: self.interface_package_text.redo())
@@ -138,14 +138,12 @@ class TabInterface:
             text_list = [self.interface_package_text, self.interface_ports_text, self.interface_generics_text]
         else:
             text_list = [self.interface_ports_text, self.interface_generics_text]
-        sash_moving.SashMover(self.paned_window_interface, text_list)
+        sash_moving.SashMover(self.paned_window, text_list)
 
     def _abort_after_storing_new_height(self) -> bool:
-        new_height = self.paned_window_interface.winfo_height()
+        new_height = self.paned_window.winfo_height()
         if new_height == 1:  # not yet initialized
             return True
-        old_height = self.paned_window_interface_height
-        self.paned_window_interface_height = new_height
-        return (
-            old_height is None or self.paned_window_interface_height < old_height
-        )  # not initialized or height reduced
+        old_height = self.paned_window_height
+        self.paned_window_height = new_height
+        return old_height is None or self.paned_window_height < old_height  # not initialized or height reduced
