@@ -11,32 +11,42 @@ class ProjectManager:
     """Simple project manager - just holds the state and provides access."""
 
     def __init__(self) -> None:
+        # Graphical elements of the GUI:
         self._root: tk.Tk = None
-        self._current_file: str = ""
         self._notebook: ttk.Notebook = None
         self._canvas: tk.Canvas = None
-        self._previous_file: str = ""
-        self._entry_widgets: list = []  # To store references to entry widgets
-        self._reset_signal_name: tk.StringVar = None
-        self._clock_signal_name: tk.StringVar = None
-        self._generate_path_value: tk.StringVar = None
-        self._working_directory_value: tk.StringVar = None
-        self._additional_sources_value: tk.StringVar = None
-        self._select_file_number_text: tk.IntVar = None
-        self._compile_cmd: tk.Entry = None
-        self._edit_cmd: tk.Entry = None
-        self._module_name: tk.Entry = None
-        self._language: tk.StringVar = None
-        self._diagram_background_color: tk.StringVar = None
-        self._diagram_background_color_error: ttk.Label = None
-        self._include_timestamp_in_output: tk.BooleanVar = None
+        self._entry_widgets: list = []  # List of entry widgets of control-tab
         self._state_action_default_button: ttk.Button = None
         self._global_action_clocked_button: ttk.Button = None
         self._global_action_combinatorial_button: ttk.Button = None
         self._reset_entry_button: ttk.Button = None
-        self._grid_drawer = None  # : grid_drawing.GridDraw
         self._undo_button: ttk.Button = None
         self._redo_button: ttk.Button = None
+        self._tab_control_ref = None  #: tab_control.TabControl
+        self._tab_interface_ref = None  #: tab_interface.TabInterface
+        self._tab_internals_ref = None  #: tab_internals.TabInternals
+        self._tab_diagram_ref = None  #: tab_diagram.TabDiagram
+        self._tab_hdl_ref = None  #: tab_hdl.TabHDL
+        self._tab_log_ref = None  #: tab_log.TabLog
+        self._menu_bar_ref = None  #: menu_bar.MenuBar
+        self._diagram_background_color: tk.StringVar = None
+        self._diagram_background_color_error: ttk.Label = None
+
+        # Service objects of the GUI:
+        self._link_dict_ref = None  #: link_dictionary.LinkDictionary
+        self._grid_drawer = None  # : grid_drawing.GridDraw
+        self._highlight_dict_ref = None  #: linting.HighLightDict
+        self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
+        self._undo_handling_ref = None  #: undo_handling.UndoHandling
+
+        # Parameters of the GUI:
+        self._state_radius = 20.0
+        self._priority_distance = 30
+        self._reset_entry_size = 40
+        self._fontsize = 10
+        self._label_fontsize = 8
+        self._state_name_font = None
+        self._abs_zoom_factor = 5.0
         self._regex_message_find_for_vhdl: str = "(.*?):([0-9]+):[0-9]+:.*"
         self._regex_message_find_for_verilog: str = (
             "(.*?):([0-9]+): .*"  # Added ' ' after the second ':', to get no hit at time stamps (i.e. 16:58:36).
@@ -45,26 +55,25 @@ class ProjectManager:
         self._regex_file_line_number_quote: str = "\\2"
         self._size_of_file1_line_number: int = 0
         self._size_of_file2_line_number: int = 0
+
+        # Parameters of the design
+        self._language: tk.StringVar = None
+        self._module_name: tk.Entry = None
+        self._reset_signal_name: tk.StringVar = None
+        self._clock_signal_name: tk.StringVar = None
+
+        # Parameters of the project:
+        self._current_file: str = ""
+        self._previous_file: str = ""
+        self._generate_path_value: tk.StringVar = None
+        self._working_directory_value: tk.StringVar = None
+        self._additional_sources_value: tk.StringVar = None
+        self._select_file_number_text: tk.IntVar = None
+        self._compile_cmd: tk.Entry = None
+        self._edit_cmd: tk.Entry = None
+        self._include_timestamp_in_output: tk.BooleanVar = None
         self._date_of_hdl_file_shown_in_hdl_tab: float = 0.0
         self._date_of_hdl_file2_shown_in_hdl_tab: float = 0.0
-        self._link_dict_ref = None  #: link_dictionary.LinkDictionary
-        self._tab_control_ref = None  #: tab_control.TabControl
-        self._tab_interface_ref = None  #: tab_interface.TabInterface
-        self._tab_internals_ref = None  #: tab_internals.TabInternals
-        self._tab_diagram_ref = None  #: tab_diagram.TabDiagram
-        self._tab_hdl_ref = None  #: tab_hdl.TabHDL
-        self._tab_log_ref = None  #: tab_log.TabLog
-        self._menu_bar_ref = None  #: menu_bar.MenuBar
-        self._state_radius = 20.0
-        self._priority_distance = 30
-        self._reset_entry_size = 40
-        self._fontsize = 10
-        self._label_fontsize = 8
-        self._state_name_font = None
-        self._highlight_dict_ref = None  #: linting.HighLightDict
-        self._abs_zoom_factor = 5.0
-        self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
-        self._undo_handling_ref = None  #: undo_handling.UndoHandling
 
     @property
     def highlight_dict_ref(self):  # -> linting.HighLightDict:
