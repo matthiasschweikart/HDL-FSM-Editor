@@ -40,13 +40,6 @@ class TabInterface:
         self.interface_package_text.update_highlight_tags(
             10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
         )
-        self.interface_package_text.bind("<Control-Z>", lambda event: self.interface_package_text.edit_redo())
-        self.interface_package_text.bind(
-            "<Control-e>", lambda event: self.interface_package_text.edit_in_external_editor()
-        )
-        self.interface_package_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
         _interface_package_scroll = ttk.Scrollbar(
             self.interface_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_package_text.yview
         )
@@ -76,13 +69,6 @@ class TabInterface:
             wrap=tk.WORD,
         )
         project_manager.interface_generics_text = self.interface_generics_text
-        self.interface_generics_text.bind("<Control-Z>", lambda event: self.interface_generics_text.edit_redo())
-        self.interface_generics_text.bind(
-            "<Control-e>", lambda event: self.interface_generics_text.edit_in_external_editor()
-        )
-        self.interface_generics_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
         interface_generics_scroll = ttk.Scrollbar(
             self.interface_generics_frame,
             orient=tk.VERTICAL,
@@ -107,12 +93,6 @@ class TabInterface:
             interface_ports_frame, text_type="ports", height=3, width=10, undo=True, font=("Courier", 10), wrap=tk.WORD
         )
         project_manager.interface_ports_text = self.interface_ports_text
-        self.interface_ports_text.bind("<Control-z>", lambda event: self.interface_ports_text.undo())
-        self.interface_ports_text.bind("<Control-Z>", lambda event: self.interface_ports_text.redo())
-        self.interface_ports_text.bind("<Control-e>", lambda event: self.interface_ports_text.edit_in_external_editor())
-        self.interface_ports_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
         interface_ports_scroll = ttk.Scrollbar(
             interface_ports_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_ports_text.yview
         )
@@ -126,6 +106,29 @@ class TabInterface:
         self.paned_window_interface.add(interface_ports_frame, weight=1)
         self.paned_window_interface.add(self.interface_generics_frame, weight=1)
         project_manager.notebook.add(self.paned_window_interface, sticky="nsew", text=GuiTab.INTERFACE.value)
+
+        self.interface_package_text.bind("<Control-z>", lambda event: self.interface_package_text.undo())
+        self.interface_package_text.bind("<Control-Z>", lambda event: self.interface_package_text.redo())
+        self.interface_package_text.bind(
+            "<Control-e>", lambda event: self.interface_package_text.edit_in_external_editor()
+        )
+        self.interface_package_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
+        self.interface_generics_text.bind("<Control-z>", lambda event: self.interface_generics_text.undo())
+        self.interface_generics_text.bind("<Control-Z>", lambda event: self.interface_generics_text.redo())
+        self.interface_generics_text.bind(
+            "<Control-e>", lambda event: self.interface_generics_text.edit_in_external_editor()
+        )
+        self.interface_generics_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
+        self.interface_ports_text.bind("<Control-z>", lambda event: self.interface_ports_text.undo())
+        self.interface_ports_text.bind("<Control-Z>", lambda event: self.interface_ports_text.redo())
+        self.interface_ports_text.bind("<Control-e>", lambda event: self.interface_ports_text.edit_in_external_editor())
+        self.interface_ports_text.bind(
+            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
+        )
 
     def adjust_sash_positions(self) -> None:
         """Adjust sash positions of paned window if the window is increased."""
