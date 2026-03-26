@@ -152,8 +152,8 @@ class MainWindow:
         return base_path / "rsc" / resource_name
 
     def _copy_message_into_log_tab(self, check_version_result, _read_message_result) -> None:
-        project_manager.log_frame_text.config(state=tk.NORMAL)
-        project_manager.log_frame_text.insert(
+        project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
+        project_manager.tab_log_ref.log_frame_text.insert(
             "1.0", constants.HEADER_STRING + "\n" + check_version_result + "\n" + _read_message_result + "\n"
         )
-        project_manager.log_frame_text.config(state=tk.DISABLED)
+        project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)

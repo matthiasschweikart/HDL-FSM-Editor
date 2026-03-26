@@ -36,7 +36,7 @@ class FindReplace:
             messagebox.showinfo("HDL-FSM-Editor", "The search is aborted because you searched for an empty string.")
             return
         if in_hdl:
-            text_field = {"tab": GuiTab.GENERATED_HDL, "ref": project_manager.hdl_frame_text, "update": ""}
+            text_field = {"tab": GuiTab.GENERATED_HDL, "ref": project_manager.tab_hdl_ref.hdl_frame_text, "update": ""}
             continue_search = self._search_in_text_field(text_field)
             if not continue_search:
                 return
@@ -74,22 +74,50 @@ class FindReplace:
         text_fields = []
         if project_manager.language.get() == "VHDL":
             text_fields.append(
-                {"tab": GuiTab.INTERFACE, "ref": project_manager.interface_package_text, "update": "Ports"}
+                {
+                    "tab": GuiTab.INTERFACE,
+                    "ref": project_manager.tab_interface_ref.interface_package_text,
+                    "update": "Ports",
+                }
             )
         text_fields.append(
-            {"tab": GuiTab.INTERFACE, "ref": project_manager.interface_generics_text, "update": "Generics"}
+            {
+                "tab": GuiTab.INTERFACE,
+                "ref": project_manager.tab_interface_ref.interface_generics_text,
+                "update": "Generics",
+            }
         )
-        text_fields.append({"tab": GuiTab.INTERFACE, "ref": project_manager.interface_ports_text, "update": "Ports"})
+        text_fields.append(
+            {"tab": GuiTab.INTERFACE, "ref": project_manager.tab_interface_ref.interface_ports_text, "update": "Ports"}
+        )
         if project_manager.language.get() == "VHDL":
-            text_fields.append({"tab": GuiTab.INTERNALS, "ref": project_manager.internals_package_text, "update": ""})
-        text_fields.append({"tab": GuiTab.INTERNALS, "ref": project_manager.internals_architecture_text, "update": ""})
+            text_fields.append(
+                {"tab": GuiTab.INTERNALS, "ref": project_manager.tab_internals_ref.internals_package_text, "update": ""}
+            )
         text_fields.append(
-            {"tab": GuiTab.INTERNALS, "ref": project_manager.internals_process_clocked_text, "update": ""}
+            {
+                "tab": GuiTab.INTERNALS,
+                "ref": project_manager.tab_internals_ref.internals_architecture_text,
+                "update": "",
+            }
         )
         text_fields.append(
-            {"tab": GuiTab.INTERNALS, "ref": project_manager.internals_process_combinatorial_text, "update": ""}
+            {
+                "tab": GuiTab.INTERNALS,
+                "ref": project_manager.tab_internals_ref.internals_process_clocked_text,
+                "update": "",
+            }
         )
-        text_fields.append({"tab": GuiTab.GENERATED_HDL, "ref": project_manager.hdl_frame_text, "update": ""})
+        text_fields.append(
+            {
+                "tab": GuiTab.INTERNALS,
+                "ref": project_manager.tab_internals_ref.internals_process_combinatorial_text,
+                "update": "",
+            }
+        )
+        text_fields.append(
+            {"tab": GuiTab.GENERATED_HDL, "ref": project_manager.tab_hdl_ref.hdl_frame_text, "update": ""}
+        )
         for text_field in text_fields:
             if continue_search:
                 continue_search = self._search_in_text_field(text_field)

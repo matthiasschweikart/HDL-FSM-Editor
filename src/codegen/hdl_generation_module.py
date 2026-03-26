@@ -22,7 +22,9 @@ def create_module_logic(file_name, file_line_number, state_tag_list_sorted) -> N
     architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(1, state_signal_type_definition)
     file_line_number += state_signal_type_definition.count("\n")
 
-    signal_declarations = hdl_generation_library.get_text_from_text_widget(project_manager.internals_architecture_text)
+    signal_declarations = hdl_generation_library.get_text_from_text_widget(
+        project_manager.tab_internals_ref.internals_architecture_text
+    )
     architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(1, signal_declarations)
     number_of_new_lines = signal_declarations.count("\n")
     project_manager.link_dict_ref.add(
@@ -30,7 +32,7 @@ def create_module_logic(file_name, file_line_number, state_tag_list_sorted) -> N
         file_line_number,
         "custom_text_in_internals_tab",
         number_of_new_lines,
-        project_manager.internals_architecture_text,
+        project_manager.tab_internals_ref.internals_architecture_text,
     )
     file_line_number += number_of_new_lines
 
@@ -53,7 +55,7 @@ def create_module_logic(file_name, file_line_number, state_tag_list_sorted) -> N
     file_line_number += 1
 
     variable_declarations = hdl_generation_library.get_text_from_text_widget(
-        project_manager.internals_process_clocked_text
+        project_manager.tab_internals_ref.internals_process_clocked_text
     )
     if variable_declarations != "":
         architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(2, variable_declarations)
@@ -63,7 +65,7 @@ def create_module_logic(file_name, file_line_number, state_tag_list_sorted) -> N
             file_line_number,
             "custom_text_in_internals_tab",
             number_of_new_lines,
-            project_manager.internals_process_clocked_text,
+            project_manager.tab_internals_ref.internals_process_clocked_text,
         )
         file_line_number += number_of_new_lines
 

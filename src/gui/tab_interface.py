@@ -22,7 +22,7 @@ class TabInterface:
         self.interface_package_frame.columnconfigure(1, weight=0)
         self.interface_package_frame.rowconfigure(0, weight=0)
         self.interface_package_frame.rowconfigure(1, weight=1)
-        self.interface_package_label = ttk.Label(self.interface_package_frame, text="Packages:", padding=5)
+        interface_package_label = ttk.Label(self.interface_package_frame, text="Packages:", padding=5)
         interface_package_info = ttk.Label(
             self.interface_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
@@ -35,32 +35,28 @@ class TabInterface:
             font=("Courier", 10),
             wrap=tk.WORD,
         )
-        project_manager.interface_package_text = self.interface_package_text
         self.interface_package_text.insert("1.0", "library ieee;\nuse ieee.std_logic_1164.all;")
         self.interface_package_text.update_highlight_tags(
             10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
         )
-        _interface_package_scroll = ttk.Scrollbar(
+        interface_package_scroll = ttk.Scrollbar(
             self.interface_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_package_text.yview
         )
-        self.interface_package_text.config(yscrollcommand=_interface_package_scroll.set)
-        self.interface_package_label.grid(row=0, column=0, sticky="wns")
+        self.interface_package_text.config(yscrollcommand=interface_package_scroll.set)
+        interface_package_label.grid(row=0, column=0, sticky="wns")
         interface_package_info.grid(row=0, column=0, sticky=tk.E)
         self.interface_package_text.grid(row=1, column=0, sticky="nsew")
-        _interface_package_scroll.grid(row=1, column=1, sticky="nsew")
+        interface_package_scroll.grid(row=1, column=1, sticky="nsew")
 
-        self.interface_generics_frame = ttk.Frame(self.paned_window)
-        self.interface_generics_frame.columnconfigure(0, weight=1)
-        self.interface_generics_frame.columnconfigure(1, weight=0)
-        self.interface_generics_frame.rowconfigure(0, weight=0)
-        self.interface_generics_frame.rowconfigure(1, weight=1)
-        self.interface_generics_label = ttk.Label(self.interface_generics_frame, text="Generics:", padding=5)
-        project_manager.interface_generics_label = self.interface_generics_label
-        interface_generics_info = ttk.Label(
-            self.interface_generics_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
-        )
+        interface_generics_frame = ttk.Frame(self.paned_window)
+        interface_generics_frame.columnconfigure(0, weight=1)
+        interface_generics_frame.columnconfigure(1, weight=0)
+        interface_generics_frame.rowconfigure(0, weight=0)
+        interface_generics_frame.rowconfigure(1, weight=1)
+        self.interface_generics_label = ttk.Label(interface_generics_frame, text="Generics:", padding=5)
+        interface_generics_info = ttk.Label(interface_generics_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5)
         self.interface_generics_text = custom_text.CustomText(
-            self.interface_generics_frame,
+            interface_generics_frame,
             text_type="generics",
             height=3,
             width=10,
@@ -68,9 +64,8 @@ class TabInterface:
             font=("Courier", 10),
             wrap=tk.WORD,
         )
-        project_manager.interface_generics_text = self.interface_generics_text
         interface_generics_scroll = ttk.Scrollbar(
-            self.interface_generics_frame,
+            interface_generics_frame,
             orient=tk.VERTICAL,
             cursor="arrow",
             command=self.interface_generics_text.yview,
@@ -86,25 +81,23 @@ class TabInterface:
         interface_ports_frame.columnconfigure(1, weight=0)
         interface_ports_frame.rowconfigure(0, weight=0)
         interface_ports_frame.rowconfigure(1, weight=1)
-        self.interface_ports_label = ttk.Label(interface_ports_frame, text="Ports:", padding=5)
-        project_manager.interface_ports_label = self.interface_ports_label
-        interface_ports_info = ttk.Label(interface_ports_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5)
+        interface_ports_label = ttk.Label(interface_ports_frame, text="Ports:", padding=5)
+        interface_ports_linfo = ttk.Label(interface_ports_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5)
         self.interface_ports_text = custom_text.CustomText(
             interface_ports_frame, text_type="ports", height=3, width=10, undo=True, font=("Courier", 10), wrap=tk.WORD
         )
-        project_manager.interface_ports_text = self.interface_ports_text
         interface_ports_scroll = ttk.Scrollbar(
             interface_ports_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_ports_text.yview
         )
         self.interface_ports_text.config(yscrollcommand=interface_ports_scroll.set)
-        self.interface_ports_label.grid(row=0, column=0, sticky=tk.W)
-        interface_ports_info.grid(row=0, column=0, sticky=tk.E)
+        interface_ports_label.grid(row=0, column=0, sticky=tk.W)
+        interface_ports_linfo.grid(row=0, column=0, sticky=tk.E)
         self.interface_ports_text.grid(row=1, column=0, sticky="nsew")
         interface_ports_scroll.grid(row=1, column=1, sticky="nsew")
 
         self.paned_window.add(self.interface_package_frame, weight=1)
         self.paned_window.add(interface_ports_frame, weight=1)
-        self.paned_window.add(self.interface_generics_frame, weight=1)
+        self.paned_window.add(interface_generics_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERFACE.value)
 
         self.interface_package_text.bind("<Control-z>", lambda event: self.interface_package_text.undo())

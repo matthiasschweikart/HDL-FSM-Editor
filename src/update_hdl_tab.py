@@ -115,24 +115,24 @@ class UpdateHdlTab:
     @classmethod
     def clear_hdl_tab(cls):
         """Removes old content from the HDL-tab before copying new HDL into it."""
-        project_manager.hdl_frame_text.config(state=tk.NORMAL)
-        project_manager.hdl_frame_text.delete("1.0", tk.END)
-        project_manager.hdl_frame_text.insert("1.0", "")
-        project_manager.hdl_frame_text.config(state=tk.DISABLED)
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.NORMAL)
+        project_manager.tab_hdl_ref.hdl_frame_text.delete("1.0", tk.END)
+        project_manager.tab_hdl_ref.hdl_frame_text.insert("1.0", "")
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
 
     @classmethod
     def copy_into_hdl_tab(cls, entity, arch):
         """Copies new HDL content into the HDL-tab."""
         entity_tag = "generated_entity_bg"
         arch_tag = "generated_arch_bg"
-        project_manager.hdl_frame_text.config(state=tk.NORMAL)
-        project_manager.hdl_frame_text.delete("1.0", tk.END)
-        project_manager.hdl_frame_text.insert("1.0", entity, entity_tag)
-        project_manager.hdl_frame_text.insert(tk.END, arch, arch_tag)
-        project_manager.hdl_frame_text.config(state=tk.DISABLED)
-        project_manager.hdl_frame_text.update_highlight_tags(
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.NORMAL)
+        project_manager.tab_hdl_ref.hdl_frame_text.delete("1.0", tk.END)
+        project_manager.tab_hdl_ref.hdl_frame_text.insert("1.0", entity, entity_tag)
+        project_manager.tab_hdl_ref.hdl_frame_text.insert(tk.END, arch, arch_tag)
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
+        project_manager.tab_hdl_ref.hdl_frame_text.update_highlight_tags(
             10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
         )
         # Pale brown for entity, pale yellow for architecture
-        project_manager.hdl_frame_text.tag_configure(entity_tag, background="#F5E6D3")
-        project_manager.hdl_frame_text.tag_configure(arch_tag, background="#FFF9CC")
+        project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(entity_tag, background="#F5E6D3")
+        project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(arch_tag, background="#FFF9CC")

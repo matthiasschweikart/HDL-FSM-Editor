@@ -191,13 +191,13 @@ class CustomText(CodeEditor):
         nr_of_characters_in_line = 0
         max_line_length = 0
         if self not in [
-            project_manager.interface_generics_text,
-            project_manager.interface_package_text,
-            project_manager.interface_ports_text,
-            project_manager.internals_architecture_text,
-            project_manager.internals_process_clocked_text,
-            project_manager.internals_process_combinatorial_text,
-            project_manager.internals_package_text,
+            project_manager.tab_interface_ref.interface_generics_text,
+            project_manager.tab_interface_ref.interface_package_text,
+            project_manager.tab_interface_ref.interface_ports_text,
+            project_manager.tab_internals_ref.internals_architecture_text,
+            project_manager.tab_internals_ref.internals_process_clocked_text,
+            project_manager.tab_internals_ref.internals_process_combinatorial_text,
+            project_manager.tab_internals_ref.internals_package_text,
         ]:
             for c in text:
                 if c != "\n":
@@ -349,7 +349,9 @@ class CustomText(CodeEditor):
         self.signals_list = hdl_generation_library.get_all_declared_signal_and_variable_names(all_signal_declarations)
         self.constants_list = hdl_generation_library.get_all_declared_constant_names(all_signal_declarations)
 
-    def update_custom_text_class_ports_list(self) -> None:  # Needed at self==project_manager.interface_ports_text
+    def update_custom_text_class_ports_list(
+        self,
+    ) -> None:  # Needed at self==project_manager.tab_interface_ref.interface_ports_text
         """Updates the port_types_list of this CustomText object, if it is the interface_ports_text"""
         all_port_declarations = self.get("1.0", tk.END).lower()
         self.readable_ports_list = hdl_generation_architecture_state_actions.get_all_readable_ports(
@@ -362,7 +364,7 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_generics_list(self) -> None:
         """Updates the generics_list of this CustomText object, if it is the interface_generics_text"""
-        all_generic_declarations = project_manager.interface_generics_text.get("1.0", tk.END).lower()
+        all_generic_declarations = project_manager.tab_interface_ref.interface_generics_text.get("1.0", tk.END).lower()
         self.generics_list = hdl_generation_architecture_state_actions.get_all_generic_names(all_generic_declarations)
 
     def _update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows(self) -> None:
@@ -372,7 +374,10 @@ class CustomText(CodeEditor):
         text = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(text)
         if text.isspace():
             return
-        if project_manager.language.get() == "VHDL" and self == project_manager.internals_architecture_text:
+        if (
+            project_manager.language.get() == "VHDL"
+            and self == project_manager.tab_internals_ref.internals_architecture_text
+        ):
             self._fill_function_names_list()
         if project_manager.language.get() == "VHDL":
             text = self._remove_loop_indices(text)
@@ -414,7 +419,7 @@ class CustomText(CodeEditor):
         _remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
         _remove_items_from_list(
             CustomText.read_variables_of_all_windows[self],
-            project_manager.internals_architecture_text.function_names_list,
+            project_manager.tab_internals_ref.internals_architecture_text.function_names_list,
         )
         _remove_items_from_list(CustomText.read_variables_of_all_windows[self], [";", ","])
         # ';' appears at VHDL-"null" assignments.
@@ -641,10 +646,16 @@ class CustomText(CodeEditor):
                 ):
                     # As the procedure definition may not be part of this VHDL file,
                     # it can not for sure be determined, which parameter is read and which parameter is written.
-                    if procedure_parameter in project_manager.interface_ports_text.readable_ports_list:
+                    if (
+                        procedure_parameter
+                        in project_manager.tab_interface_ref.interface_ports_text.readable_ports_list
+                    ):
                         # If a parameter is an input port, then it is read.
                         CustomText.read_variables_of_all_windows[self] += [procedure_parameter]
-                    elif procedure_parameter in project_manager.interface_ports_text.writable_ports_list:
+                    elif (
+                        procedure_parameter
+                        in project_manager.tab_interface_ref.interface_ports_text.writable_ports_list
+                    ):
                         # If a parameter is an output port, then it is written and
                         # must be added to the variable text with a pseudo assignment:
                         text += procedure_parameter + " <= ;"
@@ -835,13 +846,13 @@ class CustomText(CodeEditor):
 def _declaration_text_widgets():
     """Text widgets that show HDL declarations (interface/internals). Used for language-aware highlighting."""
     return [
-        project_manager.interface_generics_text,
-        project_manager.interface_package_text,
-        project_manager.interface_ports_text,
-        project_manager.internals_architecture_text,
-        project_manager.internals_process_clocked_text,
-        project_manager.internals_process_combinatorial_text,
-        project_manager.internals_package_text,
+        project_manager.tab_interface_ref.interface_generics_text,
+        project_manager.tab_interface_ref.interface_package_text,
+        project_manager.tab_interface_ref.interface_ports_text,
+        project_manager.tab_internals_ref.internals_architecture_text,
+        project_manager.tab_internals_ref.internals_process_clocked_text,
+        project_manager.tab_internals_ref.internals_process_combinatorial_text,
+        project_manager.tab_internals_ref.internals_package_text,
     ]
 
 

@@ -33,15 +33,15 @@ def compile_hdl() -> None:
             )
             return
     project_manager.notebook.show_tab(GuiTab.COMPILE_MSG)
-    project_manager.log_frame_text.config(state=tk.NORMAL)
-    project_manager.log_frame_text.insert(
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
+    project_manager.tab_log_ref.log_frame_text.insert(
         tk.END,
         "\n++++++++++++++++++++++++++++++++++++++ "
         + datetime.today().ctime()
         + " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n",
     )
-    project_manager.log_frame_text.config(state=tk.DISABLED)
-    project_manager.log_frame_text.see(tk.END)
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
+    project_manager.tab_log_ref.log_frame_text.see(tk.END)
     start_time = datetime.now()
     commands = _get_command_list()
     if commands is None:
@@ -49,9 +49,9 @@ def compile_hdl() -> None:
         return
     run_command_list(commands, execute=_execute)
     end_time = datetime.now()
-    project_manager.log_frame_text.config(state=tk.NORMAL)
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
     _insert_line_in_log("Finished user commands from Control-Tab after " + str(end_time - start_time) + ".\n")
-    project_manager.log_frame_text.config(state=tk.DISABLED)
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
 
 
 def _execute(command) -> bool:
@@ -173,14 +173,14 @@ def _insert_line_in_log(line) -> None:
         return
 
     line_low = line.lower()
-    project_manager.log_frame_text.config(state=tk.NORMAL)
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
     if match_object_of_message is not None or " error " in line_low or " warning " in line_low:
         # Add line together with color-tag to the text:
         if project_manager.language.get() == "VHDL" and "report note" in line_low:
-            project_manager.log_frame_text.insert(tk.END, line, ("message_green"))
+            project_manager.tab_log_ref.log_frame_text.insert(tk.END, line, ("message_green"))
         else:
-            project_manager.log_frame_text.insert(tk.END, line, ("message_red"))
+            project_manager.tab_log_ref.log_frame_text.insert(tk.END, line, ("message_red"))
     else:
-        project_manager.log_frame_text.insert(tk.END, line)
-    project_manager.log_frame_text.config(state=tk.DISABLED)
-    project_manager.log_frame_text.see(tk.END)
+        project_manager.tab_log_ref.log_frame_text.insert(tk.END, line)
+    project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
+    project_manager.tab_log_ref.log_frame_text.see(tk.END)

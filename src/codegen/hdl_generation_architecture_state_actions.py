@@ -23,7 +23,7 @@ def create_state_action_process(file_name, file_line_number, state_tag_list_sort
     # Get from Interface/Ports and from Internals/Architecture Declarations:
     all_possible_sensitivity_entries = create_a_list_with_all_possible_sensitivity_entries()
     variable_declarations = hdl_generation_library.get_text_from_text_widget(
-        project_manager.internals_process_combinatorial_text
+        project_manager.tab_internals_ref.internals_process_combinatorial_text
     )
     if project_manager.language.get() == "VHDL":
         state_action_process, file_line_number = _create_state_action_process_for_vhdl(
@@ -83,7 +83,7 @@ def _create_state_action_process_for_vhdl(
             file_line_number,
             "custom_text_in_internals_tab",
             number_of_lines,
-            project_manager.internals_process_combinatorial_text,
+            project_manager.tab_internals_ref.internals_process_combinatorial_text,
         )
         file_line_number += number_of_lines
     state_action_process += "begin\n"
@@ -157,7 +157,7 @@ def _create_state_action_process_for_verilog(
             file_line_number,
             "custom_text_in_internals_tab",
             number_of_new_lines,
-            project_manager.internals_process_combinatorial_text,
+            project_manager.tab_internals_ref.internals_process_combinatorial_text,
         )
         file_line_number += number_of_new_lines
 
@@ -207,9 +207,9 @@ def _create_state_action_process_for_verilog(
 
 def create_a_list_with_all_possible_sensitivity_entries() -> list:
     """Returns a list with all possible sensitivity list entries."""
-    all_port_declarations = project_manager.interface_ports_text.get("1.0", tk.END).lower()
+    all_port_declarations = project_manager.tab_interface_ref.interface_ports_text.get("1.0", tk.END).lower()
     readable_ports_list = get_all_readable_ports(all_port_declarations, check=True)
-    all_signal_declarations = project_manager.internals_architecture_text.get("1.0", tk.END).lower()
+    all_signal_declarations = project_manager.tab_internals_ref.internals_architecture_text.get("1.0", tk.END).lower()
     signals_list = _get_all_signals(all_signal_declarations)
     signals_list.extend(readable_ports_list)
     return signals_list

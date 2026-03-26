@@ -82,7 +82,7 @@ class NotebookTop(ttk.Notebook):
     def _if_hdl_tab_set_focus(self) -> None:
         selected_tab_index = self.index(self.select())
         if selected_tab_index == 4:  # Index of HDL tab
-            project_manager.hdl_frame_text.focus_set()
+            project_manager.tab_hdl_ref.hdl_frame_text.focus_set()
 
     def show_tab(self, tab: GuiTab) -> None:
         """Select the notebook tab whose text equals the given GuiTab value."""

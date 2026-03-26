@@ -11,8 +11,6 @@ class ProjectManager:
     """Simple project manager - just holds the state and provides access."""
 
     def __init__(self) -> None:
-        # self._project = Project()
-        self._store_events = True
         self._root: tk.Tk = None
         self._current_file: str = ""
         self._notebook: ttk.Notebook = None
@@ -29,20 +27,6 @@ class ProjectManager:
         self._edit_cmd: tk.Entry = None
         self._module_name: tk.Entry = None
         self._language: tk.StringVar = None
-        self._interface_package_text = None  #: custom_text.CustomText = None
-        self._interface_generics_text = None  #: custom_text.CustomText = None
-        self._interface_ports_text = None  #: custom_text.CustomText = None
-        self._internals_package_text = None  #: custom_text.CustomText = None
-        self._internals_architecture_text = None  #: custom_text.CustomText = None
-        self._internals_process_clocked_text = None  #: custom_text.CustomText = None
-        self._internals_process_combinatorial_text = None  #: custom_text.CustomText = None
-        self._interface_generics_label: ttk.Label = None
-        self._interface_ports_label: ttk.Label = None
-        self._hdl_frame_text = None  #: custom_text.CustomText = None
-        self._log_frame_text = None  #: custom_text.CustomText = None
-        self._internals_architecture_label: ttk.Label = None
-        self._internals_process_clocked_label: ttk.Label = None
-        self._internals_process_combinatorial_label: ttk.Label = None
         self._diagram_background_color: tk.StringVar = None
         self._diagram_background_color_error: ttk.Label = None
         self._include_timestamp_in_output: tk.BooleanVar = None
@@ -81,11 +65,6 @@ class ProjectManager:
         self._abs_zoom_factor = 5.0
         self._write_data_creator_ref = None  #: write_data_creator.WriteDataCreator
         self._undo_handling_ref = None  #: undo_handling.UndoHandling
-
-    @property
-    def store_events(self):  # -> linting.HighLightDict:
-        """Get the highlight dictionary."""
-        return self._store_events
 
     @property
     def highlight_dict_ref(self):  # -> linting.HighLightDict:
@@ -446,146 +425,6 @@ class ProjectManager:
     def root(self, value: tk.Tk) -> None:
         """Set the root Tk widget."""
         self._root = value
-
-    @property
-    def internals_architecture_label(self) -> tk.Label:
-        """Get the internals architecture Label widget."""
-        return self._internals_architecture_label
-
-    @internals_architecture_label.setter
-    def internals_architecture_label(self, value: tk.Label) -> None:
-        """Set the internals architecture Label widget."""
-        self._internals_architecture_label = value
-
-    @property
-    def internals_process_clocked_label(self) -> tk.Label:
-        """Get the internals process clocked Label widget."""
-        return self._internals_process_clocked_label
-
-    @internals_process_clocked_label.setter
-    def internals_process_clocked_label(self, value: tk.Label) -> None:
-        """Set the internals process clocked Label widget."""
-        self._internals_process_clocked_label = value
-
-    @property
-    def internals_process_combinatorial_label(self) -> tk.Label:
-        """Get the internals process combinatorial Label widget."""
-        return self._internals_process_combinatorial_label
-
-    @internals_process_combinatorial_label.setter
-    def internals_process_combinatorial_label(self, value: tk.Label) -> None:
-        """Set the internals process combinatorial Label widget."""
-        self._internals_process_combinatorial_label = value
-
-    @property
-    def log_frame_text(self) -> tk.Entry:
-        """Get the log frame Entry widget."""
-        return self._log_frame_text
-
-    @log_frame_text.setter
-    def log_frame_text(self, value: tk.Entry) -> None:
-        """Set the log frame Entry widget."""
-        self._log_frame_text = value
-
-    @property
-    def hdl_frame_text(self) -> tk.Entry:
-        """Get the HDL frame Entry widget."""
-        return self._hdl_frame_text
-
-    @hdl_frame_text.setter
-    def hdl_frame_text(self, value: tk.Entry) -> None:
-        """Set the HDL frame Entry widget."""
-        self._hdl_frame_text = value
-
-    @property
-    def interface_ports_label(self) -> tk.Label:
-        """Get the interface ports Label widget."""
-        return self._interface_ports_label
-
-    @interface_ports_label.setter
-    def interface_ports_label(self, value: tk.Label) -> None:
-        """Set the interface ports Label widget."""
-        self._interface_ports_label = value
-
-    @property
-    def interface_generics_label(self) -> tk.Label:
-        """Get the interface generics Label widget."""
-        return self._interface_generics_label
-
-    @interface_generics_label.setter
-    def interface_generics_label(self, value: tk.Label) -> None:
-        """Set the interface generics Label widget."""
-        self._interface_generics_label = value
-
-    @property
-    def interface_generics_text(self) -> tk.Entry:
-        """Get the interface generics Entry widget."""
-        return self._interface_generics_text
-
-    @interface_generics_text.setter
-    def interface_generics_text(self, value: tk.Entry) -> None:
-        """Set the interface generics Entry widget."""
-        self._interface_generics_text = value
-
-    @property
-    def interface_ports_text(self) -> tk.Entry:
-        """Get the interface ports Entry widget."""
-        return self._interface_ports_text
-
-    @interface_ports_text.setter
-    def interface_ports_text(self, value: tk.Entry) -> None:
-        """Set the interface ports Entry widget."""
-        self._interface_ports_text = value
-
-    @property
-    def internals_package_text(self) -> tk.Entry:
-        """Get the internals package Entry widget."""
-        return self._internals_package_text
-
-    @internals_package_text.setter
-    def internals_package_text(self, value: tk.Entry) -> None:
-        """Set the internals package Entry widget."""
-        self._internals_package_text = value
-
-    @property
-    def internals_architecture_text(self) -> tk.Entry:
-        """Get the internals architecture Entry widget."""
-        return self._internals_architecture_text
-
-    @internals_architecture_text.setter
-    def internals_architecture_text(self, value: tk.Entry) -> None:
-        """Set the internals architecture Entry widget."""
-        self._internals_architecture_text = value
-
-    @property
-    def internals_process_combinatorial_text(self) -> tk.Entry:
-        """Get the internals process combinatorial Entry widget."""
-        return self._internals_process_combinatorial_text
-
-    @internals_process_combinatorial_text.setter
-    def internals_process_combinatorial_text(self, value: tk.Entry) -> None:
-        """Set the internals process combinatorial Entry widget."""
-        self._internals_process_combinatorial_text = value
-
-    @property
-    def internals_process_clocked_text(self) -> tk.Entry:
-        """Get the internals process clocked Entry widget."""
-        return self._internals_process_clocked_text
-
-    @internals_process_clocked_text.setter
-    def internals_process_clocked_text(self, value: tk.Entry) -> None:
-        """Set the internals process clocked Entry widget."""
-        self._internals_process_clocked_text = value
-
-    @property
-    def interface_package_text(self) -> tk.Entry:
-        """Get the interface package Entry widget."""
-        return self._interface_package_text
-
-    @interface_package_text.setter
-    def interface_package_text(self, value: tk.Entry) -> None:
-        """Set the interface package Entry widget."""
-        self._interface_package_text = value
 
     @property
     def language(self) -> tk.StringVar:

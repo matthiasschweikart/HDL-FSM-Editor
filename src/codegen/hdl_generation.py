@@ -112,8 +112,8 @@ class HdlGeneration:
             update_hdl_tab.UpdateHdlTab.copy_into_hdl_tab(ent, arch)
             project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
             if not is_script_mode:
-                project_manager.log_frame_text.config(state=tk.NORMAL)
-                project_manager.log_frame_text.insert(
+                project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
+                project_manager.tab_log_ref.log_frame_text.insert(
                     tk.END,
                     "\n++++++++++++++++++++++++++++++++++++++ "
                     + datetime.today().ctime()
@@ -122,13 +122,15 @@ class HdlGeneration:
                     + config.module_name
                     + "\nHDL generation ready.\n",
                 )
-                project_manager.log_frame_text.config(state=tk.DISABLED)
+                project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
             sensitivity_check_hfe.SensitivityCheckHfe(is_script_mode)
 
     def _create_entity(self, config, file_name, file_line_number) -> tuple:
         entity = ""
 
-        package_statements = hdl_generation_library.get_text_from_text_widget(project_manager.interface_package_text)
+        package_statements = hdl_generation_library.get_text_from_text_widget(
+            project_manager.tab_interface_ref.interface_package_text
+        )
         entity += package_statements
         number_of_new_lines = package_statements.count("\n")
         project_manager.link_dict_ref.add(
@@ -136,7 +138,7 @@ class HdlGeneration:
             file_line_number,
             "custom_text_in_interface_tab",
             number_of_new_lines,
-            project_manager.interface_package_text,
+            project_manager.tab_interface_ref.interface_package_text,
         )
         file_line_number += number_of_new_lines
 
@@ -147,7 +149,9 @@ class HdlGeneration:
         project_manager.link_dict_ref.add(file_name, file_line_number, "Control-Tab", 1, "module_name")
         file_line_number += 1
 
-        generic_declarations = hdl_generation_library.get_text_from_text_widget(project_manager.interface_generics_text)
+        generic_declarations = hdl_generation_library.get_text_from_text_widget(
+            project_manager.tab_interface_ref.interface_generics_text
+        )
         generic_declarations = ListSeparationCheck(generic_declarations, "VHDL").get_fixed_list()
         if generic_declarations != "":
             generic_declarations = (
@@ -162,12 +166,14 @@ class HdlGeneration:
                 file_line_number,
                 "custom_text_in_interface_tab",
                 number_of_new_lines,
-                project_manager.interface_generics_text,
+                project_manager.tab_interface_ref.interface_generics_text,
             )
             file_line_number += number_of_new_lines + 1
         entity += generic_declarations
 
-        port_declarations = hdl_generation_library.get_text_from_text_widget(project_manager.interface_ports_text)
+        port_declarations = hdl_generation_library.get_text_from_text_widget(
+            project_manager.tab_interface_ref.interface_ports_text
+        )
         port_declarations = ListSeparationCheck(port_declarations, "VHDL").get_fixed_list()
         if port_declarations != "":
             port_declarations = (
@@ -182,7 +188,7 @@ class HdlGeneration:
                 file_line_number,
                 "custom_text_in_interface_tab",
                 number_of_new_lines,
-                project_manager.interface_ports_text,
+                project_manager.tab_interface_ref.interface_ports_text,
             )
             file_line_number += number_of_new_lines + 1
         entity += port_declarations
@@ -198,7 +204,9 @@ class HdlGeneration:
         project_manager.link_dict_ref.add(file_name, file_line_number, "Control-Tab", 1, "module_name")
         file_line_number += 1
 
-        parameters = hdl_generation_library.get_text_from_text_widget(project_manager.interface_generics_text)
+        parameters = hdl_generation_library.get_text_from_text_widget(
+            project_manager.tab_interface_ref.interface_generics_text
+        )
         parameters = ListSeparationCheck(parameters, "Verilog").get_fixed_list()
         if parameters != "":
             parameters = (
@@ -213,12 +221,12 @@ class HdlGeneration:
                 file_line_number,
                 "custom_text_in_interface_tab",
                 number_of_new_lines,
-                project_manager.interface_generics_text,
+                project_manager.tab_interface_ref.interface_generics_text,
             )
             file_line_number += number_of_new_lines + 1
             module += parameters
 
-        ports = hdl_generation_library.get_text_from_text_widget(project_manager.interface_ports_text)
+        ports = hdl_generation_library.get_text_from_text_widget(project_manager.tab_interface_ref.interface_ports_text)
         ports = ListSeparationCheck(ports, "Verilog").get_fixed_list()
         if ports != "":
             ports = "    (\n" + hdl_generation_library.indent_text_by_the_given_number_of_tabs(2, ports) + "    );\n"
@@ -229,7 +237,7 @@ class HdlGeneration:
                 file_line_number,
                 "custom_text_in_interface_tab",
                 number_of_new_lines,
-                project_manager.interface_ports_text,
+                project_manager.tab_interface_ref.interface_ports_text,
             )
             file_line_number += number_of_new_lines + 1
             module += ports

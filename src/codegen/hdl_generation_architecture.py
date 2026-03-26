@@ -14,7 +14,9 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     """Build VHDL architecture body and write it; update file_line_number and link dict for navigation."""
     architecture = ""
 
-    package_statements = hdl_generation_library.get_text_from_text_widget(project_manager.internals_package_text)
+    package_statements = hdl_generation_library.get_text_from_text_widget(
+        project_manager.tab_internals_ref.internals_package_text
+    )
     architecture += package_statements
     number_of_new_lines = package_statements.count("\n")
     project_manager.link_dict_ref.add(
@@ -22,7 +24,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
         file_line_number,
         "custom_text_in_internals_tab",
         number_of_new_lines,
-        project_manager.internals_package_text,
+        project_manager.tab_internals_ref.internals_package_text,
     )
     file_line_number += number_of_new_lines
 
@@ -34,7 +36,9 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     architecture += "    signal state : t_state;\n"
     file_line_number += 4
 
-    signal_declarations = hdl_generation_library.get_text_from_text_widget(project_manager.internals_architecture_text)
+    signal_declarations = hdl_generation_library.get_text_from_text_widget(
+        project_manager.tab_internals_ref.internals_architecture_text
+    )
     architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(1, signal_declarations)
     number_of_new_lines = signal_declarations.count("\n")
     project_manager.link_dict_ref.add(
@@ -42,7 +46,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
         file_line_number,
         "custom_text_in_internals_tab",
         number_of_new_lines,
-        project_manager.internals_architecture_text,
+        project_manager.tab_internals_ref.internals_architecture_text,
     )
     file_line_number += number_of_new_lines
 
@@ -59,7 +63,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     file_line_number += 1
 
     variable_declarations = hdl_generation_library.get_text_from_text_widget(
-        project_manager.internals_process_clocked_text
+        project_manager.tab_internals_ref.internals_process_clocked_text
     )
     architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(2, variable_declarations)
     number_of_new_lines = variable_declarations.count("\n")
@@ -68,7 +72,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
         file_line_number,
         "custom_text_in_internals_tab",
         number_of_new_lines,
-        project_manager.internals_process_clocked_text,
+        project_manager.tab_internals_ref.internals_process_clocked_text,
     )
     file_line_number += number_of_new_lines
 

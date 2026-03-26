@@ -66,7 +66,7 @@ class HighLightDict:
         return variables_to_read
 
     def _store_not_read_input_ports(self, variables_to_write):
-        for input_port in project_manager.interface_ports_text.readable_ports_list:
+        for input_port in project_manager.tab_interface_ref.interface_ports_text.readable_ports_list:
             if input_port in variables_to_write:
                 # Input is read but must not be written:
                 variables_to_write.remove(input_port)
@@ -76,7 +76,7 @@ class HighLightDict:
         return variables_to_write
 
     def _store_not_written_output_ports(self, variables_to_read, variables_to_write):
-        for output in project_manager.interface_ports_text.writable_ports_list:
+        for output in project_manager.tab_interface_ref.interface_ports_text.writable_ports_list:
             if output in variables_to_read:
                 # Outputs is written but must not be read:
                 variables_to_read.remove(output)
@@ -93,9 +93,9 @@ class HighLightDict:
         for _, ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
             process_variable_list += ref.text_id.signals_list
         for signal in (
-            project_manager.internals_architecture_text.signals_list
-            + project_manager.internals_process_combinatorial_text.signals_list
-            + project_manager.internals_process_clocked_text.signals_list
+            project_manager.tab_internals_ref.internals_architecture_text.signals_list
+            + project_manager.tab_internals_ref.internals_process_combinatorial_text.signals_list
+            + project_manager.tab_internals_ref.internals_process_clocked_text.signals_list
             + process_variable_list
         ):
             if signal in variables_to_read and signal in variables_to_write:
@@ -109,9 +109,9 @@ class HighLightDict:
 
     def _detect_not_written_constants(self, variables_to_read, variables_to_write):
         for constant in (
-            project_manager.internals_architecture_text.constants_list
-            + project_manager.internals_process_combinatorial_text.constants_list
-            + project_manager.internals_process_clocked_text.constants_list
+            project_manager.tab_internals_ref.internals_architecture_text.constants_list
+            + project_manager.tab_internals_ref.internals_process_combinatorial_text.constants_list
+            + project_manager.tab_internals_ref.internals_process_clocked_text.constants_list
         ):
             if constant in variables_to_read:
                 variables_to_read.remove(constant)
@@ -122,13 +122,13 @@ class HighLightDict:
         return variables_to_read, variables_to_write
 
     def _remove_port_types(self, variables_to_write):
-        for port_type in project_manager.interface_ports_text.port_types_list:
+        for port_type in project_manager.tab_interface_ref.interface_ports_text.port_types_list:
             if port_type in variables_to_write:
                 variables_to_write.remove(port_type)
         return variables_to_write
 
     def _remove_generics(self, variables_to_read, variables_to_write):
-        for generic in project_manager.interface_generics_text.generics_list:
+        for generic in project_manager.tab_interface_ref.interface_generics_text.generics_list:
             if generic in variables_to_read:
                 variables_to_read.remove(generic)
             if generic in variables_to_write:

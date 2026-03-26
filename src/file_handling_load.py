@@ -60,49 +60,53 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
 
 def _load_interface_data(design_dictionary: dict[str, Any]) -> None:
     """Load interface data including package, generics, and ports text."""
-    project_manager.interface_package_text.insert("1.0", design_dictionary["interface_package"])
-    project_manager.interface_generics_text.insert("1.0", design_dictionary["interface_generics"])
-    project_manager.interface_ports_text.insert("1.0", design_dictionary["interface_ports"])
+    project_manager.tab_interface_ref.interface_package_text.insert("1.0", design_dictionary["interface_package"])
+    project_manager.tab_interface_ref.interface_generics_text.insert("1.0", design_dictionary["interface_generics"])
+    project_manager.tab_interface_ref.interface_ports_text.insert("1.0", design_dictionary["interface_ports"])
 
     # Update highlight tags and custom text class lists
-    project_manager.interface_package_text.update_highlight_tags(
+    project_manager.tab_interface_ref.interface_package_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.interface_generics_text.update_highlight_tags(
+    project_manager.tab_interface_ref.interface_generics_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.interface_ports_text.update_highlight_tags(
+    project_manager.tab_interface_ref.interface_ports_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.interface_generics_text.update_custom_text_class_generics_list()
-    project_manager.interface_ports_text.update_custom_text_class_ports_list()
+    project_manager.tab_interface_ref.interface_generics_text.update_custom_text_class_generics_list()
+    project_manager.tab_interface_ref.interface_ports_text.update_custom_text_class_ports_list()
 
 
 def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
     """Load internals data including package, architecture, and process text."""
-    project_manager.internals_package_text.insert("1.0", design_dictionary["internals_package"])
-    project_manager.internals_architecture_text.insert("1.0", design_dictionary["internals_architecture"])
-    project_manager.internals_process_clocked_text.insert("1.0", design_dictionary["internals_process"])
-    project_manager.internals_process_combinatorial_text.insert(
+    project_manager.tab_internals_ref.internals_package_text.insert("1.0", design_dictionary["internals_package"])
+    project_manager.tab_internals_ref.internals_architecture_text.insert(
+        "1.0", design_dictionary["internals_architecture"]
+    )
+    project_manager.tab_internals_ref.internals_process_clocked_text.insert(
+        "1.0", design_dictionary["internals_process"]
+    )
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.insert(
         "1.0", design_dictionary["internals_process_combinatorial"]
     )
 
     # Update highlight tags and custom text class lists
-    project_manager.internals_package_text.update_highlight_tags(
+    project_manager.tab_internals_ref.internals_package_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.internals_architecture_text.update_highlight_tags(
+    project_manager.tab_internals_ref.internals_architecture_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.internals_process_clocked_text.update_highlight_tags(
+    project_manager.tab_internals_ref.internals_process_clocked_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.internals_process_combinatorial_text.update_highlight_tags(
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.update_highlight_tags(
         10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
     )
-    project_manager.internals_architecture_text.update_custom_text_class_signals_list()
-    project_manager.internals_process_clocked_text.update_custom_text_class_signals_list()
-    project_manager.internals_process_combinatorial_text.update_custom_text_class_signals_list()
+    project_manager.tab_internals_ref.internals_architecture_text.update_custom_text_class_signals_list()
+    project_manager.tab_internals_ref.internals_process_clocked_text.update_custom_text_class_signals_list()
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.update_custom_text_class_signals_list()
 
 
 def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:

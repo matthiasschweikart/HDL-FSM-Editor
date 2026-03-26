@@ -37,11 +37,11 @@ class SensitivityCheckHfe:
             ).get_results()
             if messages:
                 if not is_script_mode:
-                    project_manager.log_frame_text.config(state=tk.NORMAL)
+                    project_manager.tab_log_ref.log_frame_text.config(state=tk.NORMAL)
                     for message in messages:
-                        project_manager.log_frame_text.insert(tk.END, message + "\n", ("message_red"))
-                    project_manager.log_frame_text.config(state=tk.DISABLED)
-                    project_manager.log_frame_text.see(tk.END)
+                        project_manager.tab_log_ref.log_frame_text.insert(tk.END, message + "\n", ("message_red"))
+                    project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
+                    project_manager.tab_log_ref.log_frame_text.see(tk.END)
                     project_manager.notebook.show_tab(GuiTab.COMPILE_MSG)
                 else:
                     for message in messages:

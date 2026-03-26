@@ -32,12 +32,12 @@ class TabControl:
         self.module_name_entry.grid(row=0, column=1, sticky=(tk.W, tk.E))
         self.module_name_entry.select_clear()
 
-        self._language = tk.StringVar()
-        project_manager.language = self._language
-        self._language.set("VHDL")
+        self.language = tk.StringVar()
+        project_manager.language = self.language
+        self.language.set("VHDL")
         language_label = ttk.Label(control_frame, text="Language:", padding=5)
         language_combobox = ttk.Combobox(
-            control_frame, textvariable=self._language, values=("VHDL", "Verilog", "SystemVerilog"), state="readonly"
+            control_frame, textvariable=self.language, values=("VHDL", "Verilog", "SystemVerilog"), state="readonly"
         )
         language_combobox.bind("<<ComboboxSelected>>", lambda event: self.switch_language_mode())
         language_label.grid(row=1, column=0, sticky=tk.W)
@@ -60,10 +60,10 @@ class TabControl:
         self.select_file_number_text = tk.IntVar()
         project_manager.select_file_number_text = self.select_file_number_text
         self.select_file_number_text.set(2)
-        self._select_file_number_radio_button1 = ttk.Radiobutton(
+        self.select_file_number_radio_button1 = ttk.Radiobutton(
             select_file_number_frame, takefocus=False, variable=self.select_file_number_text, text="1 file", value=1
         )
-        self._select_file_number_radio_button2 = ttk.Radiobutton(
+        self.select_file_number_radio_button2 = ttk.Radiobutton(
             select_file_number_frame, takefocus=False, variable=self.select_file_number_text, text="2 files", value=2
         )
         self.include_timestamp_in_output = tk.BooleanVar(value=True)
@@ -76,8 +76,8 @@ class TabControl:
         )
         include_timestamp_checkbox.grid(row=0, column=0, sticky=tk.W)
         include_timestamp_label.grid(row=0, column=1, sticky=tk.W)
-        self._select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.W)
-        self._select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.W)
+        self.select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.W)
+        self.select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.W)
 
         self.reset_signal_name = tk.StringVar()
         project_manager.reset_signal_name = self.reset_signal_name
@@ -103,13 +103,12 @@ class TabControl:
         compile_cmd_label.grid(row=6, column=0, sticky=tk.W)
         compile_cmd_entry.grid(row=6, column=1, sticky="ew")
 
-        compile_cmd_docu = ttk.Label(
+        self.compile_cmd_docu = ttk.Label(
             control_frame,
             text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n"
             "$file\t= File with Entity and Architecture\n$name\t= Module Name",
             padding=5,
         )
-        self.compile_cmd_docu = compile_cmd_docu
         self.compile_cmd_docu.grid(row=7, column=1, sticky=tk.W)
 
         self.edit_cmd = tk.StringVar()
@@ -200,22 +199,23 @@ class TabControl:
             project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # enable 2 files mode
             project_manager.select_file_number_text.set(2)
-            self._select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.E)
-            self._select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.E)
+            self.select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.E)
+            self.select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.E)
             # Interface: Adapt documentation for generics and ports
             project_manager.tab_interface_ref.paned_window.insert(
                 0, project_manager.tab_interface_ref.interface_package_frame, weight=1
             )
-            project_manager.interface_generics_label.config(text="Generics:")
-            project_manager.interface_ports_label.config(text="Ports:")
+            project_manager.tab_interface_ref.interface_generics_label.config(text="Generics:")
             # Internals: Enable VHDL-package text field
             project_manager.tab_internals_ref.paned_window.insert(
                 0, project_manager.tab_internals_ref.internals_package_frame, weight=1
             )
             # Internals: Architecture-Declarations (adapt labels to VHDL)
-            project_manager.internals_architecture_label.config(text="Architecture Declarations:")
-            project_manager.internals_process_clocked_label.config(text="Variable Declarations for clocked process:")
-            project_manager.internals_process_combinatorial_label.config(
+            project_manager.tab_internals_ref.internals_architecture_label.config(text="Architecture Declarations:")
+            project_manager.tab_internals_ref.internals_process_clocked_label.config(
+                text="Variable Declarations for clocked process:"
+            )
+            project_manager.tab_internals_ref.internals_process_combinatorial_label.config(
                 text="Variable Declarations for combinatorial process:"
             )
             # Modify compile command:
@@ -232,25 +232,24 @@ class TabControl:
             project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # Control: disable 2 files mode
             project_manager.select_file_number_text.set(1)
-            self._select_file_number_radio_button1.grid_forget()
-            self._select_file_number_radio_button2.grid_forget()
+            self.select_file_number_radio_button1.grid_forget()
+            self.select_file_number_radio_button2.grid_forget()
             # Interface: Remove VHDL-package text field
             project_manager.tab_interface_ref.paned_window.forget(
                 project_manager.tab_interface_ref.interface_package_frame
             )
             # Interface: Adapt documentation for generics and ports
-            project_manager.interface_generics_label.config(text="Parameters:")
-            project_manager.interface_ports_label.config(text="Ports:")
+            project_manager.tab_interface_ref.interface_generics_label.config(text="Parameters:")
             # Internals: Remove VHDL-package text field
             project_manager.tab_internals_ref.paned_window.forget(
                 project_manager.tab_internals_ref.internals_package_frame
             )
             # Internals: Architecture-Declarations (adapt labels to Verilog)
-            project_manager.internals_architecture_label.config(text="Internal Declarations:")
-            project_manager.internals_process_clocked_label.config(
+            project_manager.tab_internals_ref.internals_architecture_label.config(text="Internal Declarations:")
+            project_manager.tab_internals_ref.internals_process_clocked_label.config(
                 text="Local Variable Declarations for clocked always process (not supported by all Verilog compilers):"
             )
-            project_manager.internals_process_combinatorial_label.config(
+            project_manager.tab_internals_ref.internals_process_combinatorial_label.config(
                 text=(
                     "Local Variable Declarations for combinatorial always process "
                     "(not supported by all Verilog compilers):"
@@ -328,7 +327,7 @@ class TabControl:
         self._module_name_trace_id = self.module_name.trace_add(
             "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
         )
-        self._language_trace_id = self._language.trace_add(
+        self._language_trace_id = self.language.trace_add(
             "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
         )
         self._generate_path_trace_id = self.generate_path_value.trace_add(
@@ -365,7 +364,7 @@ class TabControl:
     def deactivate_traces(self) -> None:
         """Deactivate the traces for the given StringVars."""
         self.module_name.trace_remove("write", self._module_name_trace_id)
-        self._language.trace_remove("write", self._language_trace_id)
+        self.language.trace_remove("write", self._language_trace_id)
         self.generate_path_value.trace_remove("write", self._generate_path_trace_id)
         self.select_file_number_text.trace_remove("write", self._select_file_number_trace_id)
         self.include_timestamp_in_output.trace_remove("write", self._include_timestamp_trace_id)

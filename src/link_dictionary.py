@@ -118,10 +118,10 @@ class LinkDictionary:
             if file_name_architecture and selected_file == file_name_architecture:
                 file_line_number += hdl_generation.HdlGeneration.last_line_number_of_file1
         project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
-        project_manager.hdl_frame_text.highlight_item("", "", file_line_number)
-        project_manager.hdl_frame_text.config(state="normal")
-        project_manager.hdl_frame_text.focus_set()
-        project_manager.hdl_frame_text.config(state="disabled")
+        project_manager.tab_hdl_ref.hdl_frame_text.highlight_item("", "", file_line_number)
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state="normal")
+        project_manager.tab_hdl_ref.hdl_frame_text.focus_set()
+        project_manager.tab_hdl_ref.hdl_frame_text.config(state="disabled")
 
     def clear_link_dict(self, file_name) -> None:
         """Remove all link entries for the given file name."""
