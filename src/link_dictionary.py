@@ -15,6 +15,7 @@ line-number and file-name are determined and the corresponding entry of the Link
 """
 
 import tkinter as tk
+from pathlib import Path
 from tkinter import messagebox
 
 from codegen import hdl_generation
@@ -41,11 +42,12 @@ class LinkDictionary:
         hdl_item_name: str | tk.Widget,  # String when "Control-Tab", widget-references in all other cases
     ) -> None:
         """Register a link from (file_name, line) to the given tab/widget/line for HDL navigation."""
+        path_file_name = Path(file_name)
         # print("add =", file_name, file_line_number, hdl_item_type, number_of_lines, hdl_item_name)
-        if file_name not in self.link_dict:
-            self.link_dict[file_name] = {}
+        if path_file_name not in self.link_dict:
+            self.link_dict[path_file_name] = {}
         if hdl_item_type == "Control-Tab":
-            self.link_dict[file_name][file_line_number] = {
+            self.link_dict[path_file_name][file_line_number] = {
                 "tab_name": GuiTab.CONTROL,
                 "widget_reference": project_manager.tab_control_ref,
                 "hdl_item_type": hdl_item_name,
@@ -54,7 +56,7 @@ class LinkDictionary:
             }
         elif hdl_item_type == "custom_text_in_interface_tab":
             for text_line_number in range(1, number_of_lines + 1):
-                self.link_dict[file_name][file_line_number + text_line_number - 1] = {
+                self.link_dict[path_file_name][file_line_number + text_line_number - 1] = {
                     "tab_name": GuiTab.INTERFACE,
                     "widget_reference": hdl_item_name,
                     "hdl_item_type": "",
@@ -63,7 +65,7 @@ class LinkDictionary:
                 }
         elif hdl_item_type == "custom_text_in_internals_tab":
             for text_line_number in range(1, number_of_lines + 1):
-                self.link_dict[file_name][file_line_number + text_line_number - 1] = {
+                self.link_dict[path_file_name][file_line_number + text_line_number - 1] = {
                     "tab_name": GuiTab.INTERNALS,
                     "widget_reference": hdl_item_name,
                     "hdl_item_type": "",
@@ -72,7 +74,7 @@ class LinkDictionary:
                 }
         elif hdl_item_type == "custom_text_in_diagram_tab":
             for text_line_number in range(1, number_of_lines + 1):
-                self.link_dict[file_name][file_line_number + text_line_number - 1] = {
+                self.link_dict[path_file_name][file_line_number + text_line_number - 1] = {
                     "tab_name": GuiTab.DIAGRAM,
                     "widget_reference": hdl_item_name,
                     "hdl_item_type": "",
@@ -81,7 +83,7 @@ class LinkDictionary:
                 }
         elif hdl_item_type == "":  # Used at sensitivity list of state action process
             for text_line_number in range(1, number_of_lines + 1):
-                self.link_dict[file_name][file_line_number + text_line_number - 1] = {
+                self.link_dict[path_file_name][file_line_number + text_line_number - 1] = {
                     "tab_name": None,  # No tab to jump to, because this line is not entered by the user
                     "widget_reference": "",  # As there is no tab, there is also no widget to jump to.
                     "hdl_item_type": "",
@@ -91,33 +93,37 @@ class LinkDictionary:
 
     def has_link(self, file_name: str, file_line_number: int) -> bool:
         """Check if a link exists for the given file and line."""
-        return file_name in self.link_dict and file_line_number in self.link_dict[file_name]
+        path_file_name = Path(file_name)
+        return path_file_name in self.link_dict and file_line_number in self.link_dict[path_file_name]
 
     def jump_to_source(self, selected_file, file_line_number) -> None:
         """Switch to the according tab and highlight the given HDL file/line."""
         # print("jump_to_source", selected_file, file_line_number)
-        tab_to_show = self.link_dict[selected_file][file_line_number]["tab_name"]
-        widget = self.link_dict[selected_file][file_line_number]["widget_reference"]
+        path_selected_file = Path(selected_file)
+        tab_to_show = self.link_dict[path_selected_file][file_line_number]["tab_name"]
+        widget = self.link_dict[path_selected_file][file_line_number]["widget_reference"]
         if widget == "":  # The code line is not entered by the user and there is no source to jump to.
             messagebox.showinfo(
                 "HDL-FSM-Editor",
                 "No source is available for this code line.\nBut you can jump to HDL by Alt-mouse-click.",
             )
         else:
-            hdl_item_type = self.link_dict[selected_file][file_line_number]["hdl_item_type"]
-            object_identifier = self.link_dict[selected_file][file_line_number]["object_identifier"]
-            number_of_line = self.link_dict[selected_file][file_line_number]["number_of_line"]
+            hdl_item_type = self.link_dict[path_selected_file][file_line_number]["hdl_item_type"]
+            object_identifier = self.link_dict[path_selected_file][file_line_number]["object_identifier"]
+            number_of_line = self.link_dict[path_selected_file][file_line_number]["number_of_line"]
             project_manager.notebook.show_tab(tab_to_show)
             widget.highlight_item(hdl_item_type, object_identifier, number_of_line)
 
     def jump_to_hdl(self, selected_file, file_line_number) -> None:
         """Switch to Generated HDL output tab and highlight the given file/line."""
+        path_selected_file = Path(selected_file)
         if project_manager.select_file_number_text.get() == 2:
             gen_config = GenerationConfig.from_main_window()
-            file_name_architecture = gen_config.get_architecture_file()
-            if file_name_architecture and selected_file == file_name_architecture:
+            path_file_name_architecture = Path(gen_config.get_architecture_file())
+            if path_file_name_architecture and path_selected_file == path_file_name_architecture:
                 file_line_number += hdl_generation.HdlGeneration.last_line_number_of_file1
         project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
+        project_manager.notebook.update()  # Ensure the HDL tab is rendered before trying to highlight
         project_manager.tab_hdl_ref.hdl_frame_text.highlight_item("", "", file_line_number)
         project_manager.tab_hdl_ref.hdl_frame_text.config(state="normal")
         project_manager.tab_hdl_ref.hdl_frame_text.focus_set()
@@ -125,6 +131,7 @@ class LinkDictionary:
 
     def clear_link_dict(self, file_name) -> None:
         """Remove all link entries for the given file name."""
-        if file_name in self.link_dict:
-            # print("clear_link_dict: file_name =", file_name)
-            self.link_dict.pop(file_name)
+        path_file_name = Path(file_name)
+        if path_file_name in self.link_dict:
+            # print("clear_link_dict: file_name =", path_file_name)
+            self.link_dict.pop(path_file_name)
