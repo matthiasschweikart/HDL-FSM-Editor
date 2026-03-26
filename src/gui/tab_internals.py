@@ -85,10 +85,10 @@ class TabInternals:
         internals_process_clocked_frame.columnconfigure(1, weight=0)
         internals_process_clocked_frame.rowconfigure(0, weight=0)
         internals_process_clocked_frame.rowconfigure(1, weight=1)
-        _internals_process_clocked_label = ttk.Label(
+        internals_process_clocked_label = ttk.Label(
             internals_process_clocked_frame, text="Variable Declarations for clocked process:", padding=5
         )
-        project_manager.internals_process_clocked_label = _internals_process_clocked_label
+        project_manager.internals_process_clocked_label = internals_process_clocked_label
         interface_process_clocked_info = ttk.Label(
             internals_process_clocked_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
@@ -109,7 +109,7 @@ class TabInternals:
             command=self.internals_process_clocked_text.yview,
         )
         self.internals_process_clocked_text.config(yscrollcommand=internals_process_clocked_scroll.set)
-        _internals_process_clocked_label.grid(row=0, column=0, sticky=tk.W)
+        internals_process_clocked_label.grid(row=0, column=0, sticky=tk.W)
         interface_process_clocked_info.grid(row=0, column=0, sticky=tk.E)
         self.internals_process_clocked_text.grid(row=1, column=0, sticky="nsew")
         internals_process_clocked_scroll.grid(row=1, column=1, sticky="nsew")
