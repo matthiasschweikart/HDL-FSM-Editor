@@ -82,7 +82,7 @@ class CustomText(CodeEditor):
         self.text_type = text_type
         # text_type is in:
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
-        self.format_after_id = None
+        self.format_after_id = self.after(100, lambda: None)  # Dummy id for first key press
         self.update_highlight_after_id = None
         # create a proxy for the underlying widget
         self._orig = self._w + "_orig"
@@ -100,9 +100,7 @@ class CustomText(CodeEditor):
         # 2. format() is started
         # But as inserting the character takes a while, format() will still find the old text,
         # so it must be delayed until the character was inserted:
-        self.bind(
-            "<Key>", self.format_after_idle
-        )  # This binding will be overwritten for the CustomText objects in Interface/Internals tab.
+        self.bind("<Key>", self.format_after_idle)
         self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
@@ -154,9 +152,10 @@ class CustomText(CodeEditor):
 
     def format_after_idle(self, event) -> None:
         """Schedule format() after 200 ms idle (except for log text)."""
+        # Prevent the formatting of log text, which can be very long and may contain keywords by accident (which
+        # shall not be highlighted) and can not be changed by key-presses:
         if self.text_type != "log":
-            if self.format_after_id is not None:
-                self.after_cancel(self.format_after_id)
+            self.after_cancel(self.format_after_id)
             self.format_after_id = self.after(100, self.format, event)
 
     def format(self, event) -> None:
