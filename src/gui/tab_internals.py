@@ -154,7 +154,8 @@ class TabInternals:
         self.paned_window_internals.add(internals_process_combinatorial_frame, weight=1)
         project_manager.notebook.add(self.paned_window_internals, sticky="nsew", text=GuiTab.INTERNALS.value)
 
-        self.internals_package_text.bind("<Control-Z>", lambda event: self.internals_package_text.edit_redo())
+        self.internals_package_text.bind("<Control-z>", lambda event: self.internals_package_text.undo())
+        self.internals_package_text.bind("<Control-Z>", lambda event: self.internals_package_text.redo())
         self.internals_package_text.bind(
             "<Control-e>", lambda event: self.internals_package_text.edit_in_external_editor()
         )
