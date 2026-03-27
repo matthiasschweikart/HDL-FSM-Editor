@@ -181,7 +181,7 @@ class FindReplace:
                 canvas_editing.view_rectangle(object_coords, check_fit=False)
                 object_center = project_manager.canvas.coords(item)
                 canvas_editing.canvas_zoom(object_center, 0.25)
-                continue_search = messagebox.askyesno("Continue", "Find next")
+                continue_search = self._ask_continue()
                 if continue_search is False:
                     break
                 start = hit_begin + len(self.search_pattern)
@@ -236,7 +236,7 @@ class FindReplace:
                     canvas_editing.view_rectangle(object_coords_new, check_fit=False)
                 else:
                     text_field["ref"].see(index)
-                continue_search = messagebox.askyesno("Continue", "Find next")
+                continue_search = self._ask_continue()
                 text_field["ref"].tag_remove("hit", index, index + " + " + str(count.get()) + " chars")
                 if not continue_search:
                     break
@@ -262,7 +262,7 @@ class FindReplace:
                 self.number_of_hits_all += 1
                 self._move_in_foreground(GuiTab.CONTROL)
                 entry_widget_info["entry"].select_range(hit_begin, hit_begin + len(self.search_pattern))
-                continue_search = messagebox.askyesno("Continue", "Find next")
+                continue_search = self._ask_continue()
                 if continue_search is False:
                     break
                 start = hit_begin + len(self.search_pattern)
@@ -273,6 +273,31 @@ class FindReplace:
                 )
                 break
         return continue_search
+
+    def _ask_continue(self) -> bool:
+        """Non-modal Yes/No dialog that keeps the main window responsive."""
+        result = tk.BooleanVar()
+        dialog = tk.Toplevel()  # width=400)
+        dialog.title("Continue")
+        dialog.resizable(False, False)
+        dialog.protocol("WM_DELETE_WINDOW", lambda: (result.set(False), dialog.destroy()))
+        tk.Label(dialog, text="Find next?", padx=10, pady=8).grid()
+        btn_frame = tk.Frame(dialog)
+        btn_frame.grid(pady=(0, 8))
+        yes_button = tk.Button(btn_frame, text="Yes", width=8, command=lambda: (result.set(True), dialog.destroy()))
+        not_button = tk.Button(btn_frame, text="No", width=8, command=lambda: (result.set(False), dialog.destroy()))
+        yes_button.grid(row=0, column=0, padx=30)
+        not_button.grid(row=0, column=1, padx=30)
+        yes_button.bind("<Return>", lambda event: (result.set(True), dialog.destroy()))
+        yes_button.focus_set()  # Set initial keyboard focus to the "Yes" button
+        dialog.update_idletasks()  # Ensure the dialog is fully rendered before it can be interacted with
+        x, y = project_manager.root.winfo_pointerxy()
+        geometry_parts = dialog.geometry().split("+")
+        geometry_dimensions = geometry_parts[0].split("x")  # e.g., "200x100"
+        dialog.geometry(f"+{x - int(geometry_dimensions[0]) // 4}+{y - int(geometry_dimensions[1])}")
+        # wait_variable pumps the event loop so the main window stays interactive
+        dialog.wait_variable(result)
+        return result.get()
 
     def _move_in_foreground(self, tab: GuiTab) -> None:
         notebook_ids = project_manager.notebook.tabs()
