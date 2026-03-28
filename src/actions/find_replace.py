@@ -27,7 +27,12 @@ class FindReplace:
     there the search_string/replace_string are "escaped".
     """
 
+    _active_dialog: "tk.Toplevel | None" = None
+
     def __init__(self, search_string, replace_string, replace, in_hdl=False) -> None:
+        if FindReplace._active_dialog is not None and FindReplace._active_dialog.winfo_exists():
+            FindReplace._active_dialog.destroy()  # close any dialog waiting for user input
+        self.count = 0
         self.number_of_hits_all = 0
         self.search_pattern = search_string.get()
         self.replace_pattern = replace_string.get()
@@ -276,28 +281,35 @@ class FindReplace:
 
     def _ask_continue(self) -> bool:
         """Non-modal Yes/No dialog that keeps the main window responsive."""
-        result = tk.BooleanVar()
-        dialog = tk.Toplevel()  # width=400)
+        dialog = tk.Toplevel()  # open new window
         dialog.title("Continue")
         dialog.resizable(False, False)
-        dialog.protocol("WM_DELETE_WINDOW", lambda: (result.set(False), dialog.destroy()))
+        dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
+        dialog.bind("<Escape>", lambda _: dialog.destroy())
+        FindReplace._active_dialog = dialog  # Store the reference so that the window can be closed by another search.
+        answer = tk.BooleanVar(value=False)
+        self._show_continue_dialog(dialog, answer)
+        dialog.wait_window(dialog)  # Waits until the dialog is closed by the user, but keeps the main window responsive
+        return answer.get()
+
+    def _show_continue_dialog(self, dialog, answer) -> None:
         tk.Label(dialog, text="Find next?", padx=10, pady=8).grid()
         btn_frame = tk.Frame(dialog)
         btn_frame.grid(pady=(0, 8))
-        yes_button = tk.Button(btn_frame, text="Yes", width=8, command=lambda: (result.set(True), dialog.destroy()))
-        not_button = tk.Button(btn_frame, text="No", width=8, command=lambda: (result.set(False), dialog.destroy()))
-        yes_button.grid(row=0, column=0, padx=30)
-        not_button.grid(row=0, column=1, padx=30)
-        yes_button.bind("<Return>", lambda event: (result.set(True), dialog.destroy()))
+        yes_button = tk.Button(btn_frame, text="Yes", width=8, command=lambda: (answer.set(True), dialog.destroy()))
+        yes_button.bind("<Return>", lambda _: (answer.set(True), dialog.destroy()))
         yes_button.focus_set()  # Set initial keyboard focus to the "Yes" button
+        yes_button.grid(row=0, column=0, padx=30)
+        not_button = tk.Button(btn_frame, text="No", width=8, command=dialog.destroy)
+        not_button.grid(row=0, column=1, padx=30)
+        self._move_dialog_under_mouse_cursor(dialog)
+
+    def _move_dialog_under_mouse_cursor(self, dialog):
         dialog.update_idletasks()  # Ensure the dialog is fully rendered before it can be interacted with
         x, y = project_manager.root.winfo_pointerxy()
         geometry_parts = dialog.geometry().split("+")
         geometry_dimensions = geometry_parts[0].split("x")  # e.g., "200x100"
         dialog.geometry(f"+{x - int(geometry_dimensions[0]) // 4}+{y - int(geometry_dimensions[1])}")
-        # wait_variable pumps the event loop so the main window stays interactive
-        dialog.wait_variable(result)
-        return result.get()
 
     def _move_in_foreground(self, tab: GuiTab) -> None:
         notebook_ids = project_manager.notebook.tabs()
