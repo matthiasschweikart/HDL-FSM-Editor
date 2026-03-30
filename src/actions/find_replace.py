@@ -282,6 +282,7 @@ class FindReplace:
     def _ask_continue(self) -> bool:
         """Non-modal Yes/No dialog that keeps the main window responsive."""
         dialog = tk.Toplevel()  # open new window
+        dialog.wm_attributes("-topmost", True)
         dialog.title("Continue")
         dialog.resizable(False, False)
         dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
