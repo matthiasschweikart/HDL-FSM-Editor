@@ -38,7 +38,7 @@ class FindReplace:
         self.replace_pattern = replace_string.get()
         self.replace = replace
         if self.search_pattern == "":
-            messagebox.showinfo("HDL-FSM-Editor", "The search is aborted because you searched for an empty string.")
+            messagebox.showinfo("HDL-FSM-Editor", "No search is performed because you search for an empty string.")
             return
         if in_hdl:
             text_field = {"tab": GuiTab.GENERATED_HDL, "ref": project_manager.tab_hdl_ref.hdl_frame_text, "update": ""}
