@@ -21,6 +21,7 @@ class GridDraw:
     def draw_grid(self) -> None:
         """Draw grid lines in the visible window if show_grid is True; lower grid below content."""
         if self.show_grid is True:
+            self.remove_grid()  # prevent grid to exist multiple times
             visible_window = [
                 self.canvas.canvasx(0),
                 self.canvas.canvasy(0),
