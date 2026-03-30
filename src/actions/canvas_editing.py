@@ -21,43 +21,46 @@ def view_all() -> None:
     project_manager.grid_drawer.draw_grid()
 
 
-def view_rectangle(complete_rectangle, check_fit) -> None:
+def view_rectangle(rectangle_to_view, check_fit) -> None:
     """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
-    if complete_rectangle[2] - complete_rectangle[0] != 0 and complete_rectangle[3] - complete_rectangle[1] != 0:
-        visible_rectangle = [
-            project_manager.canvas.canvasx(0),
-            project_manager.canvas.canvasy(0),
-            project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-            project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-        ]
-        factor = _calculate_zoom_factor(complete_rectangle, visible_rectangle)
-        too_big = False
-        project_manager.canvas.update_idletasks()  # to get correct results from bbox
-        actual_rectangle = project_manager.canvas.bbox("all")
-        for coord in actual_rectangle:
-            # The Canvas which is used, has a scrollregion +/-100000, so here this limit
-            # is checked (unclear if really necessary):
-            if abs(coord) * factor > 100000:
-                too_big = True
-        if too_big is False:
-            complete_center = _determine_center_of_rectangle(complete_rectangle)
-            visible_center = _determine_center_of_rectangle(visible_rectangle)
-            _move_canvas_point_from_to(complete_center, visible_center)
-            canvas_zoom(complete_center, factor)
-            if check_fit:
-                _decrement_font_size_if_window_is_too_wide()
-        else:
-            messagebox.showerror("Fatal", "Zoom factor is too big.")
-    # canvas_modify_bindings.switch_to_move_mode()
+    if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
+        return
+    factor = _calculate_zoom_factor(rectangle_to_view)
+
+    too_big = False
+    project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.update_idletasks()  # to get correct results from bbox
+    actual_rectangle = project_manager.canvas.bbox("all")
+    for coord in actual_rectangle:
+        # The Canvas which is used, has a scrollregion +/-1000000, so here this limit
+        # is checked (unclear if really necessary):
+        if abs(coord) * factor > 1000000:
+            too_big = True
+
+    if too_big is True:
+        messagebox.showerror("Fatal", "Zoom factor is too big.")
+    else:
+        center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
+        _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
+        canvas_zoom(center_of_rectangle_to_view, factor)
+        if check_fit:
+            _decrement_font_size_if_window_is_too_wide()
+    project_manager.grid_drawer.draw_grid()
 
 
-def _calculate_zoom_factor(complete_rectangle, visible_rectangle):
-    complete_width = complete_rectangle[2] - complete_rectangle[0]
-    complete_height = complete_rectangle[3] - complete_rectangle[1]
+def _calculate_zoom_factor(rectangle_to_view):
+    visible_rectangle = [
+        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    rectangle_to_view_width = rectangle_to_view[2] - rectangle_to_view[0]
+    rectangle_to_view_height = rectangle_to_view[3] - rectangle_to_view[1]
     visible_width = visible_rectangle[2] - visible_rectangle[0]
     visible_height = visible_rectangle[3] - visible_rectangle[1]
-    scale_x = visible_width / complete_width
-    scale_y = visible_height / complete_height
+    scale_x = visible_width / rectangle_to_view_width
+    scale_y = visible_height / rectangle_to_view_height
     factor = min(scale_x, scale_y)
     return factor
 
@@ -66,8 +69,15 @@ def _determine_center_of_rectangle(rectangle_coords) -> list:
     return [(rectangle_coords[0] + rectangle_coords[2]) / 2, (rectangle_coords[1] + rectangle_coords[3]) / 2]
 
 
-def _move_canvas_point_from_to(complete_center, visible_center) -> None:
-    project_manager.canvas.scan_mark(int(complete_center[0]), int(complete_center[1]))
+def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view) -> None:
+    visible_rectangle = [
+        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    visible_center = _determine_center_of_rectangle(visible_rectangle)
+    project_manager.canvas.scan_mark(int(center_of_rectangle_to_view[0]), int(center_of_rectangle_to_view[1]))
     project_manager.canvas.scan_dragto(int(visible_center[0]), int(visible_center[1]), gain=1)
 
 
@@ -77,23 +87,16 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
     fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
     if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
         fontsize_rounded_down += 1
-    if fontsize_rounded_down != 0:
-        zoom_factor = fontsize_rounded_down / project_manager.fontsize
-        project_manager.abs_zoom_factor *= zoom_factor
-        project_manager.canvas.scale(
-            "all", 0, 0, zoom_factor, zoom_factor
-        )  # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius.
-        _scroll_canvas_to_show_the_zoom_center(zoom_center, zoom_factor)
-        _adapt_scroll_bars(zoom_factor)
-        canvas_font_sizes.adapt_global_size_variables(zoom_factor)
-
-
-def _scroll_canvas_to_show_the_zoom_center(zoom_center, zoom_factor) -> None:
+    if fontsize_rounded_down == 0:
+        return
+    zoom_factor = fontsize_rounded_down / project_manager.fontsize
+    project_manager.abs_zoom_factor *= zoom_factor
+    # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
+    project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
-    project_manager.canvas.scan_mark(
-        int(new_position_of_zoom_center[0]), int(new_position_of_zoom_center[1])
-    )  # Mark the point of the canvas, which serves as anchor for the shift.
-    project_manager.canvas.scan_dragto(int(zoom_center[0]), int(zoom_center[1]), gain=1)
+    _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
+    _adapt_scroll_bars(zoom_factor)
+    canvas_font_sizes.adapt_global_size_variables(zoom_factor)
 
 
 def _adapt_scroll_bars(factor) -> None:
@@ -121,8 +124,7 @@ def _decrement_font_size_if_window_is_too_wide() -> None:
         and project_manager.fontsize != 1  # When fontsize==1 then zoom_factor calculates to 0, which makes no sense.
     ):
         complete_center = _determine_center_of_rectangle(complete_rectangle)
-        visible_center = _determine_center_of_rectangle(visible_rectangle)
-        _move_canvas_point_from_to(complete_center, visible_center)
+        _shift_canvas_to_make_point_visible_in_the_middle(complete_center)
         zoom_factor = (project_manager.fontsize - 1) / project_manager.fontsize
         canvas_zoom(complete_center, zoom_factor)
         _decrement_font_size_if_window_is_too_wide()
