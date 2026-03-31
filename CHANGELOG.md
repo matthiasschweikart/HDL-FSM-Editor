@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [6.2]
+## Added
+Added new keyboard shortcuts for all text editing actions.
+Added a help-menu entry for keyboard shortcuts.
+Added a help-menu entry for working with selections.
+Scrolling speed now depends on the zoom factor.
+Added "Ctrl-G" shortcut to jump to a specific line number in the "Generated HDL" tab.
+Added button "Find in HDL".
+Added intelligent sash-moving in "Internals"- and "Interface"-tab (entry windows are minimized at window increase).
+Scrolling horizontal with the mouse wheel is now possible by pressing the Shift key at the same time.
+Loopback-transitions are now moved completely, when the connected state is moved.
+## Changed
+If VHDL is generated into 2 files, now the background in "Generated HDL"-tab is colored.
+In batch mode now "--no-version-check" and "--no-message" are active per default.
+The sensitivity list of the "state action" process now wraps, if it is longer than 80 characters.
+The "Find next" dialog does not block the main window anymore.
+## Deprecated
+## Removed
+## Fixed
+Moving the mouse cursor into a condition&action block caused a small moving of the box. Fixed.
+Up/Down scrolling of the diagram with the mouse wheel did not work if the cursor was in a text box. Fixed.
+An aborted save-as did change the stored filename. Fixed.
+Using a VHDL variable as case-selector caused disturbed highlighting. Fixed.
+The link between generated HDL and module-name and clock-signal-name in "Control"-tab did not work since 5.0. Fixed.
+Sometimes the links from "Compile Message" tab to "Generated HDL" tab did not work (because of '/' and '\' in file paths). Fixed.
+Zooming to find-hits did sometimes not work. Fixed.
+## Security
+
 ## [6.1]
 ## Added
 ## Changed
