@@ -2,8 +2,6 @@
 This module contains method used when the user edits the diagram.
 """
 
-from tkinter import messagebox
-
 from project_manager import project_manager
 
 from . import canvas_font_sizes
@@ -25,26 +23,14 @@ def view_rectangle(rectangle_to_view, check_fit) -> None:
     """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
     if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
         return
-    factor = _calculate_zoom_factor(rectangle_to_view)
-
-    too_big = False
     project_manager.grid_drawer.remove_grid()
-    project_manager.canvas.update_idletasks()  # to get correct results from bbox
-    actual_rectangle = project_manager.canvas.bbox("all")
-    for coord in actual_rectangle:
-        # The Canvas which is used, has a scrollregion +/-1000000, so here this limit
-        # is checked (unclear if really necessary):
-        if abs(coord) * factor > 1000000:
-            too_big = True
-
-    if too_big is True:
-        messagebox.showerror("Fatal", "Zoom factor is too big.")
-    else:
-        center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
-        _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
-        canvas_zoom(center_of_rectangle_to_view, factor)
-        if check_fit:
-            _decrement_font_size_if_window_is_too_wide()
+    project_manager.canvas.update_idletasks()
+    factor = _calculate_zoom_factor(rectangle_to_view)
+    center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
+    _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
+    canvas_zoom(center_of_rectangle_to_view, factor)
+    if check_fit:
+        _decrement_font_size_if_window_is_too_wide()
     project_manager.grid_drawer.draw_grid()
 
 
@@ -83,6 +69,8 @@ def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_vie
 
 def canvas_zoom(zoom_center, zoom_factor) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
+    # Include objects into the scroll area which may be moved partly outside of the visible area:
+    project_manager.canvas.configure(scrollregion=project_manager.canvas.bbox("all"))
     # Modify factor, so that fontsize is always an integer:
     fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
     if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
@@ -94,12 +82,14 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
+    # Must be called before shifting the canvas, because otherwise the scrollregion is not adapted to the new
+    # zoom factor and the canvas cannot be shifted to the correct position:
+    _adapt_scroll_region(zoom_factor)
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
-    _adapt_scroll_bars(zoom_factor)
     canvas_font_sizes.adapt_global_size_variables(zoom_factor)
 
 
-def _adapt_scroll_bars(factor) -> None:
+def _adapt_scroll_region(factor) -> None:
     scrollregion_strings = project_manager.canvas.cget("scrollregion").split()
     scrollregion_scaled = [int(float(x) * factor) for x in scrollregion_strings]
     project_manager.canvas.configure(scrollregion=scrollregion_scaled)
@@ -195,7 +185,6 @@ def zoom_wheel(event) -> None:
     zoom_center = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
-    # canvas_modify_bindings.switch_to_move_mode()
 
 
 def zoom_wheel_window_item(event, canvas_id) -> None:
@@ -218,4 +207,3 @@ def zoom_wheel_window_item(event, canvas_id) -> None:
     zoom_center = (zoom_center_x, zoom_center_y)
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
-    # canvas_modify_bindings.switch_to_move_mode()

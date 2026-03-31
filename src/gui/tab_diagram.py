@@ -33,7 +33,6 @@ class TabDiagram:
             diagram_frame,
             borderwidth=2,
             bg="white",
-            scrollregion=(-100000, -100000, 100000, 100000),
             xscrollcommand=h.set,
             yscrollcommand=v.set,
             highlightthickness=0,
