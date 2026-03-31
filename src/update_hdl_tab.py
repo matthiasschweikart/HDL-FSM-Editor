@@ -21,6 +21,9 @@ class UpdateHdlTab:
         self.date_of_hdl_file = 0.0  # Default-Value, used when hdl-file not exists.
         self.date_of_hdl_file2 = 0.0  # Default-Value, used when hdl-file not exists.
         hdlfilename = get_primary_output_path(generate_path, module_name, language, number_of_files)
+        if hdlfilename is None:
+            # no module name is yet defined, so no generated HDL exists which can be loaded.
+            return
         hdlfilename_architecture = get_architecture_output_path(generate_path, module_name, language, number_of_files)
         UpdateHdlTab.clear_hdl_tab()
         entity = ""
