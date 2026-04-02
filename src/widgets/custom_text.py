@@ -393,7 +393,20 @@ class CustomText(CodeEditor):
             text = self._remove_condition_keywords(text)
             CustomText.read_variables_of_all_windows[self] = text.split()
         elif self.text_type == "action":
-            self._process_action_read_and_written_variables(text)
+            text = self._process_action_read_and_written_variables(text)
+            # Store the remaining variable names and remove duplicates from the list,
+            # use "+=" as _add_to_read_or_written_variables_of_all_windows() already added entries:
+            CustomText.written_variables_of_all_windows[self] += list(set(text.split()))
+            # When the ";" is missing, then the right hand side with "<=" could not be found and erased.
+            # So remove "<=" and ":=" from these lists:
+            _remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
+            _remove_items_from_list(
+                CustomText.read_variables_of_all_windows[self],
+                project_manager.tab_internals_ref.internals_architecture_text.function_names_list,
+            )
+            _remove_items_from_list(CustomText.read_variables_of_all_windows[self], [";", ","])
+            # ';' appears at VHDL-"null" assignments.
+            _remove_items_from_list(CustomText.written_variables_of_all_windows[self], [";", "<=", ":="])
 
     def _process_action_read_and_written_variables(self, text: str) -> None:
         text = self._add_read_variables_from_procedure_calls_to_read_variables_of_all_windows(text)
@@ -410,20 +423,7 @@ class CustomText(CodeEditor):
         text = re.sub(r"\|", "", text, flags=re.I)
         # remove remaining "else" of an if-clause (left hand side)
         text = re.sub(" else | else$|^else |^else$", "", text, flags=re.I)
-
-        # Store the remaining variable names and remove duplicates from the list,
-        # use "+=" as _add_to_read_or_written_variables_of_all_windows() already added entries:
-        CustomText.written_variables_of_all_windows[self] += list(set(text.split()))
-        # When the ";" is missing, then the right hand side with "<=" could not be found and erased.
-        # So remove "<=" and ":=" from these lists:
-        _remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
-        _remove_items_from_list(
-            CustomText.read_variables_of_all_windows[self],
-            project_manager.tab_internals_ref.internals_architecture_text.function_names_list,
-        )
-        _remove_items_from_list(CustomText.read_variables_of_all_windows[self], [";", ","])
-        # ';' appears at VHDL-"null" assignments.
-        _remove_items_from_list(CustomText.written_variables_of_all_windows[self], [";", "<=", ":="])
+        return text
 
     def _text_is_global_actions_combinatorial(self):
         list_of_canvas_id = project_manager.canvas.find_withtag("global_actions_combinatorial1")
