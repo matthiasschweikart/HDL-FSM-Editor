@@ -51,6 +51,8 @@ VHDL_HIGHLIGHT_PATTERN_DICT = {
         "loop",
         "assert",
         "report",
+        "true",
+        "false",
         "lf",
         "severity",
     ],
