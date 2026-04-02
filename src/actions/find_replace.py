@@ -37,6 +37,7 @@ class FindReplace:
         self.search_pattern = search_string.get()
         self.replace_pattern = replace_string.get()
         self.replace = replace
+        self._first_time_showing_dialog = True
         if self.search_pattern == "":
             messagebox.showinfo("HDL-FSM-Editor", "No search is performed because you search for an empty string.")
             return
@@ -303,7 +304,10 @@ class FindReplace:
         yes_button.grid(row=0, column=0, padx=30)
         not_button = tk.Button(btn_frame, text="No", width=8, command=dialog.destroy)
         not_button.grid(row=0, column=1, padx=30)
-        self._move_dialog_under_mouse_cursor(dialog)
+        if self._first_time_showing_dialog:
+            self._first_time_showing_dialog = False
+        else:
+            self._move_dialog_under_mouse_cursor(dialog)
 
     def _move_dialog_under_mouse_cursor(self, dialog):
         dialog.update_idletasks()  # Ensure the dialog is fully rendered before it can be interacted with
