@@ -99,7 +99,18 @@ class MenuBar:
         replace_string_entry.grid(row=0, column=4)
         replace_button.grid(row=0, column=5)
 
-        help_menu = tk.Menu(project_manager.root, tearoff=0)
+        info_menu_button = ttk.Menubutton(menue_frame, text="Info", style="Window.TMenubutton")
+        info_menu = tk.Menu(info_menu_button)
+        info_menu_button.configure(menu=info_menu)
+        help_menu = tk.Menu(info_menu, tearoff=0)
+        info_menu.add_cascade(
+            label="Help",
+            menu=help_menu,
+            font=("Arial", 10),
+        )
+        info_menu.add_command(
+            label="About", command=lambda: messagebox.showinfo("About:", constants.HEADER_STRING), font=("Arial", 10)
+        )
         help_menu.add_command(
             label="Editing Shortcuts",
             command=help_shortcuts.ShortCutsDialog,
@@ -109,18 +120,6 @@ class MenuBar:
             label="Text Selection",
             command=help_selection.SelectionDialog,
             font=("Arial", 10),
-        )
-
-        info_menu_button = ttk.Menubutton(menue_frame, text="Info", style="Window.TMenubutton")
-        info_menu = tk.Menu(info_menu_button)
-        info_menu_button.configure(menu=info_menu)
-        info_menu.add_cascade(
-            label="Help",
-            menu=help_menu,
-            font=("Arial", 10),
-        )
-        info_menu.add_command(
-            label="About", command=lambda: messagebox.showinfo("About:", constants.HEADER_STRING), font=("Arial", 10)
         )
 
         file_menu_button.grid(row=0, column=0)
