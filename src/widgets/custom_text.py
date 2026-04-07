@@ -152,7 +152,7 @@ class CustomText(CodeEditor):
 
     def format_after_idle(self, event) -> None:
         """Schedule format() after 200 ms idle (except for log text)."""
-        if event.keysym in ("Control_L", "Control_R"):
+        if event is not None and event.keysym in ("Control_L", "Control_R"):  # code_editor.py uses event=None
             return  # No formatting as long as Ctrl is pressed alone.
         # Prevent the formatting of log text, which can be very long and may contain keywords by accident (which
         # shall not be highlighted) and can not be changed by key-presses:
