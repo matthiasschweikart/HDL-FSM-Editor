@@ -104,49 +104,46 @@ def _move_the_line_to_the_center_of_the_target(
 def _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transition_id, transition_point) -> None:
     transition_tags = project_manager.canvas.gettags(transition_id)
     transition_tag = ""
-    condition_action_tag = ""
+    condition_action_line_tag = ""
     ref = None
     for tag in transition_tags:
         if tag.startswith("transition"):
             transition_tag = tag
         elif tag.startswith("ca_connection"):
-            condition_action_tag = tag[:-4]
-            condition_action_window_id = project_manager.canvas.find_withtag(condition_action_tag + "_anchor")[0]
+            condition_action_line_tag = tag[:-4]
+            condition_action_window_id = project_manager.canvas.find_withtag(condition_action_line_tag + "_anchor")[0]
             ref = condition_action.ConditionAction.ref_dict[condition_action_window_id]
     for target_id in item_ids_at_moving_end_location:
-        if project_manager.canvas.type(target_id) in ["oval", "rectangle", "polygon"]:
-            target_tag = project_manager.canvas.gettags(target_id)[
-                0
-            ]  # target_tag is equal to "state<n>" or "connector<n>" or "reset_entry"
-            if transition_point == "start":
-                project_manager.canvas.addtag_withtag(
-                    "coming_from_" + target_tag, transition_id
-                )  # update tags of transition
-                project_manager.canvas.addtag_withtag(
-                    transition_tag + "_start", target_id
-                )  # update tags of the start object of the transition.
-                if condition_action_tag != "":
-                    if target_tag == "reset_entry":
-                        project_manager.canvas.addtag_withtag("connected_to_reset_transition", condition_action_tag)
-                        ref.change_descriptor_to("Transition actions (asynchronous):")
-                    else:
-                        ref.change_descriptor_to("Transition actions (clocked):")
-                priority_dict = transition.TransitionLine.determine_priorities_of_outgoing_transitions(target_id)
-                transition_priority_visibility = tk.HIDDEN if len(priority_dict) == 1 else tk.NORMAL
-                for outgoing_transition in priority_dict:
-                    project_manager.canvas.itemconfigure(
-                        outgoing_transition + "priority", state=transition_priority_visibility
-                    )
-                    project_manager.canvas.itemconfigure(
-                        outgoing_transition + "rectangle", state=transition_priority_visibility
-                    )
-            elif transition_point == "end":
-                project_manager.canvas.addtag_withtag(
-                    "going_to_" + target_tag, transition_id
-                )  # update tags of transition
-                project_manager.canvas.addtag_withtag(
-                    transition_tag + "_end", target_id
-                )  # update tags of the end state of the transition.
+        if project_manager.canvas.type(target_id) not in ["oval", "rectangle", "polygon"]:
+            return
+        target_tag = project_manager.canvas.gettags(target_id)[0]
+        # target_tag is equal to "state<n>" or "connector<n>" or "reset_entry"
+        if transition_point == "start":
+            # update tags of transition:
+            project_manager.canvas.addtag_withtag("coming_from_" + target_tag, transition_id)
+            # update tags of the start object of the transition:
+            project_manager.canvas.addtag_withtag(transition_tag + "_start", target_id)
+            # update condition-action block descriptor and tags:
+            if condition_action_line_tag != "":
+                if target_tag == "reset_entry":
+                    project_manager.canvas.addtag_withtag("connected_to_reset_transition", condition_action_window_id)
+                    ref.change_descriptor_to("Transition actions (asynchronous):")
+                else:
+                    ref.change_descriptor_to("Transition actions (clocked):")
+            priority_dict = transition.TransitionLine.determine_priorities_of_outgoing_transitions(target_id)
+            transition_priority_visibility = tk.HIDDEN if len(priority_dict) == 1 else tk.NORMAL
+            for outgoing_transition in priority_dict:
+                project_manager.canvas.itemconfigure(
+                    outgoing_transition + "priority", state=transition_priority_visibility
+                )
+                project_manager.canvas.itemconfigure(
+                    outgoing_transition + "rectangle", state=transition_priority_visibility
+                )
+        elif transition_point == "end":
+            # update tags of transition:
+            project_manager.canvas.addtag_withtag("going_to_" + target_tag, transition_id)
+            # update tags of the end object of the transition:
+            project_manager.canvas.addtag_withtag(transition_tag + "_end", target_id)
 
 
 def _shorten_all_moved_transitions_to_the_state_borders(move_list) -> None:
