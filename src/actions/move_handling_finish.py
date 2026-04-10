@@ -115,7 +115,7 @@ def _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transiti
             ref = condition_action.ConditionAction.ref_dict[condition_action_window_id]
     for target_id in item_ids_at_moving_end_location:
         if project_manager.canvas.type(target_id) not in ["oval", "rectangle", "polygon"]:
-            return
+            continue
         target_tag = project_manager.canvas.gettags(target_id)[0]
         # target_tag is equal to "state<n>" or "connector<n>" or "reset_entry"
         if transition_point == "start":
