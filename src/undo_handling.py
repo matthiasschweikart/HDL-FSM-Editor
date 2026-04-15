@@ -82,7 +82,9 @@ class UndoHandling:
     def _set_diagram_to_version_selected_by_stack_pointer(self) -> None:
         project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
         # Remove the old design:
+        current_file = project_manager.current_file
         file_handling.clear_design()
+        project_manager.current_file = current_file
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
         design, visible_center = self.stack[self.stack_write_pointer]
         file_handling_load.load_design_from_dict(design)
