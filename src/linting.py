@@ -3,8 +3,10 @@ Methods needed for highlighting signals, which are not read, not written, not de
 """
 
 import copy
+import re
 
 import constants
+from codegen import hdl_generation_library
 from elements import global_actions_combinatorial
 from project_manager import project_manager
 from widgets import custom_text
@@ -33,7 +35,6 @@ class HighLightDict:
     def _recreate_keyword_list_of_unused_signals_after_idle(self) -> None:
         self.highlight_pattern_dict["not_read"].clear()
         self.highlight_pattern_dict["not_written"].clear()
-
         variables_to_write = self._get_all_read_variables()
         variables_to_read = self._get_all_written_variables()
         variables_to_write = self._store_not_read_input_ports(variables_to_write)
@@ -43,9 +44,7 @@ class HighLightDict:
         variables_to_read, variables_to_write = self._store_not_written_not_read_signals(
             variables_to_read, variables_to_write
         )
-        variables_to_read, variables_to_write = self._detect_not_written_constants(
-            variables_to_read, variables_to_write
-        )
+        variables_to_read, variables_to_write = self._handle_constant_names(variables_to_read, variables_to_write)
         variables_to_write = self._remove_port_types(variables_to_write)
         variables_to_read, variables_to_write = self._remove_generics(variables_to_read, variables_to_write)
         self.highlight_pattern_dict["not_written"] += variables_to_write
@@ -107,9 +106,11 @@ class HighLightDict:
                 self.highlight_pattern_dict["not_written"].append(signal)
         return variables_to_read, variables_to_write
 
-    def _detect_not_written_constants(self, variables_to_read, variables_to_write):
+    def _handle_constant_names(self, variables_to_read, variables_to_write):
+        constants_from_packages = self._get_constant_names_from_packages()
         for constant in (
-            project_manager.tab_internals_ref.internals_architecture_text.constants_list
+            constants_from_packages
+            + project_manager.tab_internals_ref.internals_architecture_text.constants_list
             + project_manager.tab_internals_ref.internals_process_combinatorial_text.constants_list
             + project_manager.tab_internals_ref.internals_process_clocked_text.constants_list
         ):
@@ -120,6 +121,21 @@ class HighLightDict:
             else:
                 variables_to_write.remove(constant)
         return variables_to_read, variables_to_write
+
+    def _get_constant_names_from_packages(self) -> list[str]:
+        if project_manager.language.get() != "VHDL":
+            return []
+        constants_from_packages = []
+        package_file_list = project_manager.additional_sources_value.get().split(",")
+        for package_file in package_file_list:
+            with open(package_file.strip(), encoding="utf-8") as f:
+                package_content = f.read().lower()
+            package_content = hdl_generation_library.remove_comments_and_returns(package_content)
+            package_content = hdl_generation_library.remove_functions(package_content)
+            package_content = hdl_generation_library.surround_character_by_blanks(":", package_content)
+            package_content = re.sub(r"package\s.*?is", "", package_content)
+            constants_from_packages.extend(hdl_generation_library.get_all_declared_constant_names(package_content))
+        return constants_from_packages
 
     def _remove_port_types(self, variables_to_write):
         for port_type in project_manager.tab_interface_ref.interface_ports_text.port_types_list:
