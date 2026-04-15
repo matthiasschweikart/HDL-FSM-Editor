@@ -804,6 +804,26 @@ def create_concurrent_actions() -> tuple[str, str] | tuple:
     return "", ""
 
 
+def remove_comments(hdl_text) -> str:
+    """Strip block and line comments, normalize to space-separated string for keyword search."""
+    if project_manager.language.get() == "VHDL":
+        hdl_text = remove_vhdl_block_comments(hdl_text)
+    else:
+        hdl_text = _remove_verilog_block_comments(hdl_text)
+    lines_without_return = hdl_text.split("\n")
+    text = ""
+    for line in lines_without_return:
+        if project_manager.language.get() != "VHDL":
+            line_without_comment = re.sub("//.*$", "", line)
+        else:
+            line_without_comment = re.sub("--.*$", "", line)
+        # Add " " at the beginning of the line. Then it is possible to search for keywords
+        # surrounded by blanks also at the beginning of text:
+        text += " " + line_without_comment + "\n"
+    text += " "  # Add " " at the end, so that keywords at the end are also surrounded by blanks.
+    return text
+
+
 def remove_comments_and_returns(hdl_text) -> str:
     """Strip block and line comments, normalize to space-separated string for keyword search."""
     if project_manager.language.get() == "VHDL":

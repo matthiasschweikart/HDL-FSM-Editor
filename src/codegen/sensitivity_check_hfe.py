@@ -52,6 +52,7 @@ class SensitivityCheckHfe:
             hdl = f.read()
         if hdl == "":
             return []
+        hdl = hdl_generation_library.remove_comments(hdl)
         process_regex = VHDL_PROCESS_REGEX if project_manager.language.get() == "VHDL" else VERILOG_PROCESS_REGEX
         process_matches = re.finditer(process_regex, hdl)
         process_sensitivities_and_bodies = []
