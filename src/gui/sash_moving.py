@@ -47,7 +47,7 @@ class SashMover:
             if oversize_list[index] > 0 and not all(os > 0 for os in oversize_list[index + 1 :]):
                 self.paned_window.sashpos(
                     index,
-                    self.paned_window.sashpos(index) - oversize_list[index],  # shift down
+                    self.paned_window.sashpos(index) - oversize_list[index],  # shift up
                 )
                 oversize_list[index + 1] = oversize_list[index + 1] + oversize_list[index]
                 oversize_list[index] = 0
@@ -55,7 +55,7 @@ class SashMover:
             if oversize_list[index] > 0 and not all(os >= 0 for os in oversize_list[:index]):
                 self.paned_window.sashpos(
                     index - 1,
-                    self.paned_window.sashpos(index - 1) + oversize_list[index],  # shift up
+                    self.paned_window.sashpos(index - 1) + oversize_list[index],  # shift down
                 )
                 oversize_list[index - 1] = oversize_list[index - 1] + oversize_list[index]
                 oversize_list[index] = 0

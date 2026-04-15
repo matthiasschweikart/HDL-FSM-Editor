@@ -15,7 +15,7 @@ class TabInterface:
 
     def __init__(self) -> None:
         self.paned_window = ttk.PanedWindow(project_manager.notebook, orient=tk.VERTICAL, takefocus=True)
-        self.paned_window_height = None
+        self.paned_window_height = 1
 
         self.interface_package_frame = ttk.Frame(self.paned_window)
         self.interface_package_frame.columnconfigure(0, weight=1)
@@ -139,4 +139,4 @@ class TabInterface:
             return True
         old_height = self.paned_window_height
         self.paned_window_height = new_height
-        return old_height is None or self.paned_window_height < old_height  # not initialized or height reduced
+        return self.paned_window_height < old_height

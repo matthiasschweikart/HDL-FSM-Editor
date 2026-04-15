@@ -16,6 +16,7 @@ import linting
 import undo_handling
 import write_data_creator
 from actions import canvas_editing
+from constants import GuiTab
 from gui import menu_bar, notebook_top
 from project_manager import project_manager
 
@@ -52,12 +53,20 @@ class MainWindow:
             print(f"Warning: Could not set application icon: {e}")
 
     def _check_for_window_resize(self, event) -> None:
-        if event.widget == project_manager.root and self.window_height != event.height:
+        if event.widget == self.root and self.window_height != event.height:
             if self.window_height != 0:  # equal 0 at application start, so ignore first event
-                self.root.update_idletasks()  # update geometry information of all widgets
-                project_manager.tab_interface_ref.adjust_sash_positions()
-                project_manager.tab_internals_ref.adjust_sash_positions()
+                self._move_sashes_after_window_resize()
             self.window_height = event.height
+
+    def _move_sashes_after_window_resize(self):
+        active_tab = project_manager.notebook.get_active_tab()
+        project_manager.notebook.show_tab(GuiTab.INTERFACE)
+        self.root.update_idletasks()  # update geometry information of all widgets
+        project_manager.tab_interface_ref.adjust_sash_positions()
+        project_manager.notebook.show_tab(GuiTab.INTERNALS)
+        self.root.update_idletasks()  # update geometry information of all widgets
+        project_manager.tab_internals_ref.adjust_sash_positions()
+        project_manager.notebook.show_tab(active_tab)
 
     def set_word_boundaries(self) -> None:
         """Configure Tcl word boundaries so double-click selects identifiers (e.g. signal names)."""

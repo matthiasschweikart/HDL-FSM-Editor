@@ -90,3 +90,10 @@ class NotebookTop(ttk.Notebook):
         for tab_id in notebook_ids:
             if self.tab(tab_id, option="text") == tab.value:
                 self.select(tab_id)
+
+    def get_active_tab(self) -> GuiTab:
+        """Return the GuiTab value corresponding to the currently active notebook tab."""
+        selected_tab_text = self.tab(self.select(), option="text")
+        for tab in GuiTab:
+            if tab.value == selected_tab_text:
+                return tab
