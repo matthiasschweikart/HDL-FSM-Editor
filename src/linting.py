@@ -125,8 +125,11 @@ class HighLightDict:
     def _get_constant_names_from_packages(self) -> list[str]:
         if project_manager.language.get() != "VHDL":
             return []
+        additional_sources_string = project_manager.additional_sources_value.get()
+        if additional_sources_string == "":
+            return []
         constants_from_packages = []
-        package_file_list = project_manager.additional_sources_value.get().split(",")
+        package_file_list = additional_sources_string.split(",")
         for package_file in package_file_list:
             with open(package_file.strip(), encoding="utf-8") as f:
                 package_content = f.read().lower()
