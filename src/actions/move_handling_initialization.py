@@ -329,23 +329,21 @@ def get_point_to_move(item_id, event_x, event_y) -> str:
                 )
             )
     if number_of_points == 4:
-        return_value = ""
-        if distance_event_to_point[0] < 2 * project_manager.state_radius:
-            return_value = "start"
-        if (
-            distance_event_to_point[3] < 2 * project_manager.state_radius
-            and distance_event_to_point[3] < distance_event_to_point[0]
-        ):
-            return_value = "end"
-        if return_value == "":
-            return_value = "next_to_start" if distance_event_to_point[1] < distance_event_to_point[2] else "next_to_end"
-        return return_value
+        minimum = None
+        index_of_minimum = 0
+        for index, distance in enumerate(distance_event_to_point):
+            if minimum is None or distance < minimum:
+                minimum = distance
+                index_of_minimum = index
+        possible_return_values = ["start", "next_to_start", "next_to_end", "end"]
+        return possible_return_values[index_of_minimum]
     if number_of_points == 3:
         return_value = ""
         if distance_event_to_point[0] < 2 * project_manager.state_radius:
             return_value = "start"
         if (
             distance_event_to_point[2] < 2 * project_manager.state_radius
+            # Additional condition for loopback transition (return_value may have value "start" already):
             and distance_event_to_point[2] < distance_event_to_point[0]
         ):
             return_value = "end"
