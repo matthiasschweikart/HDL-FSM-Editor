@@ -281,8 +281,6 @@ class States:
             coords = project_manager.canvas.coords(state_id)
             center = cls._calculate_center(coords)
             cls.difference_x, cls.difference_y = -event_x + center[0], -event_y + center[1]
-        if cls._state_is_moved_to_near_to_state_or_connector(state_id, event_x, event_y):
-            return
         # When moving the center, keep the distance between event and anchor point constant:
         new_center_x, new_center_y = event_x + cls.difference_x, event_y + cls.difference_y
         if last is True:
@@ -299,38 +297,6 @@ class States:
         project_manager.canvas.coords(text_tag, new_center_x, new_center_y)
         project_manager.canvas.tag_raise(state_id, "all")
         project_manager.canvas.tag_raise(text_tag, state_id)
-
-    @classmethod
-    def _state_is_moved_to_near_to_state_or_connector(cls, moved_item_id, event_x, event_y) -> bool:
-        # Keep the distance between event and anchor point constant:
-        event_x_mod, event_y_mod = event_x + cls.difference_x, event_y + cls.difference_y
-        event_x_mod = project_manager.state_radius * round(event_x_mod / project_manager.state_radius)
-        event_y_mod = project_manager.state_radius * round(event_y_mod / project_manager.state_radius)
-        state_coords = project_manager.canvas.coords(moved_item_id)
-        state_radius = (state_coords[2] - state_coords[0]) // 2
-        moved_state_coords = (
-            event_x_mod - state_radius,
-            event_y_mod - state_radius,
-            event_x_mod + state_radius,
-            event_y_mod + state_radius,
-        )
-        overlapping_list = project_manager.canvas.find_overlapping(
-            moved_state_coords[0] - project_manager.state_radius / 2,
-            moved_state_coords[1] - project_manager.state_radius / 2,
-            moved_state_coords[2] + project_manager.state_radius / 2,
-            moved_state_coords[3] + project_manager.state_radius / 2,
-        )
-        for overlapping_item in overlapping_list:
-            overlapping_with_connector = False
-            tags = project_manager.canvas.gettags(overlapping_item)
-            for tag in tags:
-                if tag.startswith("connector"):
-                    overlapping_with_connector = True
-            if overlapping_item != moved_item_id and (
-                project_manager.canvas.type(overlapping_item) == "oval" or overlapping_with_connector
-            ):
-                return True
-        return False
 
     @classmethod
     def _calculate_center(cls, coords) -> list:

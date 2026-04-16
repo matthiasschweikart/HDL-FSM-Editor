@@ -27,7 +27,7 @@ def move_do(event, move_list, first, move_to_grid=False) -> None:
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
     """Apply move to (event_x, event_y) for each item in move_list; respect grid and proximity checks."""
-    if _connector_moved_too_close_to_other_object(move_list, event_x, event_y):
+    if _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y):
         return
     for entry in move_list:
         item_id = entry[0]
@@ -79,42 +79,47 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
             print("move: Fatal, unknown canvas type", "|" + item_type + "|")
 
 
-def _connector_moved_too_close_to_other_object(move_list, event_x, event_y) -> bool:
+def _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y) -> bool:
     for entry in move_list:
-        moved_item_id = entry[0]
+        moved_object_item_id = entry[0]
+        moved_object_must_be_checked = False
+        event_x_mod, event_y_mod = 0, 0
         if (
-            project_manager.canvas.type(moved_item_id) == "rectangle"
-            and project_manager.canvas.itemcget(moved_item_id, "fill") == constants.CONNECTOR_COLOR
+            project_manager.canvas.type(moved_object_item_id) == "rectangle"
+            and project_manager.canvas.itemcget(moved_object_item_id, "fill") == constants.CONNECTOR_COLOR
         ):
-            # Keep the distance between event and anchor point constant:
-            event_x_mod, event_y_mod = (
-                event_x + connector.ConnectorInstance.difference_x,
-                event_y + connector.ConnectorInstance.difference_y,
-            )
-            event_x_mod = project_manager.state_radius * round(
-                event_x_mod / project_manager.state_radius
-            )  # move event_x to grid.
-            event_y_mod = project_manager.state_radius * round(
-                event_y_mod / project_manager.state_radius
-            )  # move event_y to grid.
-            connector_coords = project_manager.canvas.coords(moved_item_id)
-            edge_length = connector_coords[2] - connector_coords[0]
-            new_upper_left_corner = [event_x_mod - edge_length / 2, event_y_mod - edge_length / 2]
-            new_lower_right_corner = [event_x_mod + edge_length / 2, event_y_mod + edge_length / 2]
-            moved_connector_coords = [*new_upper_left_corner, *new_lower_right_corner]
-            overlapping_list = project_manager.canvas.find_overlapping(
-                moved_connector_coords[0] - project_manager.state_radius / 2,
-                moved_connector_coords[1] - project_manager.state_radius / 2,
-                moved_connector_coords[2] + project_manager.state_radius / 2,
-                moved_connector_coords[3] + project_manager.state_radius / 2,
-            )
-            for overlapping_item in overlapping_list:
-                if overlapping_item != moved_item_id and (
-                    project_manager.canvas.type(overlapping_item) == "oval"
-                    or (
-                        project_manager.canvas.type(overlapping_item) == "rectangle"
-                        and project_manager.canvas.itemcget(overlapping_item, "fill") == constants.CONNECTOR_COLOR
-                    )
-                ):
+            moved_object_must_be_checked = True
+            event_x_mod = event_x + connector.ConnectorInstance.difference_x
+            event_y_mod = event_y + connector.ConnectorInstance.difference_y
+        elif project_manager.canvas.type(moved_object_item_id) == "oval":
+            moved_object_must_be_checked = True
+            event_x_mod = event_x + state.States.difference_x
+            event_y_mod = event_y + state.States.difference_y
+        if moved_object_must_be_checked and _too_close(moved_object_item_id, event_x_mod, event_y_mod):
+            return True
+    return False
+
+
+def _too_close(moved_object_item_id, event_x_mod, event_y_mod) -> bool:
+    event_x_mod = project_manager.state_radius * round(event_x_mod / project_manager.state_radius)
+    event_y_mod = project_manager.state_radius * round(event_y_mod / project_manager.state_radius)
+    item_coords = project_manager.canvas.coords(moved_object_item_id)
+    item_length = item_coords[2] - item_coords[0]
+    new_upper_left__corner = [event_x_mod - item_length / 2, event_y_mod - item_length / 2]
+    new_lower_right_corner = [event_x_mod + item_length / 2, event_y_mod + item_length / 2]
+    moved_coords = [*new_upper_left__corner, *new_lower_right_corner]
+    overlapping_list = project_manager.canvas.find_overlapping(
+        moved_coords[0] - project_manager.state_radius / 2,
+        moved_coords[1] - project_manager.state_radius / 2,
+        moved_coords[2] + project_manager.state_radius / 2,
+        moved_coords[3] + project_manager.state_radius / 2,
+    )
+    for overlapping_item in overlapping_list:
+        if overlapping_item != moved_object_item_id:
+            if project_manager.canvas.type(overlapping_item) == "oval":
+                return True
+            tags = project_manager.canvas.gettags(overlapping_item)
+            for tag in tags:
+                if tag.startswith("connector"):
                     return True
     return False
