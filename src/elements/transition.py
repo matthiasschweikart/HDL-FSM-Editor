@@ -155,9 +155,15 @@ class TransitionLine:
             transition_tags = project_manager.canvas.gettags(self.transition_id)
             start_state_radius = 0
             end_state_radius = 0
+            loopback_transition = False
             for tag in transition_tags:
                 if tag.startswith("transition"):
                     transition_tag = tag
+                    target_tag_list = project_manager.canvas.find_withtag(transition_tag + "_end")
+                    startp_tag_list = project_manager.canvas.find_withtag(transition_tag + "_start")
+                    if target_tag_list == startp_tag_list:
+                        loopback_transition = True
+                        break  # At a loopback transition the transition cannot be straightened.
                     TransitionLine.extend_transition_to_state_middle_points(transition_tag)
                 elif tag.startswith("coming_from_"):
                     start_state = tag.replace("coming_from_", "")
@@ -170,35 +176,9 @@ class TransitionLine:
                     end_state = tag.replace("going_to_", "")
                     end_state_coords = project_manager.canvas.coords(end_state)
                     end_state_radius = abs(end_state_coords[2] - end_state_coords[0]) / 2
-            old_coords = project_manager.canvas.coords(self.transition_id)
-            new_coords = []
-            new_coords.append(old_coords[0])
-            new_coords.append(old_coords[1])
-            new_coords.append(old_coords[-2])
-            new_coords.append(old_coords[-1])
-            new_coords = TransitionLine._shorten_vector(
-                start_state_radius, new_coords[0], new_coords[1], end_state_radius, new_coords[2], new_coords[3], 1, 1
-            )
-            project_manager.canvas.coords(self.transition_id, new_coords)
-            # Calculates the position of the priority rectangle by shortening the distance between the first point of
-            # the transition and the second point of the transition.
-            [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
-                project_manager.priority_distance, new_coords[0], new_coords[1], 0, new_coords[2], new_coords[3], 1, 0
-            )
-            [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
-                transition_tag + "rectangle"
-            )
-            project_manager.canvas.coords(
-                transition_tag + "rectangle",
-                priority_middle_x - rectangle_width_half,
-                priority_middle_y - rectangle_height_half,
-                priority_middle_x + rectangle_width_half,
-                priority_middle_y + rectangle_height_half,
-            )
-            project_manager.canvas.coords(transition_tag + "priority", priority_middle_x, priority_middle_y)
-            project_manager.canvas.tag_raise(transition_tag + "rectangle", transition_tag)
-            project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
-            design_was_changed = True
+            if not loopback_transition:
+                self._straighten_transition(transition_tag, start_state_radius, end_state_radius)
+                design_was_changed = True
         listbox.destroy()
         project_manager.canvas.delete(window)
         if design_was_changed:
@@ -252,6 +232,36 @@ class TransitionLine:
         project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
         project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
+
+    def _straighten_transition(self, transition_tag, start_state_radius, end_state_radius):
+        old_coords = project_manager.canvas.coords(self.transition_id)
+        new_coords = []
+        new_coords.append(old_coords[0])
+        new_coords.append(old_coords[1])
+        new_coords.append(old_coords[-2])
+        new_coords.append(old_coords[-1])
+        new_coords = TransitionLine._shorten_vector(
+            start_state_radius, new_coords[0], new_coords[1], end_state_radius, new_coords[2], new_coords[3], 1, 1
+        )
+        project_manager.canvas.coords(self.transition_id, new_coords)
+        # Calculates the position of the priority rectangle by shortening the distance between the first point of
+        # the transition and the second point of the transition.
+        [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
+            project_manager.priority_distance, new_coords[0], new_coords[1], 0, new_coords[2], new_coords[3], 1, 0
+        )
+        [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
+            transition_tag + "rectangle"
+        )
+        project_manager.canvas.coords(
+            transition_tag + "rectangle",
+            priority_middle_x - rectangle_width_half,
+            priority_middle_y - rectangle_height_half,
+            priority_middle_x + rectangle_width_half,
+            priority_middle_y + rectangle_height_half,
+        )
+        project_manager.canvas.coords(transition_tag + "priority", priority_middle_x, priority_middle_y)
+        project_manager.canvas.tag_raise(transition_tag + "rectangle", transition_tag)
+        project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
 
     def delete(self) -> None:
         """Remove transition line, priority rect/text, tags, linked condition-action; update ref_dict and visibility."""
