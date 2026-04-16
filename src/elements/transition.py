@@ -19,6 +19,7 @@ class TransitionLine:
 
     transition_number = 0
     ref_dict = {}
+    delta_dict = {}
     diff_dict = {}
 
     def __init__(self, transition_coords, tags, priority, new_transition=False) -> None:
@@ -300,14 +301,34 @@ class TransitionLine:
     def move_to(cls, event_x, event_y, transition_id, point, first, move_list, last=False) -> None:
         """Move transition point (start/next_to_start/next_to_end/end) to (event_x, event_y);
         Records the move offset when first is True, else maintains the offset.
-        Snaps to grid when last is True."""
+        Snaps to grid when last is True to keep being attached to state or connector."""
         if first is True:
             cls._set_difference(event_x, event_y, transition_id, point, move_list)
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + cls.diff_dict[point][0], event_y + cls.diff_dict[point][1]
-        if last is True:  # needed because the object the transition is connected to snaps to grid.
-            event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
-            event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
+        if last is True:  # Needed, because the object, to which the transition is connected to, snaps to grid.
+            if point in ("start", "end"):
+                moved_event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
+                moved_event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
+                if point == "start":
+                    # Store the delta caused by snap to grid for "next_to_start" and "next_to_end":
+                    cls.delta_dict[point] = (moved_event_x - event_x, moved_event_y - event_y, transition_id)
+                else:
+                    cls.delta_dict[point] = (0, 0, 0)
+            else:
+                # This is not a start or end point. If a loopback transition is moved together with its state,
+                # it is relevant that this transition point is not snapped to the grid, because otherwise
+                # the loopback transition could change its shape. Instead it must be moved by the same amount
+                # as the start point of the transition when this point snapped to the grid.
+                moved_event_x = event_x
+                moved_event_y = event_y
+                if "start" in cls.delta_dict and cls.delta_dict["start"][2] == transition_id:
+                    # This fix will be also used, if the transition start point was first moved alone by moving its
+                    # connected state, an then a middle point of the transition is moved. But in this case this
+                    # small fix does not matter:
+                    moved_event_x = event_x + cls.delta_dict["start"][0]
+                    moved_event_y = event_y + cls.delta_dict["start"][1]
+            event_x, event_y = moved_event_x, moved_event_y
         transition_tag = cls._determine_transition_tag(transition_id)
         project_manager.canvas.tag_lower(transition_tag)
         transition_coords = cls._move_transition(transition_tag, event_x, event_y, point)
@@ -319,7 +340,7 @@ class TransitionLine:
         coords = project_manager.canvas.coords(transition_id)
         if project_manager.canvas.type(move_list[0][0]) == "line" and point in ("start", "end"):
             # Only start or end point of transition is moved, so the line begin shall jump to the cursor:
-            cls.diff_dict[point] = (0, 0)
+            cls.diff_dict[point] = (0, 0, transition_id)
             return
         # Only a middle point of a transition is moved or
         # a point of a transition is moved, because it is connected to a moving object:
@@ -334,7 +355,7 @@ class TransitionLine:
         else:
             print("transition_handling: Fatal, unknown point =", point)
             return
-        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1])
+        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1], transition_id)
 
     @classmethod
     def _determine_transition_tag(cls, transition_id) -> str:
