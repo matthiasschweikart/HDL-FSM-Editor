@@ -295,9 +295,10 @@ class TransitionLine:
             cls._set_difference(event_x, event_y, transition_id, point, move_list)
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + cls.diff_dict[point][0], event_y + cls.diff_dict[point][1]
-        if last is True:
-            event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
-            event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
+        # if last is True:
+        #     print("snap to grid")
+        #     event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
+        #     event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
         transition_tag = cls._determine_transition_tag(transition_id)
         project_manager.canvas.tag_lower(transition_tag)
         transition_coords = cls._move_transition(transition_tag, event_x, event_y, point)
@@ -345,27 +346,55 @@ class TransitionLine:
     def _move_transition(cls, transition_tag, event_x, event_y, point) -> list:
         """Move transition line and connected condition-action line(s) if existing; lower line under states."""
         # Move transition:
-        transition_coords = project_manager.canvas.coords(transition_tag)
+        coords = project_manager.canvas.coords(transition_tag)
         # print("transition_coords before moving:", transition_coords)
         if point == "start":
-            project_manager.canvas.coords(transition_tag, event_x, event_y, *transition_coords[2:])
+            coords[0:2] = event_x, event_y
         elif point == "next_to_start":
-            project_manager.canvas.coords(
-                transition_tag, *transition_coords[0:2], event_x, event_y, *transition_coords[4:]
+            # In this case coords[6], coords[7] would be the coordinates of a loopback transition end point
+            # and should be handed over to the method _get_new_cordinates_of_not_moved_point instead
+            # of coords[0], coords[1]. But at loopback transitions the transition end point is the same as the
+            # transition start point and here it is not clear if it is a loopback transition and coords[6:8] exist:
+            not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
+                transition_tag, event_x, event_y, coords[4], coords[5], coords[0], coords[1]
             )
+            coords[2:6] = event_x, event_y, not_moved_point_x, not_moved_point_y
         elif point == "next_to_end":
-            project_manager.canvas.coords(
-                transition_tag, *transition_coords[-8:-4], event_x, event_y, *transition_coords[-2:]
+            not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
+                transition_tag, event_x, event_y, coords[2], coords[3], coords[0], coords[1]
             )
+            coords[2:6] = not_moved_point_x, not_moved_point_y, event_x, event_y
         elif point == "end":
-            project_manager.canvas.coords(transition_tag, *transition_coords[-8:-2], event_x, event_y)
+            coords[6:8] = event_x, event_y
         else:
             print("transition_handling: Fatal, unknown point =", point)
+        project_manager.canvas.coords(transition_tag, coords)
         if project_manager.grid_drawer.show_grid:
             list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
             if list_of_grid_line_canvas_ids:
                 project_manager.canvas.tag_raise(transition_tag, "grid_line")
         return project_manager.canvas.coords(transition_tag)
+
+    @classmethod
+    def _get_new_cordinates_of_not_moved_point(
+        cls, transition_tag, event_x, event_y, not_moved_point_x, not_moved_point_y, start_x, start_y
+    ) -> list:
+        target_tag_list = project_manager.canvas.find_withtag(transition_tag + "_end")
+        startp_tag_list = project_manager.canvas.find_withtag(transition_tag + "_start")
+        if target_tag_list != startp_tag_list:
+            return not_moved_point_x, not_moved_point_y  # No loopback transition
+        moved_vector_x = event_x - start_x
+        moved_vector_y = event_y - start_y
+        moved_vector_length = math.sqrt(moved_vector_x**2 + moved_vector_y**2)
+        not_moved_vector_x = not_moved_point_x - start_x
+        not_moved_vector_y = not_moved_point_y - start_y
+        not_moved_vector_length = math.sqrt(not_moved_vector_x**2 + not_moved_vector_y**2)
+        factor = moved_vector_length / not_moved_vector_length
+        new_not_moved_vector_x = not_moved_vector_x * factor
+        new_not_moved_vector_y = not_moved_vector_y * factor
+        new_not_moved_point_x = start_x + new_not_moved_vector_x
+        new_not_moved_point_y = start_y + new_not_moved_vector_y
+        return new_not_moved_point_x, new_not_moved_point_y
 
     @classmethod
     def _move_priority_rectangle(cls, event_x, event_y, transition_tag, transition_coords, point) -> None:
