@@ -347,9 +347,8 @@ class TransitionLine:
         """Move transition line and connected condition-action line(s) if existing; lower line under states."""
         # Move transition:
         coords = project_manager.canvas.coords(transition_tag)
-        # print("transition_coords before moving:", transition_coords)
         if point == "start":
-            coords[0:2] = event_x, event_y
+            coords[:2] = event_x, event_y
         elif point == "next_to_start":
             # In this case coords[6], coords[7] would be the coordinates of a loopback transition end point
             # and should be handed over to the method _get_new_cordinates_of_not_moved_point instead
@@ -365,7 +364,7 @@ class TransitionLine:
             )
             coords[2:6] = not_moved_point_x, not_moved_point_y, event_x, event_y
         elif point == "end":
-            coords[6:8] = event_x, event_y
+            coords[-2:] = event_x, event_y
         else:
             print("transition_handling: Fatal, unknown point =", point)
         project_manager.canvas.coords(transition_tag, coords)
