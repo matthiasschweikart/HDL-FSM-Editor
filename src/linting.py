@@ -131,13 +131,20 @@ class HighLightDict:
         constants_from_packages = []
         package_file_list = additional_sources_string.split(",")
         for package_file in package_file_list:
-            with open(package_file.strip(), encoding="utf-8") as f:
-                package_content = f.read().lower()
-            package_content = hdl_generation_library.remove_comments_and_returns(package_content)
-            package_content = hdl_generation_library.remove_functions(package_content)
-            package_content = hdl_generation_library.surround_character_by_blanks(":", package_content)
-            package_content = re.sub(r"package\s.*?is", "", package_content)
-            constants_from_packages.extend(hdl_generation_library.get_all_declared_constant_names(package_content))
+            try:
+                with open(package_file.strip(), encoding="utf-8") as f:
+                    package_content = f.read().lower()
+                package_content = hdl_generation_library.remove_comments_and_returns(package_content)
+                package_content = hdl_generation_library.remove_functions(package_content)
+                package_content = hdl_generation_library.surround_character_by_blanks(":", package_content)
+                package_content = re.sub(r"package\s.*?is", "", package_content)
+                constants_from_packages.extend(hdl_generation_library.get_all_declared_constant_names(package_content))
+            except Exception:  # pylint: disable=broad-except
+                print(
+                    "Error while reading package file "
+                    + package_file.strip()
+                    + ". Any constants defined in this file will be highlighted incorrectly."
+                )
         return constants_from_packages
 
     def _remove_port_types(self, variables_to_write):
