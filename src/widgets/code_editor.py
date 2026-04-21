@@ -20,6 +20,12 @@ class CodeEditor(tk.Text):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        # Ctrl-c/x without selection should copy/cut the whole line:
+        self.bind("<Control-c>", lambda event: self._copy())
+        self.bind("<Control-x>", lambda event: self._cut())
+        # Ctrl-v after Ctrl-c/x without selection should paste at the beginning of the line:
+        self.bind("<Control-v>", lambda event: self._paste())
+        self.paste_always_at_line_begin = False
         # Word-wise cursor movement
         self.bind("<Control-Left>", lambda event: self.move_word_left())
         self.bind("<Control-Right>", lambda event: self.move_word_right())
@@ -40,6 +46,46 @@ class CodeEditor(tk.Text):
         # Indent/unindent
         self.bind("<Control-bracketleft>", lambda event: self.unindent_selection())
         self.bind("<Control-bracketright>", lambda event: self.indent_selection())
+
+    def _copy(self) -> str | None:
+        sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
+        if not sel_ranges:
+            self._copy_complete_line()
+            return "break"
+
+    def _cut(self) -> str | None:
+        sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
+        if not sel_ranges:
+            self._cut_complete_line()
+            return "break"
+
+    def _paste(self) -> str | None:
+        sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
+        if not sel_ranges and self.paste_always_at_line_begin:
+            self._paste_complete_line()
+            return "break"
+        self.paste_always_at_line_begin = False
+        self.format_after_idle(None)  # Trigger formatting after default paste action (which may be line-wise or not)
+
+    def _copy_complete_line(self) -> None:
+        self.paste_always_at_line_begin = True
+        line_start = self.index("insert linestart")
+        line_end = self.index("insert lineend")
+        self.clipboard_clear()
+        # Put a return character at the end, regardless of whether the line already ends with one.
+        self.clipboard_append(self.get(line_start, line_end) + "\n")
+        return line_start, line_end
+
+    def _cut_complete_line(self) -> None:
+        line_start, line_end = self._copy_complete_line()
+        # Delete also the possible newline character at the end of the line, regardless of whether it exists.
+        self.delete(line_start, line_end + "+1c")
+
+    def _paste_complete_line(self) -> None:
+        self.paste_always_at_line_begin = False
+        line_start = self.index("insert linestart")
+        self.insert(line_start, self.clipboard_get())
+        self.format_after_idle(None)
 
     def format_after_idle(self, event) -> None:
         """Override in subclass to trigger formatting after indent/unindent. No-op by default."""
