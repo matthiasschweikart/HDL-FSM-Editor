@@ -198,6 +198,8 @@ class SensitivityCheck:
         in_bracket = 0
         new_process_body_list = []
         for word in reversed(process_body_list):  # Only the process body is relevant for the target check.
+            if word in ("<=", ":="):
+                in_bracket = 0  # Fix wrong number of opening or closing brackets at the right hand side.
             if word == ")":  # jump over index-bracket
                 in_bracket += 1
             elif word == "(":
@@ -205,7 +207,7 @@ class SensitivityCheck:
             elif in_bracket == 0:
                 if word == ";":
                     line_end_hit = True
-                elif line_end_hit and word == "<=":
+                elif line_end_hit and word in ("<=", ":="):
                     remove_target = True
                 elif remove_target:
                     word = "t-a-r-g-e-t"
