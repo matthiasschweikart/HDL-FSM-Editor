@@ -43,22 +43,16 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
                 transition.TransitionLine.move_to(
                     event_x, event_y, item_id, item_point_to_move, first, move_list, move_to_grid
                 )
-            elif (
-                tags[0].endswith("comment_line") and item_point_to_move == "end"
-            ):  # state is moved and state_comment line must follow
-                tag_of_comment_window = tags[0][:-5]  # tag[0] = state<number>_comment_line
-                canvas_id_of_comment_window = project_manager.canvas.find_withtag(tag_of_comment_window)[0]
-                ref = state_comment.StateComment.ref_dict[canvas_id_of_comment_window]
-                ref.move_line_point_to(event_x, event_y, first)
-            elif (
-                tags[0].startswith("connection") and item_point_to_move == "end"
-            ):  # state is moved and state action line must follow
-                tag_of_connected_state_action = "state_action" + tags[0][10:]  # connection<n>
-                canvas_id_of_connected_state_action = project_manager.canvas.find_withtag(
-                    tag_of_connected_state_action
-                )[0]
-                ref = state_action.StateAction.ref_dict[canvas_id_of_connected_state_action]
-                ref.move_line_point_to(event_x, event_y, first)
+            elif tags[0].endswith("comment_line"):
+                transition.TransitionLine.move_to(
+                    event_x, event_y, item_id, item_point_to_move + "_comment_line", first, move_list, move_to_grid
+                )
+            elif tags[0].startswith("connection"):
+                transition.TransitionLine.move_to(
+                    event_x, event_y, item_id, item_point_to_move + "_connection", first, move_list, move_to_grid
+                )
+            else:
+                print("move: Fatal, unknown line type with tags", tags)
         elif item_type == "rectangle":
             connector.ConnectorInstance.move_to(event_x, event_y, item_id, first, move_to_grid)
         elif item_type == "window":

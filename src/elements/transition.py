@@ -298,21 +298,36 @@ class TransitionLine:
             project_manager.canvas.itemconfigure(tag_of_outgoing_transition + "priority", state=tk.HIDDEN)
 
     @classmethod
-    def move_to(cls, event_x, event_y, transition_id, point, first, move_list, last=False) -> None:
-        """Move transition point (start/next_to_start/next_to_end/end) to (event_x, event_y);
+    def move_to(cls, event_x, event_y, line_id, point, first, move_list, last=False) -> None:
+        """Move line point (start*/next_to_start/next_to_end/end*) to (event_x, event_y);
         Records the move offset when first is True, else maintains the offset.
         Snaps to grid when last is True to keep being attached to state or connector."""
+        # point can be:
+        # At transitions           : "start", "next_to_start", "next_to_end", "end"
+        # At comment lines         : "start_comment_line", "end_comment_line"
+        # At lines to state actions: "start_connection", "end_connection"
         if first is True:
-            cls._set_difference(event_x, event_y, transition_id, point, move_list)
+            cls._set_difference(event_x, event_y, line_id, point, move_list)
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + cls.diff_dict[point][0], event_y + cls.diff_dict[point][1]
-        if last is True:  # Needed, because the object, to which the transition is connected to, snaps to grid.
-            if point in ("start", "end"):
+        # Needed, because the object, to which the transition is connected to, snaps to grid.
+        if last is True:
+            tags_of_line = project_manager.canvas.gettags(line_id)
+            disable_snap_to_grid = False
+            for tag in tags_of_line:
+                # move_to() is also called for connection to state-action and for comment_line moving,
+                # where the startpoint shall not snap to grid.
+                if (tag.startswith("connection") or tag.endswith("_comment_line")) and point == "start":
+                    disable_snap_to_grid = True
+            if disable_snap_to_grid:
+                moved_event_x = event_x
+                moved_event_y = event_y
+            elif point in ("start", "end", "end_comment_line", "end_connection"):
                 moved_event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
                 moved_event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
                 if point == "start":
                     # Store the delta caused by snap to grid for "next_to_start" and "next_to_end":
-                    cls.delta_dict[point] = (moved_event_x - event_x, moved_event_y - event_y, transition_id)
+                    cls.delta_dict[point] = (moved_event_x - event_x, moved_event_y - event_y, line_id)
                 else:
                     cls.delta_dict[point] = (0, 0, 0)
             else:
@@ -322,62 +337,66 @@ class TransitionLine:
                 # as the start point of the transition when this point snapped to the grid.
                 moved_event_x = event_x
                 moved_event_y = event_y
-                if "start" in cls.delta_dict and cls.delta_dict["start"][2] == transition_id:
+                if "start" in cls.delta_dict and cls.delta_dict["start"][2] == line_id:
                     # This fix will be also used, if the transition start point was first moved alone by moving its
                     # connected state, an then a middle point of the transition is moved. But in this case this
                     # small fix does not matter:
                     moved_event_x = event_x + cls.delta_dict["start"][0]
                     moved_event_y = event_y + cls.delta_dict["start"][1]
             event_x, event_y = moved_event_x, moved_event_y
-        transition_tag = cls._determine_transition_tag(transition_id)
-        project_manager.canvas.tag_lower(transition_tag)
-        transition_coords = cls._move_transition(transition_tag, event_x, event_y, point)
-        cls._move_priority_rectangle(event_x, event_y, transition_tag, transition_coords, point)
+        line_tag = cls._determine_line_tag(line_id)
+        project_manager.canvas.tag_lower(line_tag)
+        line_coords = cls._move_line(line_tag, event_x, event_y, point)
+        if line_tag.startswith("transition"):
+            cls._move_priority_rectangle(event_x, event_y, line_tag, line_coords, point)
 
     @classmethod
-    def _set_difference(cls, event_x, event_y, transition_id, point, move_list) -> None:
+    def _set_difference(cls, event_x, event_y, line_id, point, move_list) -> None:
         """Calculate the difference between the event and the transition point to move, if first is True."""
-        coords = project_manager.canvas.coords(transition_id)
-        if project_manager.canvas.type(move_list[0][0]) == "line" and point in ("start", "end"):
-            # Only start or end point of transition is moved, so the line begin shall jump to the cursor:
-            cls.diff_dict[point] = (0, 0, transition_id)
+        coords = project_manager.canvas.coords(line_id)
+        if (
+            project_manager.canvas.type(move_list[0][0]) == "line"  # A transition is moved alone.
+            and point in ("start", "end")
+        ):
+            # Only the start or the end point of a transition is moved, so the line begin shall jump to the cursor:
+            cls.diff_dict[point] = (0, 0, line_id)
             return
-        # Only a middle point of a transition is moved or
-        # a point of a transition is moved, because it is connected to a moving object:
-        if point == "start":
+        # A middle point of a transition is moved or
+        # a line is moved, because it is connected to a moving object:
+        if point.startswith("start"):
             point_to_move = [coords[0], coords[1]]
         elif point == "next_to_start":
             point_to_move = [coords[2], coords[3]]
         elif point == "next_to_end":
             point_to_move = [coords[-4], coords[-3]]
-        elif point == "end":
+        elif point.startswith("end"):
             point_to_move = [coords[-2], coords[-1]]
         else:
             print("transition_handling: Fatal, unknown point =", point)
             return
-        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1], transition_id)
+        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1], line_id)
 
     @classmethod
-    def _determine_transition_tag(cls, transition_id) -> str:
-        """Determine the transition tag based on the transition_id."""
-        all_transition_tags = project_manager.canvas.gettags(transition_id)
-        transition_tag = ""
-        for single_transition_tag in all_transition_tags:
+    def _determine_line_tag(cls, line_id) -> str:
+        """Determine the line tag based on the line_id."""
+        all_line_tags = project_manager.canvas.gettags(line_id)
+        line_tag = ""
+        for single_tag in all_line_tags:
             if (
-                single_transition_tag.startswith("transition")
-                or single_transition_tag.startswith("connection")
-                or single_transition_tag.endswith("comment_line")
+                single_tag.startswith("transition")
+                or single_tag.startswith("connection")
+                or single_tag.endswith("comment_line")
             ):
-                transition_tag = single_transition_tag
+                line_tag = single_tag
                 break
-        return transition_tag
+        return line_tag
 
     @classmethod
-    def _move_transition(cls, transition_tag, event_x, event_y, point) -> list:
-        """Move transition line and connected condition-action line(s) if existing; lower line under states."""
-        # Move transition:
-        coords = project_manager.canvas.coords(transition_tag)
-        if point == "start":
+    def _move_line(cls, line_tag, event_x, event_y, point) -> list:
+        """Move line and connected condition-action line(s) if existing; lower line under states."""
+        # Move line:
+        coords = project_manager.canvas.coords(line_tag)
+        if point.startswith("start"):
             coords[:2] = event_x, event_y
         elif point == "next_to_start":
             # In this case coords[6], coords[7] would be the coordinates of a loopback transition end point
@@ -385,24 +404,24 @@ class TransitionLine:
             # of coords[0], coords[1]. But at loopback transitions the transition end point is the same as the
             # transition start point and here it is not clear if it is a loopback transition and coords[6:8] exist:
             not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
-                transition_tag, event_x, event_y, coords[4], coords[5], coords[0], coords[1]
+                line_tag, event_x, event_y, coords[4], coords[5], coords[0], coords[1]
             )
             coords[2:6] = event_x, event_y, not_moved_point_x, not_moved_point_y
         elif point == "next_to_end":
             not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
-                transition_tag, event_x, event_y, coords[2], coords[3], coords[0], coords[1]
+                line_tag, event_x, event_y, coords[2], coords[3], coords[0], coords[1]
             )
             coords[2:6] = not_moved_point_x, not_moved_point_y, event_x, event_y
-        elif point == "end":
+        elif point.startswith("end"):
             coords[-2:] = event_x, event_y
         else:
             print("transition_handling: Fatal, unknown point =", point)
-        project_manager.canvas.coords(transition_tag, coords)
+        project_manager.canvas.coords(line_tag, coords)
         if project_manager.grid_drawer.show_grid:
             list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
             if list_of_grid_line_canvas_ids:
-                project_manager.canvas.tag_raise(transition_tag, "grid_line")
-        return project_manager.canvas.coords(transition_tag)
+                project_manager.canvas.tag_raise(line_tag, "grid_line")
+        return project_manager.canvas.coords(line_tag)
 
     @classmethod
     def _get_new_cordinates_of_not_moved_point(
@@ -428,60 +447,59 @@ class TransitionLine:
     @classmethod
     def _move_priority_rectangle(cls, event_x, event_y, transition_tag, transition_coords, point) -> None:
         """Move priority rectangle."""
-        if transition_tag.startswith("transition"):  # There is no priority rectangle at a "connection".
-            # The tag "transition_tag + '_start'" is already removed from the old start state when
-            #  the transition start-point is moved. In all other cases the tag exists.
-            # So try to get the coordinates of the start state (there the priority rectangle is positioned):
-            start_state_coords = project_manager.canvas.coords(transition_tag + "_start")
-            if point == "start":
-                if (
-                    start_state_coords == [] or project_manager.canvas.type(transition_tag + "_start") == "polygon"
-                ):  # Transition start point is disconnected from its start state and moved alone.
-                    start_state_radius = 0
-                else:  #  State with connected transition is moved.
-                    start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
-                # Calculates the position of the priority rectangle by shortening the vector from the
-                # event (= first point of transition) to the second point of the transition.
-                [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
-                    start_state_radius + project_manager.priority_distance,
-                    event_x,
-                    event_y,
-                    0,
-                    transition_coords[2],
-                    transition_coords[3],
-                    1,
-                    0,
-                )
-            else:
-                # Calculates the position of the priority rectangle by shortening the first point of the
-                # transition to the second point of the transition.
+        # The tag "transition_tag + '_start'" is already removed from the old start state when
+        #  the transition start-point is moved. In all other cases the tag exists.
+        # So try to get the coordinates of the start state (there the priority rectangle is positioned):
+        start_state_coords = project_manager.canvas.coords(transition_tag + "_start")
+        if point == "start":
+            if (
+                start_state_coords == [] or project_manager.canvas.type(transition_tag + "_start") == "polygon"
+            ):  # Transition start point is disconnected from its start state and moved alone.
+                start_state_radius = 0
+            else:  #  State with connected transition is moved.
                 start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
-                # Because the transition is already extended to the start-state middle, the length of the
-                # vector must be shortened additionally by the start state radius,
-                # to keep the priority outside of the start-state.
-                [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
-                    start_state_radius + project_manager.priority_distance,
-                    transition_coords[0],
-                    transition_coords[1],
-                    0,
-                    transition_coords[2],
-                    transition_coords[3],
-                    1,
-                    0,
-                )
-            [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
-                transition_tag + "rectangle"
+            # Calculates the position of the priority rectangle by shortening the vector from the
+            # event (= first point of transition) to the second point of the transition.
+            [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
+                start_state_radius + project_manager.priority_distance,
+                event_x,
+                event_y,
+                0,
+                transition_coords[2],
+                transition_coords[3],
+                1,
+                0,
             )
-            project_manager.canvas.coords(
-                transition_tag + "rectangle",
-                priority_middle_x - rectangle_width_half,
-                priority_middle_y - rectangle_height_half,
-                priority_middle_x + rectangle_width_half,
-                priority_middle_y + rectangle_height_half,
+        else:
+            # Calculates the position of the priority rectangle by shortening the first point of the
+            # transition to the second point of the transition.
+            start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
+            # Because the transition is already extended to the start-state middle, the length of the
+            # vector must be shortened additionally by the start state radius,
+            # to keep the priority outside of the start-state.
+            [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
+                start_state_radius + project_manager.priority_distance,
+                transition_coords[0],
+                transition_coords[1],
+                0,
+                transition_coords[2],
+                transition_coords[3],
+                1,
+                0,
             )
-            project_manager.canvas.coords(transition_tag + "priority", priority_middle_x, priority_middle_y)
-            project_manager.canvas.tag_raise(transition_tag + "rectangle", transition_tag)
-            project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
+        [rectangle_width_half, rectangle_height_half] = TransitionLine._get_rectangle_dimensions(
+            transition_tag + "rectangle"
+        )
+        project_manager.canvas.coords(
+            transition_tag + "rectangle",
+            priority_middle_x - rectangle_width_half,
+            priority_middle_y - rectangle_height_half,
+            priority_middle_x + rectangle_width_half,
+            priority_middle_y + rectangle_height_half,
+        )
+        project_manager.canvas.coords(transition_tag + "priority", priority_middle_x, priority_middle_y)
+        project_manager.canvas.tag_raise(transition_tag + "rectangle", transition_tag)
+        project_manager.canvas.tag_raise(transition_tag + "priority", transition_tag + "rectangle")
 
     @classmethod
     def extend_transition_to_state_middle_points(cls, transition_tag) -> None:

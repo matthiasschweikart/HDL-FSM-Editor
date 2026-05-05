@@ -141,7 +141,7 @@ class StateAction:
         self.label_id.configure(style="StateActionsWindow.TLabel")
 
     def move_to(self, event_x, event_y, first) -> None:
-        """Reposition window and connection line;
+        """Reposition window;
         Updates the move offset when first is True else maintains the offset."""
         if first:
             # Calculate the difference between the "anchor" point and the event:
@@ -150,15 +150,6 @@ class StateAction:
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + self.difference_x, event_y + self.difference_y
         project_manager.canvas.coords(self.window_id, event_x, event_y)
-        # Move the connection line:
-        window_tags = project_manager.canvas.gettags(self.window_id)
-        for t in window_tags:
-            if t.startswith("connection"):  # remove "_start"
-                line_tag = t[:-6]
-                line_coords = project_manager.canvas.coords(line_tag)
-                line_coords[0] = event_x
-                line_coords[1] = event_y
-                project_manager.canvas.coords(line_tag, line_coords)
 
     def move_line_point_to(self, event_x, event_y, first) -> None:
         """Move connection line end to (event_x, event_y) snapped to grid; used when state is moved."""
