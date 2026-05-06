@@ -82,7 +82,6 @@ class CodeEditor(tk.Text):
         self.delete(line_start, line_end + "+1c")
 
     def _paste_complete_line(self) -> None:
-        # self.paste_always_at_line_begin = False
         line_start = self.index("insert linestart")
         self.insert(line_start, self.clipboard_get())
         self.format_after_idle(None)
