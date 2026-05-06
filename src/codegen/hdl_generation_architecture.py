@@ -6,6 +6,7 @@ from codegen import (
     hdl_generation_architecture_state_actions,
     hdl_generation_architecture_state_sequence,
     hdl_generation_library,
+    hdl_generation_transitions,
 )
 from project_manager import project_manager
 
@@ -144,7 +145,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     architecture += "            -- State Machine:\n"
     architecture += "            case state is\n"
     file_line_number += 2
-    transition_specifications = hdl_generation_library.extract_transition_specifications_from_the_graph(
+    transition_specifications = hdl_generation_transitions.extract_transition_specifications_from_the_graph(
         state_tag_list_sorted
     )
     state_sequence, file_line_number = hdl_generation_architecture_state_sequence.create_vhdl_for_the_state_sequence(
