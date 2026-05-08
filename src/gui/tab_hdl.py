@@ -22,25 +22,30 @@ class TabHDL:
         hdl_frame = ttk.Frame(project_manager.notebook)
         hdl_frame.grid()
         hdl_frame.columnconfigure(0, weight=1)
-        hdl_frame.rowconfigure(0, weight=1)
+        hdl_frame.rowconfigure(1, weight=1)
+
+        header_line = ttk.Label(
+            hdl_frame,
+            text="Ctrl-G: Jump to line ...",
+        )
+        header_line.grid(row=0, column=0, sticky=tk.W, padx=4, pady=4)
 
         self.hdl_frame_text = custom_text.CustomText(
             hdl_frame, text_type="generated", undo=False, font=("Courier", 10), wrap=tk.WORD
         )
-        self.hdl_frame_text.grid(row=0, column=0, sticky="nsew")
-        self.hdl_frame_text.columnconfigure((0, 0), weight=1)
+        self.hdl_frame_text.grid(row=1, column=0, sticky=(tk.N, tk.W, tk.E, tk.S))
         self.hdl_frame_text.config(state=tk.DISABLED)
 
         hdl_frame_text_scroll = ttk.Scrollbar(
             hdl_frame, orient=tk.VERTICAL, cursor="arrow", command=self.hdl_frame_text.yview
         )
         self.hdl_frame_text.config(yscrollcommand=hdl_frame_text_scroll.set)
-        hdl_frame_text_scroll.grid(row=0, column=1, sticky="nsew")
+        hdl_frame_text_scroll.grid(row=1, column=1, sticky=(tk.N, tk.W, tk.E, tk.S))
 
         self.hdl_frame_text.bind("<Motion>", self._cursor_move_hdl_tab)
         self.hdl_frame_text.bind("<Control-G>", self._jump_to_line)
 
-        project_manager.notebook.add(hdl_frame, sticky="nsew", text=GuiTab.GENERATED_HDL.value)
+        project_manager.notebook.add(hdl_frame, sticky=tk.N + tk.E + tk.W + tk.S, text=GuiTab.GENERATED_HDL.value)
 
     def _cursor_move_hdl_tab(self, *_) -> None:
         if self.hdl_frame_text.get("1.0", tk.END + "- 1 char") == "":
@@ -71,8 +76,8 @@ class TabHDL:
                     "underline", f"{line_number}.{start_index - 1}", f"{line_number + 1}.0"
                 )
                 self.hdl_frame_text.tag_config("underline", underline=1)  # activate underline
-                self._func_id_jump = self.hdl_frame_text.bind(  # Bind to text widget
-                    "<Control-Button-1>",
+                self._func_id_jump = self.hdl_frame_text.bind(
+                    "<Button-1>",
                     lambda event: project_manager.link_dict_ref.jump_to_source(selected_file, line_number_in_file),
                 )
             else:

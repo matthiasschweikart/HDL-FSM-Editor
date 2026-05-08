@@ -21,35 +21,44 @@ class TabLog:
         self._func_id_jump2 = None
         log_frame = ttk.Frame(project_manager.notebook)
         log_frame.grid()
-        log_frame.columnconfigure(0, weight=1)
-        log_frame.rowconfigure(1, weight=1)
+        log_frame.rowconfigure(0, weight=0)  # Row for button-frame
+        log_frame.rowconfigure(1, weight=1)  # Row for text
+        log_frame.columnconfigure(0, weight=1)  # Column for text
+        log_frame.columnconfigure(1, weight=0)  # Column for scrollbar
 
         log_frame_button_frame = ttk.Frame(log_frame)
         self.log_frame_text = custom_text.CustomText(log_frame, text_type="log", undo=False, wrap=tk.WORD)
-        log_frame_button_frame.grid(row=0, column=0, sticky="ew")
-        self.log_frame_text.grid(row=1, column=0, sticky="nsew")
-        self.log_frame_text.columnconfigure((0, 0), weight=1)
         self.log_frame_text.config(state=tk.DISABLED)
-
-        log_frame_clear_button = ttk.Button(log_frame_button_frame, takefocus=False, text="Clear", style="Find.TButton")
-        log_frame_clear_button.grid(row=0, column=0, sticky=tk.W)
-        log_frame_clear_button.configure(command=self._clear_log_tab)
-
-        log_frame_regex_button = ttk.Button(
-            log_frame_button_frame, takefocus=False, text="Define Regex for Hyperlinks", style="Find.TButton"
-        )
-        log_frame_regex_button.grid(row=0, column=1, sticky=tk.W)
-        log_frame_regex_button.config(command=self._edit_regex)
-
         log_frame_text_scroll = ttk.Scrollbar(
             log_frame, orient=tk.VERTICAL, cursor="arrow", command=self.log_frame_text.yview
         )
         self.log_frame_text.config(yscrollcommand=log_frame_text_scroll.set)
-        log_frame_text_scroll.grid(row=1, column=1, sticky="nsew")
+        log_frame_button_frame.grid(row=0, column=0, sticky=(tk.W, tk.E))
+        self.log_frame_text.grid(row=1, column=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+        log_frame_text_scroll.grid(row=1, column=1, sticky=(tk.N, tk.W, tk.E, tk.S))
+
+        log_frame_clear_button = ttk.Button(
+            log_frame_button_frame, takefocus=False, text="Clear", style="Find.TButton", command=self._clear_log_tab
+        )
+        log_frame_regex_button = ttk.Button(
+            log_frame_button_frame,
+            takefocus=False,
+            text="Define Regex for Hyperlinks",
+            style="Find.TButton",
+            command=self._edit_regex,
+        )
+        log_frame_label = ttk.Label(
+            log_frame_button_frame,
+            text="Follow links by left mouse button: Without modifier to source, with Ctrl to generated HDL",
+        )
+        log_frame_clear_button.grid(row=0, column=0, sticky=tk.W)
+        log_frame_regex_button.grid(row=0, column=1, sticky=tk.W)
+        log_frame_label.grid(row=0, column=2, sticky=tk.E)
+        log_frame_button_frame.columnconfigure(2, weight=1)
 
         self.log_frame_text.bind("<Motion>", self._cursor_move_log_tab)
 
-        project_manager.notebook.add(log_frame, sticky="nsew", text=GuiTab.COMPILE_MSG.value)
+        project_manager.notebook.add(log_frame, sticky=tk.N + tk.E + tk.W + tk.S, text=GuiTab.COMPILE_MSG.value)
         self._debug_active = tk.IntVar()
         self._debug_active.set(1)  # 1: inactive, 2: active
 
@@ -149,11 +158,11 @@ class TabLog:
                     self.log_frame_text.tag_add("underline", str(line_number) + ".0", str(line_number + 1) + ".0")
                     self.log_frame_text.tag_config("underline", underline=1, foreground="red")
                     self._func_id_jump1 = self.log_frame_text.bind(
-                        "<Control-Button-1>",
+                        "<Button-1>",
                         lambda event: project_manager.link_dict_ref.jump_to_source(file_name, file_line_number),
                     )
                     self._func_id_jump2 = self.log_frame_text.bind(
-                        "<Alt-Button-1>",
+                        "<Control-Button-1>",
                         lambda event: project_manager.link_dict_ref.jump_to_hdl(file_name, file_line_number),
                     )
                 else:
@@ -168,7 +177,7 @@ class TabLog:
                 if self._func_id_jump1 is not None:
                     self.log_frame_text.unbind("<Button-1>", self._func_id_jump1)
                 if self._func_id_jump2 is not None:
-                    self.log_frame_text.unbind("<Button-1>", self._func_id_jump2)
+                    self.log_frame_text.unbind("<Control-Button-1>", self._func_id_jump2)
                 self._func_id_jump1 = None
                 self._func_id_jump2 = None
             self._line_number_under_pointer_log_tab = line_number
