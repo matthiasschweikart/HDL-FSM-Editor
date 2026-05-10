@@ -133,9 +133,7 @@ class UpdateHdlTab:
         project_manager.tab_hdl_ref.hdl_frame_text.insert("1.0", entity, entity_tag)
         project_manager.tab_hdl_ref.hdl_frame_text.insert(tk.END, arch, arch_tag)
         project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
-        project_manager.tab_hdl_ref.hdl_frame_text.update_highlight_tags(
-            10, ["not_read", "not_written", "control", "datatype", "function", "comment"]
-        )
+        project_manager.tab_hdl_ref.hdl_frame_text.update_highlight_tags(10)
         # Pale brown for entity, pale yellow for architecture
         project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(entity_tag, background="#F5E6D3")
         project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(arch_tag, background="#FFF9CC")

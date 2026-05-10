@@ -112,6 +112,7 @@ class CustomText(CodeEditor):
         CustomText.written_variables_of_all_windows[self] = []
         self.tag_config("message_red", foreground="red")
         self.tag_config("message_green", foreground="green")
+        self.format_after_id = None
 
     def _open(self) -> str:
         file_handling.open_file()
@@ -156,7 +157,9 @@ class CustomText(CodeEditor):
         # Prevent the formatting of log text, which can be very long and may contain keywords by accident (which
         # shall not be highlighted) and can not be changed by key-presses:
         if self.text_type != "log":
-            self.after_idle(self.format, event)
+            if self.format_after_id is not None:
+                self.after_cancel(self.format_after_id)
+            self.format_after_id = self.after(200, self.format, event)
 
     def format(self, event) -> None:
         """Update text box size and highlighting."""
@@ -169,10 +172,11 @@ class CustomText(CodeEditor):
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
         self._update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows()
-        self._update_highlighting_in_all_texts()
-        if event is not None and event.keysym == "BackSpace":
-            # In order to keep the mouse-pointer inside the shrinking window:
-            self._move_mouse_to_insert_cursor()
+        if event is not None:
+            self.update_highlight_tags_in_all_texts()
+            if event.keysym == "BackSpace":
+                # In order to keep the mouse-pointer inside the shrinking window:
+                self._move_mouse_to_insert_cursor()
 
     def _move_mouse_to_insert_cursor(self) -> None:
         bbox_char = self.bbox("insert")
@@ -209,14 +213,7 @@ class CustomText(CodeEditor):
             self.config(width=max_line_length)
             self.config(height=nr_of_lines)
 
-    def _update_highlighting_in_all_texts(self) -> None:
-        # The tags "control", "datatype", "function" must only be updated in this CustomText object:
-        self.update_highlight_tags(project_manager.fontsize, ["control", "datatype", "function"])
-        project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
-        # The tags "not_read", "not_written", and "comment" must be updated in all CustomText objects:
-        self._update_highlight_tags_in_all_windows_for_not_read_not_written_and_comment()
-
-    def update_highlight_tags(self, fontsize, highlight_tag_name_list) -> None:
+    def update_highlight_tags(self, fontsize) -> None:
         """
         Updates only in this text. Called when text is changed by:
         - format()
@@ -227,8 +224,8 @@ class CustomText(CodeEditor):
         - after loading HDL into HDL-Tab
         - after HDL generation
         """
-        # highlight_tag_name is in ["control", "datatype", "function", "not_read", "not_written", "comment"]
-        for highlight_tag_name in highlight_tag_name_list:
+        # highlight_tag_name: "control", "datatype", "function", "not_read", "not_written", "comment"]
+        for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_delete(highlight_tag_name)
             self._tag_add_highlight_tag(highlight_tag_name)
             self._tag_configure_highlight_tag(highlight_tag_name, fontsize)
@@ -399,14 +396,14 @@ class CustomText(CodeEditor):
             CustomText.written_variables_of_all_windows[self] += list(set(text.split()))
             # When the ";" is missing, then the right hand side with "<=" could not be found and erased.
             # So remove "<=" and ":=" from these lists:
-            _remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
-            _remove_items_from_list(
+            self._remove_items_from_list(CustomText.read_variables_of_all_windows[self], ["<=", ":="])
+            self._remove_items_from_list(
                 CustomText.read_variables_of_all_windows[self],
                 project_manager.tab_internals_ref.internals_architecture_text.function_names_list,
             )
-            _remove_items_from_list(CustomText.read_variables_of_all_windows[self], [";", ","])
+            self._remove_items_from_list(CustomText.read_variables_of_all_windows[self], [";", ","])
             # ';' appears at VHDL-"null" assignments.
-            _remove_items_from_list(CustomText.written_variables_of_all_windows[self], [";", "<=", ":="])
+            self._remove_items_from_list(CustomText.written_variables_of_all_windows[self], [";", "<=", ":="])
 
     def _process_action_read_and_written_variables(self, text: str) -> None:
         text = self._add_read_variables_from_procedure_calls_to_read_variables_of_all_windows(text)
@@ -827,44 +824,36 @@ class CustomText(CodeEditor):
         self.see(str(number_of_line) + ".0")
         self.focus_set()
 
-    def _update_highlight_tags_in_all_windows_for_not_read_not_written_and_comment(self) -> None:
-        """Schedule update of not_read, not_written, and comment highlights in all text windows after 300 ms."""
-        if self.update_highlight_after_id is not None:
-            project_manager.root.after_cancel(self.update_highlight_after_id)
-        self.update_highlight_after_id = project_manager.root.after(
-            300, self._update_highlight_tags_in_all_windows_for_not_read_not_written_and_comment_after_idle
-        )
+    def _remove_items_from_list(self, lst: list, items) -> None:
+        for item in items:
+            if item in lst:
+                lst.remove(item)
 
-    def _update_highlight_tags_in_all_windows_for_not_read_not_written_and_comment_after_idle(self) -> None:
-        # Comment must be the last, because in the range of a comment all other tags are deleted:
+    @classmethod
+    def update_highlight_tags_in_all_texts(cls) -> None:
+        """Update the highlight tags for not_read, not_written, control, datatype, function, and comment."""
+        project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in CustomText.read_variables_of_all_windows:
-            text_ref.update_highlight_tags(project_manager.fontsize, ["not_read", "not_written", "comment"])
-        for text_ref in _declaration_text_widgets():
-            text_ref.update_highlight_tags(10, ["not_read", "not_written", "comment"])
+            text_ref.update_highlight_tags(project_manager.fontsize)
+        for text_ref in cls.declaration_text_widgets():
+            text_ref.update_highlight_tags(10)
 
+    @classmethod
+    def refresh_highlighting_in_all_declaration_widgets(cls) -> None:
+        """Reapply syntax highlighting in all declaration widgets (e.g. after language change)."""
+        project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
+        for text_ref in cls.declaration_text_widgets():
+            text_ref.update_highlight_tags(10)
 
-def _declaration_text_widgets():
-    """Text widgets that show HDL declarations (interface/internals). Used for language-aware highlighting."""
-    return [
-        project_manager.tab_interface_ref.interface_generics_text,
-        project_manager.tab_interface_ref.interface_package_text,
-        project_manager.tab_interface_ref.interface_ports_text,
-        project_manager.tab_internals_ref.internals_architecture_text,
-        project_manager.tab_internals_ref.internals_process_clocked_text,
-        project_manager.tab_internals_ref.internals_process_combinatorial_text,
-        project_manager.tab_internals_ref.internals_package_text,
-    ]
-
-
-def refresh_highlighting_in_all_declaration_widgets() -> None:
-    """Reapply syntax highlighting in all declaration widgets (e.g. after language change)."""
-    tag_list = ["not_read", "not_written", "control", "datatype", "function", "comment"]
-    for text_ref in _declaration_text_widgets():
-        text_ref.update_highlight_tags(10, tag_list)
-    project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
-
-
-def _remove_items_from_list(lst: list, items) -> None:
-    for item in items:
-        if item in lst:
-            lst.remove(item)
+    @classmethod
+    def declaration_text_widgets(cls) -> list:
+        """Text widgets that show HDL declarations (interface/internals). Used for language-aware highlighting."""
+        return [
+            project_manager.tab_interface_ref.interface_generics_text,
+            project_manager.tab_interface_ref.interface_package_text,
+            project_manager.tab_interface_ref.interface_ports_text,
+            project_manager.tab_internals_ref.internals_architecture_text,
+            project_manager.tab_internals_ref.internals_process_clocked_text,
+            project_manager.tab_internals_ref.internals_process_combinatorial_text,
+            project_manager.tab_internals_ref.internals_package_text,
+        ]

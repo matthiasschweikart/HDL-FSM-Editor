@@ -267,7 +267,7 @@ class TabControl:
                 text="Variables for compile command:\n$file\t= Module-File\n$name\t= Module Name"
             )
 
-        custom_text.refresh_highlighting_in_all_declaration_widgets()
+        custom_text.CustomText.refresh_highlighting_in_all_declaration_widgets()
 
     def _set_path(self) -> None:
         path = askdirectory(title="Select directory for generated HDL")
