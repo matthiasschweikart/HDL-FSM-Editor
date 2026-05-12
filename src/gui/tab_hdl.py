@@ -17,7 +17,6 @@ class TabHDL:
 
     def __init__(self) -> None:
         self._line_number_under_pointer_hdl_tab: int = 0
-        self._func_id_jump: str | None = None
 
         hdl_frame = ttk.Frame(project_manager.notebook)
         hdl_frame.grid()
@@ -76,14 +75,11 @@ class TabHDL:
                     "underline", f"{line_number}.{start_index - 1}", f"{line_number + 1}.0"
                 )
                 self.hdl_frame_text.tag_config("underline", underline=1)  # activate underline
-                self._func_id_jump = self.hdl_frame_text.bind(
+                self.hdl_frame_text.tag_bind(
+                    "underline",
                     "<Button-1>",
                     lambda event: project_manager.link_dict_ref.jump_to_source(selected_file, line_number_in_file),
                 )
-            else:
-                # For this line no link exists:
-                self.hdl_frame_text.unbind("<Button-1>", self._func_id_jump)
-                self._func_id_jump = None
             self._line_number_under_pointer_hdl_tab = line_number
 
     def _jump_to_line(self, *_) -> None:
