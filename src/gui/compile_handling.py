@@ -42,6 +42,7 @@ def compile_hdl() -> None:
     )
     project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
     project_manager.tab_log_ref.log_frame_text.see(tk.END)
+    project_manager.root.update()  # Wait until the user can see the log.
     start_time = datetime.now()
     commands = _get_command_list()
     if commands is None:
@@ -184,3 +185,4 @@ def _insert_line_in_log(line) -> None:
         project_manager.tab_log_ref.log_frame_text.insert(tk.END, line)
     project_manager.tab_log_ref.log_frame_text.config(state=tk.DISABLED)
     project_manager.tab_log_ref.log_frame_text.see(tk.END)
+    project_manager.root.update()
