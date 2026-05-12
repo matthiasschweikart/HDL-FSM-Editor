@@ -156,7 +156,7 @@ class CustomText(CodeEditor):
             return  # No formatting as long as Ctrl is pressed alone.
         # Prevent the formatting of log text, which can be very long and may contain keywords by accident (which
         # shall not be highlighted) and can not be changed by key-presses:
-        if self.text_type != "log":
+        if self.text_type not in ("generated", "log"):
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
             self.format_after_id = self.after(200, self.format, event)
