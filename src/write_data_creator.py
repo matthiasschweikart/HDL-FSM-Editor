@@ -14,7 +14,7 @@ from widgets import config
 class WriteDataCreator:
     """
     Only one WriteDataCreator object is used.
-    It is created at a file-operation.
+    It is created at a start up.
     """
 
     def __init__(self, standard_size) -> None:
