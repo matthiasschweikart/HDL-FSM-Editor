@@ -59,6 +59,7 @@ class CodeEditor(tk.Text):
         if not sel_ranges:
             self._cut_complete_line()
             return "break"
+        self.format_after_idle(None)  # Trigger formatting after default paste action (which may be line-wise or not)
 
     def _paste(self) -> str | None:
         sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
