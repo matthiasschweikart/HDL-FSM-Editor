@@ -12,8 +12,16 @@ import tkinter as tk
 
 import constants
 import file_handling
+from actions import canvas_editing
 from codegen import hdl_generation_architecture_state_actions, hdl_generation_library
-from elements import global_actions_combinatorial
+from elements import (
+    condition_action,
+    global_actions_clocked,
+    global_actions_combinatorial,
+    state_action,
+    state_actions_default,
+    state_comment,
+)
 from project_manager import project_manager
 
 from . import config
@@ -823,6 +831,33 @@ class CustomText(CodeEditor):
         self.tag_config("highlight", background="orange")
         self.see(str(number_of_line) + ".0")
         self.focus_set()
+        canvas_id_of_window = self._get_canvas_id_of_window()
+        if canvas_id_of_window is not None:
+            coords = project_manager.canvas.coords(canvas_id_of_window)
+            zoom_center = coords[0], coords[1]
+            zoom_factor = 0.75 * project_manager.state_radius_default / project_manager.state_radius
+            canvas_editing.canvas_zoom(zoom_center, zoom_factor)
+
+    def _get_canvas_id_of_window(self) -> int | None:
+        for canvas_id, text_ref in state_actions_default.StateActionsDefault.ref_dict.items():
+            if text_ref.text_id == self:
+                return canvas_id
+        for canvas_id, text_ref in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
+            if self in (text_ref.text_before_id, text_ref.text_after_id):
+                return canvas_id
+        for canvas_id, text_ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
+            if text_ref.text_id == self:
+                return canvas_id
+        for canvas_id, text_ref in state_action.StateAction.ref_dict.items():
+            if text_ref.text_id == self:
+                return canvas_id
+        for canvas_id, text_ref in state_comment.StateComment.ref_dict.items():
+            if text_ref.text_id == self:
+                return canvas_id
+        for canvas_id, text_ref in condition_action.ConditionAction.ref_dict.items():
+            if self in (text_ref.condition_id, text_ref.action_id):
+                return canvas_id
+        return None
 
     def _remove_items_from_list(self, lst: list, items) -> None:
         for item in items:

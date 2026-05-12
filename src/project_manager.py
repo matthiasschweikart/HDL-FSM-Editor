@@ -40,7 +40,8 @@ class ProjectManager:
         self._undo_handling_ref = None  #: undo_handling.UndoHandling
 
         # Parameters of the GUI:
-        self._state_radius = 20.0
+        self._state_radius_default = 20.0
+        self._state_radius = self._state_radius_default
         self._priority_distance = 30
         self._reset_entry_size = 40
         self._fontsize = 10
@@ -84,6 +85,11 @@ class ProjectManager:
     def highlight_dict_ref(self, value):  # value : linting.HighLightDict) -> None:
         """Set the highlight dictionary."""
         self._highlight_dict_ref = value
+
+    @property
+    def state_radius_default(self) -> float:
+        """Get the default state radius."""
+        return self._state_radius_default
 
     @property
     def state_radius(self) -> float:
