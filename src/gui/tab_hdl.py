@@ -72,7 +72,7 @@ class TabHDL:
                 start_index += 1  # leading blanks shall not be underlined
             if project_manager.link_dict_ref.has_link(selected_file, line_number_in_file):
                 self.hdl_frame_text.tag_add(  # add tag for all characters until end of line
-                    "underline", f"{line_number}.{start_index - 1}", f"{line_number + 1}.0"
+                    "underline", f"{line_number}.{start_index - 1}", f"{line_number}.end"
                 )
                 self.hdl_frame_text.tag_config("underline", underline=1)  # activate underline
                 self.hdl_frame_text.tag_bind(
