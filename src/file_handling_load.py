@@ -135,13 +135,18 @@ def _load_canvas_elements(design_dictionary: dict[str, Any]) -> None:
         design_dictionary, state_comment_line_dictionary, state_action_line_dictionary, condition_action_line_dictionary
     )
 
-    # Sort the display order for the transition priorities:
-    for transition_id in transition_ids:
-        project_manager.canvas.tag_raise(transition_id)
-    for rectangle_id in ids_of_rectangles_to_raise:
-        project_manager.canvas.tag_raise(rectangle_id)
-    for priority_id in priority_ids:
-        project_manager.canvas.tag_raise(priority_id)
+    # Eliminate inaccuracies:
+    for transition_tag in transition_dict:
+        transition.TransitionLine.extend_transition_to_state_middle_points(transition_tag)
+        transition.TransitionLine.shorten_to_state_border(transition_tag)
+
+    # # Sort the display order for the transition priorities:
+    # for transition_id in transition_ids:
+    #     project_manager.canvas.tag_raise(transition_id)
+    # for rectangle_id in ids_of_rectangles_to_raise:
+    #     project_manager.canvas.tag_raise(rectangle_id)
+    # for priority_id in priority_ids:
+    #     project_manager.canvas.tag_raise(priority_id)
     for transition_identifer in hide_priority_rectangle_list:
         project_manager.canvas.itemconfigure(f"{transition_identifer}priority", state=tk.HIDDEN)
         project_manager.canvas.itemconfigure(f"{transition_identifer}rectangle", state=tk.HIDDEN)
