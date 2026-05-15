@@ -69,15 +69,10 @@ def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_vie
 
 def canvas_zoom(zoom_center, zoom_factor) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
-    # Include objects into the scroll area which may be moved partly outside of the visible area:
-    project_manager.canvas.configure(scrollregion=project_manager.canvas.bbox("all"))
     # Modify factor, so that fontsize is always an integer:
-    fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
-    if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
-        fontsize_rounded_down += 1
-    if fontsize_rounded_down == 0:
+    zoom_factor = _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor)
+    if zoom_factor == 0:
         return
-    zoom_factor = fontsize_rounded_down / project_manager.fontsize
     project_manager.abs_zoom_factor *= zoom_factor
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
@@ -93,6 +88,13 @@ def _adapt_scroll_region(factor) -> None:
     scrollregion_strings = project_manager.canvas.cget("scrollregion").split()
     scrollregion_scaled = [int(float(x) * factor) for x in scrollregion_strings]
     project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+
+
+def _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor):
+    fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
+    if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
+        fontsize_rounded_down += 1
+    return fontsize_rounded_down / project_manager.fontsize
 
 
 def _decrement_font_size_if_window_is_too_wide() -> None:
@@ -182,7 +184,23 @@ def zoom_wheel(event) -> None:
         factor = 1 / 1.1
     elif event.num == 4 or event.delta >= 0:  # scroll up
         factor = 1.1
-    zoom_center = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+    # Adapt the zoom factor here, so that the new center of the zoomed window can be predicted correctly here.
+    # Otherwise canvas_zoom() would adapt the zoom factor, which would change the position of the zoom center.
+    factor = _modify_zoom_factor_to_achieve_integer_fontsize(factor)
+    if factor == 0:
+        return
+    visible_rectangle = [
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    visible_center = _determine_center_of_rectangle(visible_rectangle)
+    event_coords = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+    zoom_center = [  # Place new center between event and visible center, so that it will become the new visible center.
+        event_coords[0] + (visible_center[0] - event_coords[0]) / factor,
+        event_coords[1] + (visible_center[1] - event_coords[1]) / factor,
+    ]
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
 

@@ -240,6 +240,15 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
         project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
     if not is_script_mode:
+        project_manager.root.update_idletasks()  # update geometry information of all widgets
+        bbox = project_manager.canvas.bbox("all")
+        scrollregion_scaled = (
+            bbox[0] - (bbox[2] - bbox[0]) * 0.5,
+            bbox[1] - (bbox[3] - bbox[1]) * 0.5,
+            bbox[2] + (bbox[2] - bbox[0]) * 0.5,
+            bbox[3] + (bbox[3] - bbox[1]) * 0.5,
+        )
+        project_manager.canvas.configure(scrollregion=scrollregion_scaled)
         project_manager.root.after_idle(canvas_editing.view_all)
     project_manager.root.after_idle(_init_undo_stack)
     project_manager.root.config(cursor="arrow")
