@@ -30,13 +30,13 @@ class WriteDataCreator:
         """Zoom canvas to standard_size/actual_size at origin; return the zoom factor."""
         zoom_factor = self.standard_size / actual_size
         project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
-        canvas_font_sizes.adapt_global_size_variables(zoom_factor)
+        canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
         return zoom_factor
 
     def zoom_graphic_back_to_actual_size(self, zoom_factor) -> None:
         """Restore canvas zoom by applying 1/zoom_factor at origin."""
         project_manager.canvas.scale("all", 0, 0, 1 / zoom_factor, 1 / zoom_factor)
-        canvas_font_sizes.adapt_global_size_variables(1 / zoom_factor)
+        canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(1 / zoom_factor)
 
     def round_and_sort_data(self, design_dictionary) -> dict[str, list]:
         """Sort and round coordinates/parameters in design_dictionary; store as compare object; return updated dict."""

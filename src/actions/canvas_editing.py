@@ -81,7 +81,7 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
     # zoom factor and the canvas cannot be shifted to the correct position:
     _adapt_scroll_region(zoom_factor)
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
-    canvas_font_sizes.adapt_global_size_variables(zoom_factor)
+    canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
 
 
 def _adapt_scroll_region(factor) -> None:

@@ -12,7 +12,7 @@ from elements import (
 from project_manager import project_manager
 
 
-def adapt_global_size_variables(factor) -> None:
+def adapt_fontsizes_and_store_global_size_variables(factor) -> None:
     """Adapt all global size variables and font sizes by the given factor."""
     project_manager.state_radius = factor * project_manager.state_radius  # publish new state radius
     project_manager.priority_distance = factor * project_manager.priority_distance
