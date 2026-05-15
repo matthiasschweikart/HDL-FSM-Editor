@@ -506,15 +506,12 @@ class TransitionLine:
         """Set transition start/end to center of connected state/connector; lower line under states."""
         transition_coords = project_manager.canvas.coords(transition_tag)
         end_state_coords = project_manager.canvas.coords(transition_tag + "_end")
-        if transition_tag.startswith(
-            "transition"
-        ):  # When transition_tag starts with "connection" no start point is needed.
-            start_coords = project_manager.canvas.coords(
-                transition_tag + "_start"
-            )  # Coords are from a circle (state) or from a connector (rectangle) or from the reset entry (polygon).
-            if (
-                project_manager.canvas.type(transition_tag + "_start") != "polygon"
-            ):  # At the reset entry the transition start point is not modified for moving.
+        if transition_tag.startswith("transition"):
+            # When transition_tag starts with "connection" no start point is needed.
+            start_coords = project_manager.canvas.coords(transition_tag + "_start")
+            # Coords are from a state (circle) or from a connector (rectangle) or from the reset entry (polygon).
+            if project_manager.canvas.type(transition_tag + "_start") != "polygon":
+                # At the reset entry the transition start point is not modified for moving.
                 transition_coords[0] = (start_coords[0] + start_coords[2]) // 2
                 transition_coords[1] = (start_coords[1] + start_coords[3]) // 2
         transition_coords[-2] = (end_state_coords[0] + end_state_coords[2]) // 2
