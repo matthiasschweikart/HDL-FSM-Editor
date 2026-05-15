@@ -135,9 +135,9 @@ class TabDiagram:
         canvas.bind("<Home>", lambda event: canvas_editing.view_all())
         canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         canvas.bind("<Motion>", canvas_delete.CanvasDelete.store_mouse_position)
-        canvas.bind("<Control-MouseWheel>", canvas_editing.zoom_wheel)  # MouseWheel used at Windows.
-        canvas.bind("<Control-Button-4>", canvas_editing.zoom_wheel)  # MouseWheel-Scroll-Up used at Linux.
-        canvas.bind("<Control-Button-5>", canvas_editing.zoom_wheel)  # MouseWheel-Scroll-Down used at Linux.
+        canvas.bind("<Control-MouseWheel>", self._zoom_by_wheel)  # MouseWheel used at Windows.
+        canvas.bind("<Control-Button-4>", self._zoom_by_wheel)  # MouseWheel-Scroll-Up used at Linux.
+        canvas.bind("<Control-Button-5>", self._zoom_by_wheel)  # MouseWheel-Scroll-Down used at Linux.
         canvas.bind("<Control-Button-1>", self._scroll_start)
         canvas.bind("<Control-B1-Motion>", self._scroll_move)
         canvas.bind("<Control-ButtonRelease-1>", self._scroll_end)
@@ -150,6 +150,10 @@ class TabDiagram:
         self._create_font_for_state_names()
         grid_drawer = grid_drawing.GridDraw(canvas)
         project_manager.grid_drawer = grid_drawer
+
+    def _zoom_by_wheel(self, event) -> None:
+        event_coords = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+        canvas_editing.zoom_wheel(event, event_coords[0], event_coords[1])
 
     def _scroll_xview(self, *args) -> None:
         project_manager.grid_drawer.remove_grid()

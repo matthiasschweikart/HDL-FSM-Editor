@@ -83,9 +83,20 @@ class StateActionsDefault:
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
         for single_id in ids_list:
             for seq in seq1_list:
-                single_id.bind(seq, lambda event: canvas_editing.zoom_wheel_window_item(event, self.window_id))
+                single_id.bind(seq, lambda event, id=single_id: self._zoom_by_wheel(event, id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+
+    def _zoom_by_wheel(self, event, canvas_id) -> None:
+        window_coords = project_manager.canvas.coords(self.window_id)
+        window_bbox = project_manager.canvas.bbox(self.window_id)
+        window_height = window_bbox[3] - window_bbox[1]
+        window_root = [window_coords[0], window_coords[1] - window_height / 2]
+        event_x = window_root[0] + event.x
+        event_y = window_root[1] + event.y
+        if canvas_id != self.label:
+            event_y += self.label.winfo_height()
+        canvas_editing.zoom_wheel(event, event_x, event_y)
 
     def tag(self) -> None:
         """Set window tag to state_actions_default."""

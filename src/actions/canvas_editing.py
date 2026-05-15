@@ -172,8 +172,8 @@ def zoom_minus() -> None:
     project_manager.canvas.grid()
 
 
-def zoom_wheel(event) -> None:
-    """Handle mouse wheel: zoom in/out at cursor position."""
+def zoom_wheel(event, event_x, event_y) -> None:
+    """Zoom in/out at cursor position of the given window item."""
     project_manager.grid_drawer.remove_grid()
     # event.delta: attribute of the mouse wheel under Windows and MacOs.
     # One "felt step" at the mouse wheel gives this value:
@@ -196,32 +196,9 @@ def zoom_wheel(event) -> None:
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     ]
     visible_center = _determine_center_of_rectangle(visible_rectangle)
-    event_coords = translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     zoom_center = [  # Place new center between event and visible center, so that it will become the new visible center.
-        event_coords[0] + (visible_center[0] - event_coords[0]) / factor,
-        event_coords[1] + (visible_center[1] - event_coords[1]) / factor,
+        event_x + (visible_center[0] - event_x) / factor,
+        event_y + (visible_center[1] - event_y) / factor,
     ]
-    canvas_zoom(zoom_center, factor)
-    project_manager.grid_drawer.draw_grid()
-
-
-def zoom_wheel_window_item(event, canvas_id) -> None:
-    """Zoom in/out at cursor position of the given window item."""
-    project_manager.grid_drawer.remove_grid()
-    # event.delta: attribute of the mouse wheel under Windows and MacOs.
-    # One "felt step" at the mouse wheel gives this value:
-    # Windows: delta=+/-120 ; MacOS: delta=+/-1 ; Linux: delta=0
-    # num: attribute of the the mouse wheel under Linux  ("scroll-up=5" and "scroll-down=4").
-    factor = 1
-    if event.num == 5 or event.delta < 0:  # scroll down
-        factor = 1 / 1.1
-    elif event.num == 4 or event.delta >= 0:  # scroll up
-        factor = 1.1
-    window_coor = project_manager.canvas.coords(canvas_id)
-    project_manager.canvas.update_idletasks()  # to get correct results from bbox
-    window_bbox = project_manager.canvas.bbox(canvas_id)
-    zoom_center_x = window_coor[0] + event.x
-    zoom_center_y = window_coor[1] - (window_bbox[3] - window_bbox[1]) / 2 + event.y
-    zoom_center = (zoom_center_x, zoom_center_y)
     canvas_zoom(zoom_center, factor)
     project_manager.grid_drawer.draw_grid()
