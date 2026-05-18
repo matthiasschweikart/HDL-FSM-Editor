@@ -180,11 +180,10 @@ class CustomText(CodeEditor):
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
         self._update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows()
-        if event is not None:
-            self.update_highlight_tags_in_all_texts()
-            if event.keysym == "BackSpace":
-                # In order to keep the mouse-pointer inside the shrinking window:
-                self._move_mouse_to_insert_cursor()
+        self.update_highlight_tags_in_all_texts()
+        if event is not None and event.keysym == "BackSpace":
+            # In order to keep the mouse-pointer inside the shrinking window:
+            self._move_mouse_to_insert_cursor()
 
     def _move_mouse_to_insert_cursor(self) -> None:
         bbox_char = self.bbox("insert")
