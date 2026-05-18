@@ -81,6 +81,7 @@ class CodeEditor(tk.Text):
         line_start, line_end = self._copy_complete_line()
         # Delete also the possible newline character at the end of the line, regardless of whether it exists.
         self.delete(line_start, line_end + "+1c")
+        self.format_after_idle(None)
 
     def _paste_complete_line(self) -> None:
         line_start = self.index("insert linestart")
