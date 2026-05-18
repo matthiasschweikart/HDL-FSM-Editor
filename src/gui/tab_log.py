@@ -66,6 +66,12 @@ class TabLog:
         self.log_frame_text.config(state=tk.NORMAL)
         self.log_frame_text.delete("1.0", tk.END)
         self.log_frame_text.config(state=tk.DISABLED)
+        if self._func_id_jump1 is not None:
+            self.log_frame_text.unbind("<Button-1>", self._func_id_jump1)
+            self._func_id_jump1 = None
+        if self._func_id_jump2 is not None:
+            self.log_frame_text.unbind("<Control-Button-1>", self._func_id_jump2)
+            self._func_id_jump2 = None
 
     def _edit_regex(self, *_) -> None:
         """Open the regex configuration dialog and update settings if confirmed."""
