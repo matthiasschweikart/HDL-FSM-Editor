@@ -107,46 +107,30 @@ def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.label_fontsize = design_dictionary["label_fontsize"]
 
 
-def _load_canvas_elements(design_dictionary: dict[str, Any]) -> None:
+def _load_canvas_elements(design_dict: dict[str, Any]) -> None:
     """Load all canvas elements including states, transitions, text, and windows."""
-    transition_ids = []
-    ids_of_rectangles_to_raise = []
-    priority_ids = []
     hide_priority_rectangle_list: list[str] = []
     transition_dict: dict[str, Any] = {}
-    state_comment_line_dictionary: dict[str, Any] = {}
-    state_action_line_dictionary: dict[str, Any] = {}
-    condition_action_line_dictionary: dict[str, Any] = {}
-
-    hide_priority_rectangle_list.extend(_load_canvas_states(design_dictionary))
-    hide_priority_rectangle_list.extend(_load_canvas_polygons(design_dictionary))
-    _load_canvas_text_elements(design_dictionary, transition_dict)
-    _load_canvas_lines(
-        design_dictionary,
-        state_comment_line_dictionary,
-        state_action_line_dictionary,
-        condition_action_line_dictionary,
-        transition_dict,
-    )
-    hide_priority_rectangle_list.extend(_load_canvas_rectangles(design_dictionary))
-
+    state_comment_line_dict: dict[str, Any] = {}
+    state_act_line_dict: dict[str, Any] = {}
+    cond_act_line_dict: dict[str, Any] = {}
+    hide_priority_rectangle_list.extend(_load_canvas_states(design_dict))
+    hide_priority_rectangle_list.extend(_load_canvas_polygons(design_dict))
+    _load_canvas_text_elements(design_dict, transition_dict)
+    _distribute_lines(design_dict, state_comment_line_dict, state_act_line_dict, cond_act_line_dict, transition_dict)
+    hide_priority_rectangle_list.extend(_load_canvas_rectangles(design_dict))
     _load_transitions_from_dict(transition_dict)
-    _load_window_elements(
-        design_dictionary, state_comment_line_dictionary, state_action_line_dictionary, condition_action_line_dictionary
-    )
-
+    _load_state_action_blocks(design_dict, state_act_line_dict)
+    _load_state_comment_blocks(design_dict, state_comment_line_dict)
+    _load_condition_action_blocks(design_dict, cond_act_line_dict)
+    _load_global_actions_clocked(design_dict)
+    _load_global_actions_combinatorial(design_dict)
+    _load_state_actions_default(design_dict)
+    _update_window_element_button_states()
     # Eliminate inaccuracies:
     for transition_tag in transition_dict:
         transition.TransitionLine.extend_transition_to_state_middle_points(transition_tag)
         transition.TransitionLine.shorten_to_state_border(transition_tag)
-
-    # # Sort the display order for the transition priorities:
-    # for transition_id in transition_ids:
-    #     project_manager.canvas.tag_raise(transition_id)
-    # for rectangle_id in ids_of_rectangles_to_raise:
-    #     project_manager.canvas.tag_raise(rectangle_id)
-    # for priority_id in priority_ids:
-    #     project_manager.canvas.tag_raise(priority_id)
     for transition_identifer in hide_priority_rectangle_list:
         project_manager.canvas.itemconfigure(f"{transition_identifer}priority", state=tk.HIDDEN)
         project_manager.canvas.itemconfigure(f"{transition_identifer}rectangle", state=tk.HIDDEN)
@@ -214,7 +198,7 @@ def _load_canvas_text_elements(design_dictionary: dict[str, Any], transition_dic
                     transition_dict[transition_tag]["prio-item"] = {"text": text}
 
 
-def _load_canvas_lines(
+def _distribute_lines(
     design_dictionary: dict[str, Any],
     state_comment_line_dictionary: dict[str, Any],
     state_action_line_dictionary: dict[str, Any],
@@ -257,7 +241,7 @@ def _load_canvas_rectangles(design_dictionary: dict[str, Any]) -> list[str]:
     return hide_list
 
 
-def _load_transitions_from_dict(transition_dict):
+def _load_transitions_from_dict(transition_dict: dict[str, Any]) -> None:
     """Load transitions from the provided transition dictionary."""
     for _, single_transition_dict in transition_dict.items():
         transition_coords = single_transition_dict["line-item"]["coords"]
@@ -267,14 +251,7 @@ def _load_transitions_from_dict(transition_dict):
     transition.TransitionLine.hide_priority_of_single_outgoing_transitions()
 
 
-def _load_window_elements(
-    design_dictionary: dict[str, Any],
-    state_comment_line_dictionary: dict[str, Any],
-    state_action_line_dictionary: dict[str, Any],
-    condition_action_line_dictionary: dict[str, Any],
-) -> None:
-    """Load all window elements including state actions, comments, and global actions."""
-    # Load state action blocks
+def _load_state_action_blocks(design_dictionary: dict[str, Any], state_action_line_dictionary: dict[str, Any]) -> None:
     for definition in design_dictionary["window_state_action_block"]:
         coords = definition[0]
         text = definition[1]
@@ -295,7 +272,10 @@ def _load_window_elements(
                     action=text,
                 )
 
-    # Load state comments
+
+def _load_state_comment_blocks(
+    design_dictionary: dict[str, Any], state_comment_line_dictionary: dict[str, Any]
+) -> None:
     for definition in design_dictionary.get("window_state_comment", []):
         coords = definition[0]
         text = definition[1]
@@ -305,9 +285,8 @@ def _load_window_elements(
             coords[0] - 100, coords[1], padding=1, tags=tags, line_coords=line_coords, comment=text
         )
 
-    _load_condition_action_blocks(design_dictionary, condition_action_line_dictionary)
 
-    # Load global actions
+def _load_global_actions_clocked(design_dictionary: dict[str, Any]) -> None:
     for definition in design_dictionary["window_global_actions"]:
         coords = definition[0]
         text_before = definition[1]
@@ -317,7 +296,8 @@ def _load_window_elements(
             coords[0], coords[1], padding=1, tags=tags, before=text_before, after=text_after
         )
 
-    # Load global actions combinatorial
+
+def _load_global_actions_combinatorial(design_dictionary: dict[str, Any]) -> None:
     for definition in design_dictionary["window_global_actions_combinatorial"]:
         coords = definition[0]
         text = definition[1]
@@ -326,21 +306,18 @@ def _load_window_elements(
             coords[0], coords[1], padding=1, tags=tags, actions=text
         )
 
-    # Load state actions default
+
+def _load_state_actions_default(design_dictionary: dict[str, Any]) -> None:
     for definition in design_dictionary["window_state_actions_default"]:
         coords = definition[0]
         text = definition[1]
         tags = definition[2]
         state_actions_default.StateActionsDefault(coords[0], coords[1], padding=1, tags=tags, action=text)
 
-    _update_window_element_button_states()
-
 
 def _load_condition_action_blocks(
-    design_dictionary: dict[str, Any],
-    condition_action_line_dictionary: dict[str, Any],
+    design_dictionary: dict[str, Any], condition_action_line_dictionary: dict[str, Any]
 ) -> None:
-    """Load condition/action window blocks from design dict."""
     for definition in design_dictionary["window_condition_action_block"]:
         coords = definition[0]
         condition = definition[1]
