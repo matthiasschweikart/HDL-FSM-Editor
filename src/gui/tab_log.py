@@ -161,13 +161,15 @@ class TabLog:
                 ):  # For example ieee source files are not a key in link_dict.
                     if debug:
                         print("Filename and line-number are found in Link-Dictionary.")
-                    self.log_frame_text.tag_add("underline", str(line_number) + ".0", str(line_number + 1) + ".0")
+                    self.log_frame_text.tag_add("underline", str(line_number) + ".0", str(line_number) + ".end")
                     self.log_frame_text.tag_config("underline", underline=1, foreground="red")
-                    self._func_id_jump1 = self.log_frame_text.bind(
+                    self._func_id_jump1 = self.log_frame_text.tag_bind(
+                        "underline",
                         "<Button-1>",
                         lambda event: project_manager.link_dict_ref.jump_to_source(file_name, file_line_number),
                     )
-                    self._func_id_jump2 = self.log_frame_text.bind(
+                    self._func_id_jump2 = self.log_frame_text.tag_bind(
+                        "underline",
                         "<Control-Button-1>",
                         lambda event: project_manager.link_dict_ref.jump_to_hdl(file_name, file_line_number),
                     )
@@ -175,15 +177,15 @@ class TabLog:
                     if debug:
                         print("Filename or line-number not found in Link-Dictionary.")
                     # Add only tag (for coloring in red), but don't underline as no link exists.
-                    self.log_frame_text.tag_add("underline", str(line_number) + ".0", str(line_number + 1) + ".0")
+                    self.log_frame_text.tag_add("underline", str(line_number) + ".0", str(line_number) + ".end")
 
             else:
                 if debug:
                     print("Regex did not match line           : ", content_of_line)
                 if self._func_id_jump1 is not None:
-                    self.log_frame_text.unbind("<Button-1>", self._func_id_jump1)
+                    self.log_frame_text.tag_unbind("underline", "<Button-1>", self._func_id_jump1)
                 if self._func_id_jump2 is not None:
-                    self.log_frame_text.unbind("<Control-Button-1>", self._func_id_jump2)
+                    self.log_frame_text.tag_unbind("underline", "<Control-Button-1>", self._func_id_jump2)
                 self._func_id_jump1 = None
                 self._func_id_jump2 = None
             self._line_number_under_pointer_log_tab = line_number
