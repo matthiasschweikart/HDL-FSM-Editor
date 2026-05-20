@@ -13,6 +13,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [6.4]
+## Added
+- When moving a state, now state-comment, state-action and loopback transition are moved together with the state.
+- Ctrl-x and Ctrl-c/v now work at whole lines if nothing is selected.
+- Sash positions in Interface and Internals tab are now adapted automatically when the window is resized.
+- When showing find-hits, now the diagram is zoomed properly.
+- The transition menue entry "straighten shape" now does not modify loopback transition anymore.
+- Following links in "generated HDL" and in "messages" tab now does not need the Ctrl-key anymore.
+- Following links in "generated HDL" and in "messages" now only works at underlined characters.
+- The links no longer work either over the line number or beyond the line end.
+- At compile now the "messages" tab becomes visible faster.
+- Highlighting works faster now.
+- Highlighting a big number of lines in the "generated HDL" tab does not freeze the GUI anymore.
+## Changed
+## Deprecated
+## Removed
+## Fixed
+- At zooming by Ctrl-key and mouse-wheel the diagram "jumped". Fixed.
+- Changing the shape of small loopback transitions did not work well. Fixed.
+- In a newly loaded design straight transitions did sometimes not snap exactly to the grid. Fixed.
+- Sometimes the HFE window was resized, when Ctrl-g or Ctrl-p were pressed. Fixed.
+- At loading a design straight transitions sometimes did snap to the grid. Fixed.
+- Help menue entry did not work under Linux. Fixed.
+- Disconnecting the transition starting at reset entry caused a fatal. Fixed.
+- Sensitivity checks did not ignore HDL code in comments. Fixed.
+- Sensitivity check did not work correctly if not closed brackets were in the HDL. Fixed.
+- An empty additional sources field caused problems at linting. Fixed.
+- A not existing additional sources file caused a exception at linting. Fixed.
+- Moving a state above another state disconnected the connected transitions. Fixed.
+## Security
+
 ## [6.3]
 ## Added
 ## Changed
@@ -177,7 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 - A title for the "select HDL directory" dialog.
 ## Changed
-- Picking up objects for moving was sometimes kind of hard, now it works easy and as expected.</li>
+- Picking up objects for moving was sometimes kind of hard, now it works easy and as expected.
 ## Deprecated
 ## Removed
 ## Fixed

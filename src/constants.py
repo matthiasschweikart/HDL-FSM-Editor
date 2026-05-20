@@ -5,7 +5,7 @@ Constants for all modules of HDL-FSM-Editor
 # from enum import StrEnum # StrEnum does not exist in Linux Mint
 from enum import Enum
 
-VERSION = "6.3"
+VERSION = "6.4"
 HEADER_STRING = (
     "HDL-FSM-Editor\nVersion " + VERSION + "\nCreated by Matthias Schweikart\nContact: matthias.schweikart@gmx.de"
 )
