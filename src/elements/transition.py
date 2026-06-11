@@ -801,7 +801,7 @@ class TransitionLine:
         project_manager.canvas.delete(transition_id)
         # Restore bindings:
         project_manager.canvas.unbind("<Motion>", transition_draw_funcid)
-        project_manager.canvas.bind("<Button-1>", cls.create)
+        project_manager.canvas.bind("<Button-1>", TransitionLine.create)
         project_manager.root.bind_all("<Escape>", lambda event: canvas_modify_bindings.switch_to_move_mode())
 
     @classmethod
