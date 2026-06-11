@@ -22,9 +22,7 @@ class TransitionLine:
     delta_dict = {}
     diff_dict = {}
 
-    def __init__(self, transition_coords, tags, priority, new_transition=False) -> None:
-        if new_transition:
-            TransitionLine.transition_number += 1
+    def __init__(self, transition_coords, tags, priority) -> None:
         self.difference_x = 0
         self.difference_y = 0
         transition_tag = tags[0]  # "transition<n>"
@@ -64,6 +62,7 @@ class TransitionLine:
             project_manager.canvas.tag_raise(self.transition_id, "grid_line")
         project_manager.canvas.tag_raise(self.priority_text)
         TransitionLine.ref_dict[self.transition_id] = self
+        TransitionLine.transition_number += 1
 
     def _determine_position_of_priority_rectangle(self, transition_coords):
         # Determine middle of the priority rectangle position by calculating a shortened transition:
@@ -792,7 +791,7 @@ class TransitionLine:
             priority_dict = TransitionLine.determine_priorities_of_outgoing_transitions(start_state_canvas_id)
             unused_priority = cls._get_unused_priority(priority_dict)
             cls._end_inserting_transition(transition_id, transition_draw_funcid)
-            TransitionLine(transition_coords, tags, unused_priority, new_transition=True)
+            TransitionLine(transition_coords, tags, unused_priority)
             TransitionLine.hide_priority_of_single_outgoing_transitions()
             project_manager.undo_handling_ref.design_has_changed()
 

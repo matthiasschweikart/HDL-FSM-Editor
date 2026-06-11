@@ -247,7 +247,7 @@ def _load_transitions_from_dict(transition_dict: dict[str, Any]) -> None:
         transition_coords = single_transition_dict["line-item"]["coords"]
         tags = single_transition_dict["line-item"]["tags"]
         priority = single_transition_dict["prio-item"]["text"]
-        transition.TransitionLine(transition_coords, tags, priority, new_transition=False)
+        transition.TransitionLine(transition_coords, tags, priority)
     transition.TransitionLine.hide_priority_of_single_outgoing_transitions()
 
 
