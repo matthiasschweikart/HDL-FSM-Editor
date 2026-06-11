@@ -268,7 +268,6 @@ def _load_state_action_blocks(design_dictionary: dict[str, Any], state_action_li
                     tags=tags,
                     line_coords=line_coords,
                     line_tags=line_tags,
-                    increment=False,
                     action=text,
                 )
 

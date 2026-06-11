@@ -25,11 +25,8 @@ class StateAction:
         tags,
         line_coords,
         line_tags,
-        increment,
         action,
     ) -> None:
-        if increment is True:
-            StateAction.state_action_id += 1
         self.text_content = action
         self.difference_x = 0
         self.difference_y = 0
@@ -96,6 +93,7 @@ class StateAction:
                 single_id.bind(seq, lambda event, id=single_id: self._zoom_by_wheel(event, id))
             for seq in seq2_list:
                 single_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+        StateAction.state_action_id += 1
 
     def _zoom_by_wheel(self, event, canvas_id) -> None:
         window_coords = project_manager.canvas.coords(self.window_id)
@@ -216,6 +214,5 @@ class StateAction:
             tags=state_action_tags,
             line_coords=line_coords,
             line_tags=line_tags,
-            increment=True,
             action="",
         )
