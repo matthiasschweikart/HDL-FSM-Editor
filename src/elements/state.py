@@ -26,9 +26,7 @@ class States:
     difference_x = 0
     difference_y = 0
 
-    def __init__(self, coords, tags, text, fill_color, new_state=False) -> None:
-        if new_state:
-            States.state_number += 1
+    def __init__(self, coords, tags, text, fill_color) -> None:
         self.state_id = project_manager.canvas.create_oval(
             coords,
             fill=fill_color,
@@ -65,6 +63,7 @@ class States:
         project_manager.canvas.tag_bind(self.text_id, "<Double-Button-1>", self._edit_state_name)
         project_manager.canvas.tag_bind(self.text_id, "<Button-3>", self._show_menu)
         States.ref_dict[self.state_id] = self
+        States.state_number += 1
 
     def _show_menu(self, event) -> None:
         listbox = OptionMenu(
@@ -301,10 +300,9 @@ class States:
         ]
         States(
             coords,
-            tags=["state" + str(States.state_number + 1)],
-            text="S" + str(States.state_number + 1),
+            tags=["state" + str(States.state_number)],
+            text="S" + str(States.state_number),
             fill_color=constants.STATE_COLOR,
-            new_state=True,
         )
         # design_has_changed cannot be called by state.States, because state.States must be called
         # when an Undo is performed, which shall not create a new entry in the Undo-Stack.
