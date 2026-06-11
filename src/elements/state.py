@@ -135,35 +135,11 @@ class States:
         project_manager.canvas.delete(window)
         if selected_entry == "add action":
             tags = project_manager.canvas.gettags(self.state_id)
-            action_block_exists = False
             for tag in tags:
                 if tag.startswith("connection"):  # searching for "connection<n>_end"
-                    action_block_exists = True
-            if not action_block_exists:
-                project_manager.canvas.addtag_withtag(
-                    "connection" + str(state_action.StateAction.state_action_id) + "_end", self.state_id
-                )
-                line_tags = (
-                    "connection" + str(state_action.StateAction.state_action_id),
-                    "connected_to_" + project_manager.canvas.gettags(self.state_id)[0],
-                )
-                state_action_tags = (
-                    "state_action" + str(state_action.StateAction.state_action_id),
-                    "connection" + str(state_action.StateAction.state_action_id) + "_start",
-                )
-                middle_x, middle_y = self._calculate_center(project_manager.canvas.coords(self.state_id))
-                line_coords = [menu_x + 100, menu_y, middle_x, middle_y]
-                state_action.StateAction(
-                    menu_x + 100,
-                    menu_y,
-                    padding=1,
-                    tags=state_action_tags,
-                    line_coords=line_coords,
-                    line_tags=line_tags,
-                    increment=True,
-                    action="",
-                )
-                project_manager.undo_handling_ref.design_has_changed()
+                    return  # There is already a state action attached to this state.
+            state_action.StateAction.create(menu_x, menu_y, self.state_id)
+            project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "add comment":
             tags = project_manager.canvas.gettags(self.state_id)
             for tag in tags:

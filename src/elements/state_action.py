@@ -192,3 +192,30 @@ class StateAction:
         del custom_text.CustomText.read_variables_of_all_windows[self.text_id]
         del custom_text.CustomText.written_variables_of_all_windows[self.text_id]
         del StateAction.ref_dict[self.window_id]
+
+    @classmethod
+    def create(cls, menu_x, menu_y, state_id) -> None:
+        """Create a new state-action window at menu position with connection to the state."""
+        project_manager.canvas.addtag_withtag("connection" + str(cls.state_action_id) + "_end", state_id)
+        line_tags = (
+            "connection" + str(cls.state_action_id),
+            "connected_to_" + project_manager.canvas.gettags(state_id)[0],
+        )
+        state_action_tags = (
+            "state_action" + str(cls.state_action_id),
+            "connection" + str(cls.state_action_id) + "_start",
+        )
+        coords = project_manager.canvas.coords(state_id)
+        middle_x = (coords[0] + coords[2]) / 2
+        middle_y = (coords[1] + coords[3]) / 2
+        line_coords = [menu_x + 100, menu_y, middle_x, middle_y]
+        StateAction(
+            menu_x + 100,
+            menu_y,
+            padding=1,
+            tags=state_action_tags,
+            line_coords=line_coords,
+            line_tags=line_tags,
+            increment=True,
+            action="",
+        )
