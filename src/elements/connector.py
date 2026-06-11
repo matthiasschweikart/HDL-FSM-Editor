@@ -2,8 +2,8 @@
 Module handling connectors on the canvas.
 """
 
-import actions.canvas_editing as canvas_editing
 import constants
+from actions import canvas_editing
 from elements import transition
 from project_manager import project_manager
 
@@ -31,6 +31,7 @@ class ConnectorInstance:
             lambda event: project_manager.canvas.itemconfig(self.connector_id, width=1),
         )
         ConnectorInstance.ref_dict[self.connector_id] = self
+        ConnectorInstance.connector_number += 1
 
     def delete(self):
         """Remove connector from canvas and delete any transition it started or ended; update ref_dict."""
@@ -62,7 +63,6 @@ class ConnectorInstance:
             if "grid_line" not in project_manager.canvas.gettags(overlapping_item):
                 # Another item (different from a grid-line) is already at this position.
                 return
-        ConnectorInstance.connector_number += 1
         tag = "connector" + str(ConnectorInstance.connector_number)
         coords = (
             event_x - project_manager.state_radius / 4,
