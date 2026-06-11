@@ -127,7 +127,7 @@ class ResetEntry:
         reset_entry_polygon_coords = cls._move_reset_entry_polygon_to_event(
             canvas_grid_coordinates_of_the_event, reset_entry_polygon_coords
         )
-        cls(reset_entry_polygon_coords, tags=("reset_entry",))
+        ResetEntry(reset_entry_polygon_coords, tags=("reset_entry",))
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
 
