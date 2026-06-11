@@ -182,3 +182,24 @@ class StateComment:
         project_manager.canvas.delete(self.line_id)
         project_manager.canvas.dtag("all", "state" + comment_number + "_comment_line_end")
         del StateComment.ref_dict[self.window_id]
+
+    @classmethod
+    def create(cls, menu_x, menu_y, tags) -> None:
+        """Create a new state-comment window at menu position with connection to the state."""
+        for tag in tags:
+            if tag.startswith("state"):
+                state_coords = project_manager.canvas.coords(tag)
+                project_manager.canvas.addtag_withtag(tag + "_comment_line_end", tag)
+                StateComment(
+                    menu_x,
+                    menu_y,
+                    padding=1,
+                    tags=[tag + "_comment", tag + "_comment_line_start"],
+                    line_coords=[
+                        menu_x + 100,
+                        menu_y,
+                        (state_coords[2] + state_coords[0]) / 2,
+                        (state_coords[3] + state_coords[1]) / 2,
+                    ],
+                    comment="",
+                )

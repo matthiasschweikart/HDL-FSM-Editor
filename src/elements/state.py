@@ -145,25 +145,8 @@ class States:
             for tag in tags:
                 if tag.endswith("comment_line_end"):
                     return  # There is already a comment attached to this state.
-            state_coords = project_manager.canvas.coords(self.state_id)
-            for tag in tags:
-                if tag.startswith("state"):
-                    state_identifier = tag
-                    project_manager.canvas.addtag_withtag(state_identifier + "_comment_line_end", state_identifier)
-                    state_comment.StateComment(
-                        menu_x,
-                        menu_y,
-                        padding=1,
-                        tags=[state_identifier + "_comment", state_identifier + "_comment_line_start"],
-                        line_coords=[
-                            menu_x + 100,
-                            menu_y,
-                            (state_coords[2] + state_coords[0]) / 2,
-                            (state_coords[3] + state_coords[1]) / 2,
-                        ],
-                        comment="",
-                    )
-                    project_manager.undo_handling_ref.design_has_changed()
+            state_comment.StateComment.create(menu_x, menu_y, tags)
+            project_manager.undo_handling_ref.design_has_changed()
         elif selected_entry == "change color":
             new_color = ColorChanger(constants.STATE_COLOR).ask_color()
             project_manager.canvas.itemconfigure(self.state_id, fill=new_color)
