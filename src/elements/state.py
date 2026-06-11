@@ -5,11 +5,8 @@ Module handling states on the canvas.
 import tkinter as tk
 from tkinter import messagebox
 
-import actions.canvas_delete as canvas_delete
-import actions.canvas_editing as canvas_editing
-import actions.move_handling_canvas_item as move_handling_canvas_item
-import actions.move_handling_initialization as move_handling_initialization
 import constants
+from actions import canvas_delete, canvas_editing, move_handling_canvas_item, move_handling_initialization
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
