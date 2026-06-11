@@ -29,10 +29,7 @@ class ConditionAction:
         action,
         line_coords,
         line_tags,
-        increment,
     ) -> None:
-        if increment is True:
-            ConditionAction.conditionaction_id += 1
         self.difference_x = 0
         self.difference_y = 0
         self.action_text = action  # Stores the text without a trailing "return"
@@ -150,6 +147,7 @@ class ConditionAction:
 
         # Create dictionary for translating the canvas-id of the canvas-window into a reference to this object:
         ConditionAction.ref_dict[self.window_id] = self
+        ConditionAction.conditionaction_id += 1
 
     def _zoom_by_wheel(self, event, canvas_id) -> None:
         window_coords = project_manager.canvas.coords(self.window_id)
@@ -287,20 +285,18 @@ class ConditionAction:
         """Create a new condition-action window at menu position with connection to the transition."""
         transition_coords = project_manager.canvas.coords(transition_id)
         line_coords = [menu_x, menu_y, transition_coords[0], transition_coords[1]]
-        # Incrementing of conditionaction_id is needed, as in old versions of HFE first conditionaction_id was
-        # incremented and afterwards the tags were created by reading this new value:
         project_manager.canvas.addtag_withtag(
-            "ca_connection" + str(ConditionAction.conditionaction_id + 1) + "_end", transition_id
+            "ca_connection" + str(ConditionAction.conditionaction_id) + "_end", transition_id
         )
         tags = [
-            "condition_action" + str(ConditionAction.conditionaction_id + 1),
-            "ca_connection" + str(ConditionAction.conditionaction_id + 1) + "_anchor",
+            "condition_action" + str(ConditionAction.conditionaction_id),
+            "ca_connection" + str(ConditionAction.conditionaction_id) + "_anchor",
         ]
         if connected_to_reset_entry:
             tags.append("connected_to_reset_transition")
         transition_tags = project_manager.canvas.gettags(transition_id)
         line_tags = [
-            "ca_connection" + str(ConditionAction.conditionaction_id + 1),
+            "ca_connection" + str(ConditionAction.conditionaction_id),
             "connected_to_" + transition_tags[0],
         ]
         condition_action_ref = ConditionAction(
@@ -313,6 +309,5 @@ class ConditionAction:
             action="",
             line_coords=line_coords,
             line_tags=line_tags,
-            increment=True,
         )
         condition_action_ref.condition_id.focus()  # Puts the text input cursor into the text box.

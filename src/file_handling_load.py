@@ -338,7 +338,6 @@ def _load_condition_action_blocks(
                     action=action,
                     line_coords=line_coords,
                     line_tags=line_tags,
-                    increment=False,
                 )
                 break
 
