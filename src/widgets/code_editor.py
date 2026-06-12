@@ -7,6 +7,7 @@ Extensions to the standard tkinter.Text widget for code editing.
 - Indent/unindent (Ctrl+], Ctrl+[ and Shift+Tab)
 """
 
+import platform
 import re
 import tkinter as tk
 from typing import Any, Callable
@@ -43,9 +44,15 @@ class CodeEditor(tk.Text):
         # Whole word deletion
         self.bind("<Control-BackSpace>", lambda event: self.delete_word_backward())
         self.bind("<Control-Delete>", lambda event: self.delete_word_forward())
-        # Indent/unindent
+        # Indent/unindent (works only under Linux)
         self.bind("<Control-bracketleft>", lambda event: self.unindent_selection())
         self.bind("<Control-bracketright>", lambda event: self.indent_selection())
+        # Indent/unindent
+        self.bind("<Tab>", lambda event: self.indent_selection())
+        if platform.system() == "Windows":
+            self.bind("<Shift-Tab>", lambda event: self.unindent_selection())
+        else:
+            self.bind("<ISO_Left_Tab>", lambda event: self.unindent_selection())
         # Pos1/Home
         self.bind("<Home>", lambda event: self._move_to_line_start())
 
