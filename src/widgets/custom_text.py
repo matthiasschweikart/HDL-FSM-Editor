@@ -3,7 +3,6 @@ The code was copied and extended from https://stackoverflow.com/questions/406175
 """
 
 import os
-import platform
 import re
 import shlex
 import subprocess
@@ -95,11 +94,6 @@ class CustomText(CodeEditor):
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
-        self.bind("<Tab>", lambda event: self.indent_selection())
-        if platform.system() == "Windows":
-            self.bind("<Shift-Tab>", lambda event: self.unindent_selection())
-        else:
-            self.bind("<ISO_Left_Tab>", lambda event: self.unindent_selection())
         # Overwrites the default control-o = "insert a new line", needed for opening a new file:
         self.bind("<Control-o>", lambda event: self._open())
         # After pressing a key 2 things happen:
