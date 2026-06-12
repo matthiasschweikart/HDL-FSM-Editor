@@ -46,6 +46,24 @@ class CodeEditor(tk.Text):
         # Indent/unindent
         self.bind("<Control-bracketleft>", lambda event: self.unindent_selection())
         self.bind("<Control-bracketright>", lambda event: self.indent_selection())
+        # Pos1/Home
+        self.bind("<Home>", lambda event: self._move_to_line_start())
+
+    def _move_to_line_start(self) -> str:
+        """Move cursor to the first non-blank character of the line, or to the absolute line start if already there."""
+        line_start_index = self.index("insert linestart")
+        line_text = self.get(line_start_index, f"{line_start_index} lineend")
+        first_non_blank_index = re.search(r"\S", line_text)
+        if first_non_blank_index:
+            target_index = f"{line_start_index} + {first_non_blank_index.start()} chars"
+            if self.index(tk.INSERT) == self.index(target_index):  # Cursor is already at the first non-blank character
+                target_index = line_start_index  # Move to line start
+        else:  # The line is empty or consists of blanks only
+            target_index = line_start_index
+        self.mark_set(tk.INSERT, target_index)  # set the insertion marker to the target index.
+        self.tag_remove(tk.SEL, "1.0", tk.END)  # Remove any existing selection.
+        self.mark_set(tk.ANCHOR, target_index)  # Set the selection anchor (for shift-click extension) to the target.
+        return "break"
 
     def _copy(self) -> str | None:
         self.paste_always_at_line_begin = False

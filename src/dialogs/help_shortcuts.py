@@ -37,5 +37,7 @@ class ShortCutsDialog:
 22. Tab with selection spanning multiple lines indents all selected lines (independent from start and end selection).
 23. Shift-Tab unindents the selection or the current line.
 24. The Home-Button zooms the diagram to show the entire design (same as "view all").
+25. The Home-Button inside a text editor moves the insertion cursor to the first non-blank character of the line,\
+ or to the beginning of the line if already there.
 """
         text_dialog.TextDialog("Keyboard Shortcuts for text editing", content, "1000x420")
