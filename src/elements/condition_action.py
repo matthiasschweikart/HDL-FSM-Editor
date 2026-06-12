@@ -314,4 +314,4 @@ class ConditionAction:
             line_coords=line_coords,
             line_tags=line_tags,
         )
-        condition_action_ref.condition_id.focus()  # Puts the text input cursor into the text box.
+        condition_action_ref.condition_id.focus_set()  # Puts the text input cursor into the text box.

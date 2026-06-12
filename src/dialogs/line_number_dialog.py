@@ -25,7 +25,7 @@ class LineNumberDialog:
 
         line_number = tk.IntVar()
         self.line_number_entry = ttk.Entry(frame1, textvariable=line_number, width=10)
-        self.line_number_entry.focus()
+        self.line_number_entry.focus_set()
         self.line_number_entry.grid(row=0, column=1, pady=5)
         frame1.columnconfigure(0, weight=1)
         frame1.columnconfigure(2, weight=1)
