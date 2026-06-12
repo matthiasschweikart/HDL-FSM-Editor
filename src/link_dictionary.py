@@ -123,7 +123,7 @@ class LinkDictionary:
             if path_file_name_architecture and path_selected_file == path_file_name_architecture:
                 file_line_number += hdl_generation.HdlGeneration.last_line_number_of_file1
         project_manager.notebook.show_tab(GuiTab.GENERATED_HDL)
-        project_manager.notebook.update()  # Ensure the HDL tab is rendered before trying to highlight
+        project_manager.notebook.update_idletasks()  # Ensure the HDL tab is rendered before trying to highlight
         project_manager.tab_hdl_ref.hdl_frame_text.highlight_item("", "", file_line_number)
         project_manager.tab_hdl_ref.hdl_frame_text.config(state="normal")
         project_manager.tab_hdl_ref.hdl_frame_text.focus_set()
