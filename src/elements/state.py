@@ -295,6 +295,10 @@ class States:
             event_x + project_manager.state_radius,
             event_y + project_manager.state_radius,
         ]
+        while project_manager.canvas.find_withtag("state" + str(States.state_number)):
+            # Increase until an unused number is found.
+            # This number conflict may happen, if the design was created with an old version of HFE.
+            States.state_number += 1
         States(
             coords,
             tags=["state" + str(States.state_number)],

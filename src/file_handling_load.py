@@ -33,6 +33,7 @@ def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
     _load_internals_data(design_dictionary)
     _load_canvas_data(design_dictionary)
     _load_canvas_elements(design_dictionary)
+    _load_canvas_ids(design_dictionary)  # must be done after changing the IDs by _load_canvas_elements().
     _load_log_config(design_dictionary)
     custom_text.CustomText.update_highlight_tags_in_all_texts()
 
@@ -91,13 +92,6 @@ def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.diagram_background_color.set(design_dictionary.get("diagram_background_color", "white"))
     project_manager.canvas.configure(bg=project_manager.diagram_background_color.get())
 
-    # Load canvas editing parameters
-    state.States.state_number = design_dictionary["state_number"]
-    transition.TransitionLine.transition_number = design_dictionary["transition_number"]
-    connector.ConnectorInstance.connector_number = design_dictionary["connector_number"]
-    condition_action.ConditionAction.conditionaction_id = design_dictionary["conditionaction_id"]
-    state_action.StateAction.state_action_id = design_dictionary["mytext_id"]
-
     # Load canvas visual parameters
     project_manager.state_radius = design_dictionary["state_radius"]
     project_manager.reset_entry_size = int(design_dictionary["reset_entry_size"])  # stored as float in dictionary
@@ -105,6 +99,15 @@ def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.fontsize = design_dictionary["fontsize"]
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
     project_manager.label_fontsize = design_dictionary["label_fontsize"]
+
+
+def _load_canvas_ids(design_dictionary: dict[str, Any]) -> None:
+    """Load IDs for all elements."""
+    state.States.state_number = design_dictionary["state_number"]
+    transition.TransitionLine.transition_number = design_dictionary["transition_number"]
+    connector.ConnectorInstance.connector_number = design_dictionary["connector_number"]
+    condition_action.ConditionAction.conditionaction_id = design_dictionary["conditionaction_id"]
+    state_action.StateAction.state_action_id = design_dictionary["mytext_id"]
 
 
 def _load_canvas_elements(design_dict: dict[str, Any]) -> None:

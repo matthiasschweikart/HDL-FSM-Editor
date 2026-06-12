@@ -195,6 +195,10 @@ class StateAction:
     def create(cls, menu_x, menu_y, state_id) -> None:
         """Create a new state-action window at menu position with connection to the state."""
         project_manager.canvas.addtag_withtag("connection" + str(cls.state_action_id) + "_end", state_id)
+        while project_manager.canvas.find_withtag("state_action" + str(cls.state_action_id)):
+            # Increase until an unused number is found.
+            # This number conflict may happen, if the design was created with an old version of HFE.
+            cls.state_action_id += 1
         line_tags = (
             "connection" + str(cls.state_action_id),
             "connected_to_" + project_manager.canvas.gettags(state_id)[0],

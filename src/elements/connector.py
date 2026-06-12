@@ -63,6 +63,10 @@ class ConnectorInstance:
             if "grid_line" not in project_manager.canvas.gettags(overlapping_item):
                 # Another item (different from a grid-line) is already at this position.
                 return
+        while project_manager.canvas.find_withtag("connector" + str(ConnectorInstance.connector_number)):
+            # Increase until an unused number is found.
+            # This number conflict may happen, if the design was created with an old version of HFE.
+            ConnectorInstance.connector_number += 1
         tag = "connector" + str(ConnectorInstance.connector_number)
         coords = (
             event_x - project_manager.state_radius / 4,

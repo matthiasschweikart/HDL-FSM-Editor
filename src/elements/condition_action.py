@@ -285,6 +285,10 @@ class ConditionAction:
         """Create a new condition-action window at menu position with connection to the transition."""
         transition_coords = project_manager.canvas.coords(transition_id)
         line_coords = [menu_x, menu_y, transition_coords[0], transition_coords[1]]
+        while project_manager.canvas.find_withtag("condition_action" + str(ConditionAction.conditionaction_id)):
+            # Increase until an unused number is found.
+            # This number conflict may happen, if the design was created with an old version of HFE.
+            ConditionAction.conditionaction_id += 1
         project_manager.canvas.addtag_withtag(
             "ca_connection" + str(ConditionAction.conditionaction_id) + "_end", transition_id
         )

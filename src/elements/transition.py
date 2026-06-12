@@ -697,7 +697,7 @@ class TransitionLine:
                     project_manager.root.bind_all(
                         "<Escape>",
                         lambda event, transition_id=transition_id, transition_draw_funcid=transition_draw_funcid: (
-                            cls._end_inserting_transition(transition_id, transition_draw_funcid)
+                            cls._finish_inserting_transition(transition_id, transition_draw_funcid)
                         ),
                     )
 
@@ -764,6 +764,10 @@ class TransitionLine:
             # The transition point is not accepted.
             return
         else:
+            while project_manager.canvas.find_withtag("transition" + str(TransitionLine.transition_number)):
+                # Increase until an unused number is found.
+                # This number conflict may happen, if the design was created with an old version of HFE.
+                TransitionLine.transition_number += 1
             project_manager.canvas.addtag_withtag(  # Add tag to start object
                 "transition" + str(TransitionLine.transition_number) + "_start",
                 start_state_canvas_id,
@@ -790,13 +794,13 @@ class TransitionLine:
             )
             priority_dict = TransitionLine.determine_priorities_of_outgoing_transitions(start_state_canvas_id)
             unused_priority = cls._get_unused_priority(priority_dict)
-            cls._end_inserting_transition(transition_id, transition_draw_funcid)
+            cls._finish_inserting_transition(transition_id, transition_draw_funcid)
             TransitionLine(transition_coords, tags, unused_priority)
             TransitionLine.hide_priority_of_single_outgoing_transitions()
             project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
-    def _end_inserting_transition(cls, transition_id, transition_draw_funcid) -> None:
+    def _finish_inserting_transition(cls, transition_id, transition_draw_funcid) -> None:
         project_manager.canvas.delete(transition_id)
         # Restore bindings:
         project_manager.canvas.unbind("<Motion>", transition_draw_funcid)
