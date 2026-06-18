@@ -96,6 +96,7 @@ class CodeEditor(tk.Text):
         sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
         if not sel_ranges and self.paste_always_at_line_begin:
             self._paste_complete_line()
+            self.format_after_idle(None)
             return "break"
         self.format_after_idle(None)  # Trigger formatting after default paste action (which may be line-wise or not)
 
@@ -116,7 +117,6 @@ class CodeEditor(tk.Text):
     def _paste_complete_line(self) -> None:
         line_start = self.index("insert linestart")
         self.insert(line_start, self.clipboard_get())
-        self.format_after_idle(None)
 
     def format_after_idle(self, event) -> None:
         """Override in subclass to trigger formatting after indent/unindent. No-op by default."""
