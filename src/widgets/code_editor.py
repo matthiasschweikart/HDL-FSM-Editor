@@ -80,11 +80,17 @@ class CodeEditor(tk.Text):
             return "break"
 
     def _cut(self) -> str | None:
+        # Called by CTRL-x with or without selection.
         sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
         if not sel_ranges:
             self._cut_complete_line()
-            return "break"
-        self.format_after_idle(None)  # Trigger formatting after default paste action (which may be line-wise or not)
+            self.format_after_idle(None)
+            return "break"  # Nothing else todo
+        self.format_after_idle(None)
+        # format_after_idle() is needed here also, because custom_text cuts the selected part
+        # with Ctrl-x as expected, but custom_text is only triggered by "Ctrl" (and ignores
+        # the following "x") and misses the text change.
+        return  # pass ctrl-x to default handler for cutting the selection
 
     def _paste(self) -> str | None:
         sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)
@@ -106,7 +112,6 @@ class CodeEditor(tk.Text):
         line_start, line_end = self._copy_complete_line()
         # Delete also the possible newline character at the end of the line, regardless of whether it exists.
         self.delete(line_start, line_end + "+1c")
-        self.format_after_idle(None)
 
     def _paste_complete_line(self) -> None:
         line_start = self.index("insert linestart")
