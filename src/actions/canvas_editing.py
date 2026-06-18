@@ -91,7 +91,7 @@ def _adapt_scroll_region(factor) -> None:
 
 
 def _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor):
-    fontsize_rounded_down = int(project_manager.fontsize * zoom_factor)
+    fontsize_rounded_down = round(project_manager.fontsize * zoom_factor)
     if zoom_factor > 1 and fontsize_rounded_down == project_manager.fontsize:
         fontsize_rounded_down += 1
     return fontsize_rounded_down / project_manager.fontsize
