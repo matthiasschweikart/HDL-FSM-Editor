@@ -10,7 +10,8 @@ Extensions to the standard tkinter.Text widget for code editing.
 import platform
 import re
 import tkinter as tk
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 class CodeEditor(tk.Text):
@@ -78,6 +79,7 @@ class CodeEditor(tk.Text):
         if not sel_ranges:
             self._copy_complete_line()
             return "break"
+        return  # pass ctrl-c to default handler for copying the selection
 
     def _cut(self) -> str | None:
         # Called by CTRL-x with or without selection.
@@ -99,6 +101,7 @@ class CodeEditor(tk.Text):
             self.format_after_idle(None)
             return "break"
         self.format_after_idle(None)  # Trigger formatting after default paste action (which may be line-wise or not)
+        return  # pass ctrl-v to default handler for pasting the selection
 
     def _copy_complete_line(self) -> None:
         self.paste_always_at_line_begin = True
@@ -127,7 +130,10 @@ class CodeEditor(tk.Text):
         direction: "left" or "right".
         """
         sel_ranges: tuple[str, ...] = self.tag_ranges(tk.SEL)  # type: ignore[assignment]
-        anchor_pos = self.index(tk.ANCHOR)
+        try:
+            anchor_pos = self.index(tk.ANCHOR)
+        except tk.TclError:
+            self.mark_set(tk.ANCHOR, tk.INSERT)
         cursor_pos = self.index(tk.INSERT)
         if not sel_ranges:
             self.mark_set(tk.ANCHOR, cursor_pos)
@@ -267,7 +273,6 @@ class CodeEditor(tk.Text):
             end_line = start_line
         for line_num in range(start_line, end_line + 1):
             line_action(line_num)
-        self.format_after_idle(None)
 
     def indent_selection(self) -> str:
         """Indents the line or all lines in the selection by inserting 4 blanks at the beginning of each line."""
@@ -286,12 +291,15 @@ class CodeEditor(tk.Text):
             if self._part_of_line_is_selected(sel_start_line, sel_start_column, sel_end_line, sel_end_column):
                 self.delete(sel_start_line + "." + sel_start_column, sel_start_line + "." + sel_end_column)
                 self._insert_blanks_until_next_indent_level(sel_start_column)
+                self.format_after_idle(None)
                 return "break"
         elif insert_column != "0":
             self._insert_blanks_until_next_indent_level(insert_column)
+            self.format_after_idle(None)
             return "break"
         # One or several lines are selected, or the cursor is at the beginning of a line:
         self._apply_indent_action(_indent_line)
+        self.format_after_idle(None)
         return "break"
 
     def _insert_blanks_until_next_indent_level(self, column):
@@ -326,6 +334,7 @@ class CodeEditor(tk.Text):
 
         if self._unindent_selection_is_allowed():
             self._apply_indent_action(_unindent_line)
+            self.format_after_idle(None)
         return "break"
 
     def _unindent_selection_is_allowed(self) -> bool:
