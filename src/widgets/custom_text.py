@@ -90,6 +90,7 @@ class CustomText(CodeEditor):
         # text_type is in:
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         self.update_highlight_after_id = None
+        self.overwrite = None
         # create a proxy for the underlying widget
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, self._orig)
@@ -103,6 +104,7 @@ class CustomText(CodeEditor):
         # so it must be delayed until the character was inserted:
         self.bind("<Key>", self.format_after_idle)
         self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))
+        self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
         self.readable_ports_list = []
@@ -130,6 +132,10 @@ class CustomText(CodeEditor):
             return result
         except Exception:  # pylint: disable=broad-except
             return None
+
+    def _toggle_overwrite(self):
+        self.overwrite = not self.overwrite
+        return "break"
 
     def edit_in_external_editor(self) -> None:
         """Open current text in external editor (blocking), then replace content with edited result."""
@@ -159,9 +165,16 @@ class CustomText(CodeEditor):
         # Prevent the formatting of log text, which can be very long and may contain keywords by accident (which
         # shall not be highlighted) and can not be changed by key-presses:
         if self.text_type not in ("generated", "log"):
+            self._delete_character_if_overwrite_mode(event)
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
             self.format_after_id = self.after(200, self.format, event)
+
+    def _delete_character_if_overwrite_mode(self, event):
+        if self.overwrite and event.keysym not in ("BackSpace", "Delete", "Control_L", "Control_R"):
+            cursor_index = self.index(tk.INSERT)
+            if self.get(cursor_index) != "\n" and self.compare(cursor_index, "<", tk.END):
+                self.delete(cursor_index)
 
     def format(self, event) -> None:
         """Update text box size and highlighting."""
