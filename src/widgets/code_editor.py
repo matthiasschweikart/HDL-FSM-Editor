@@ -279,7 +279,8 @@ class CodeEditor(tk.Text):
 
         def _indent_line(line_num: int) -> None:
             line_start_index, number_of_leading_blanks = self._get_number_of_leading_blanks(line_num)
-            spaces_to_add = 4 - number_of_leading_blanks if (number_of_leading_blanks % 4 != 0) else 4
+            number_of_leading_blanks = number_of_leading_blanks % 4  # reduce by multiples of 4
+            spaces_to_add = 4 - number_of_leading_blanks if (number_of_leading_blanks != 0) else 4
             # The new characters shall be selected if the line is already selected:
             tags = (tk.SEL) if tk.SEL in self.tag_names(line_start_index) else ()
             self.insert(line_start_index, " " * spaces_to_add, tags)
