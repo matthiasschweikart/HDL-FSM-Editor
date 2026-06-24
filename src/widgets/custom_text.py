@@ -97,13 +97,8 @@ class CustomText(CodeEditor):
         self.tk.createcommand(self._w, self._proxy)
         # Overwrites the default control-o = "insert a new line", needed for opening a new file:
         self.bind("<Control-o>", lambda event: self._open())
-        # After pressing a key 2 things happen:
-        # 1. The new character is inserted in the text.
-        # 2. format() is started
-        # But as inserting the character takes a while, format() will still find the old text,
-        # so it must be delayed until the character was inserted:
         self.bind("<Key>", self.format_after_idle)
-        self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))
+        self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))  # Tag is created by links in HDL/log-tab
         self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
@@ -118,11 +113,6 @@ class CustomText(CodeEditor):
         self.tag_config("message_green", foreground="green")
         self.format_after_id = None
 
-    def _open(self) -> str:
-        file_handling.open_file()
-        # Prevent a second call of open_file() by bind_all binding (which is located in entry 4 of the bind-list):
-        return "break"
-
     def _proxy(self, command, *args) -> None:
         cmd = (self._orig, command) + args
         try:
@@ -132,6 +122,11 @@ class CustomText(CodeEditor):
             return result
         except Exception:  # pylint: disable=broad-except
             return None
+
+    def _open(self) -> str:
+        file_handling.open_file()
+        # Prevent a second call of open_file() by bind_all binding (which is located in entry 4 of the bind-list):
+        return "break"
 
     def _toggle_overwrite(self):
         self.overwrite = not self.overwrite
@@ -171,7 +166,11 @@ class CustomText(CodeEditor):
             self.format_after_id = self.after(200, self.format, event)
 
     def _delete_character_if_overwrite_mode(self, event):
-        if self.overwrite and event.keysym not in ("BackSpace", "Delete", "Control_L", "Control_R"):
+        if (
+            self.overwrite
+            and event is not None
+            and event.keysym not in ("BackSpace", "Delete", "Control_L", "Control_R")
+        ):
             cursor_index = self.index(tk.INSERT)
             if self.get(cursor_index) != "\n" and self.compare(cursor_index, "<", tk.END):
                 self.delete(cursor_index)
