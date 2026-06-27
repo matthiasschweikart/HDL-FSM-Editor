@@ -248,7 +248,7 @@ class CustomText(CodeEditor):
             self.config(width=max_line_length)
             self.config(height=nr_of_lines)
 
-    def update_highlight_tags(self, fontsize) -> None:
+    def update_highlight_tags(self) -> None:
         """
         Updates only in this text. Called when text is changed by:
         - format()
@@ -261,22 +261,12 @@ class CustomText(CodeEditor):
         """
         # highlight_tag_name: "control", "datatype", "function", "not_read", "not_written", "comment"]
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
-            self.tag_delete(highlight_tag_name)
+            self.tag_remove(highlight_tag_name, "1.0", tk.END)  # Remove all previous tags of this type.
             for highlight_search_pattern in project_manager.highlight_dict_ref.highlight_pattern_dict[
                 highlight_tag_name
             ]:
                 if self.text_type != "comment":  # State comment text
                     self._add_highlight_tag_for_single_pattern(highlight_tag_name, highlight_search_pattern)
-            self._tag_configure_highlight_tag(highlight_tag_name, fontsize)
-
-    def _tag_configure_highlight_tag(self, highlight_tag_name, fontsize) -> None:
-        if self.text_type not in ("condition", "action", "comment"):
-            fontsize = 10  # Fixed fontsize for declaration text boxes.
-        self.tag_configure(
-            highlight_tag_name,
-            foreground=config.HIGHLIGHT_COLORS[highlight_tag_name],
-            font=("Courier", int(fontsize), "normal"),
-        )  # int() is necessary, because fontsize can be a "real" number.
 
     def _add_highlight_tag_for_single_pattern(self, highlight_tag_name, highlight_search_pattern) -> None:
         copy_of_text = self.get("1.0", tk.END + "- 1 chars")
@@ -895,16 +885,16 @@ class CustomText(CodeEditor):
         """Update the highlight tags for not_read, not_written, control, datatype, function, and comment."""
         project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in CustomText.read_variables_of_all_windows:
-            text_ref.update_highlight_tags(project_manager.fontsize)
+            text_ref.update_highlight_tags()
         for text_ref in cls.declaration_text_widgets():
-            text_ref.update_highlight_tags(10)
+            text_ref.update_highlight_tags()
 
     @classmethod
     def refresh_highlighting_in_all_declaration_widgets(cls) -> None:
         """Reapply syntax highlighting in all declaration widgets (e.g. after language change)."""
         project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in cls.declaration_text_widgets():
-            text_ref.update_highlight_tags(10)
+            text_ref.update_highlight_tags()
 
     @classmethod
     def declaration_text_widgets(cls) -> list:
