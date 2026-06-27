@@ -27,7 +27,9 @@ class TabLog:
         log_frame.columnconfigure(1, weight=0)  # Column for scrollbar
 
         log_frame_button_frame = ttk.Frame(log_frame)
-        self.log_frame_text = custom_text.CustomText(log_frame, text_type="log", undo=False, wrap=tk.WORD)
+        self.log_frame_text = custom_text.CustomText(
+            log_frame, text_type="log", undo=False, wrap=tk.WORD, font=("Courier", 10)
+        )
         self.log_frame_text.config(state=tk.DISABLED)
         log_frame_text_scroll = ttk.Scrollbar(
             log_frame, orient=tk.VERTICAL, cursor="arrow", command=self.log_frame_text.yview

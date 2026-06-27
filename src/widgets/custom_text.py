@@ -109,8 +109,7 @@ class CustomText(CodeEditor):
         self.function_names_list = []
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
-        self.tag_config("message_red", foreground="red")
-        self.tag_config("message_green", foreground="green")
+        self._define_text_tags(kwargs.get("font"))
         self.format_after_id = None
 
     def _proxy(self, command, *args) -> None:
@@ -131,6 +130,25 @@ class CustomText(CodeEditor):
     def _toggle_overwrite(self):
         self.overwrite = not self.overwrite
         return "break"
+
+    def _define_text_tags(self, font):
+        self.tag_configure("message_red", foreground="red")
+        self.tag_configure("message_green", foreground="green")
+        self.tag_configure("highlight", background="orange")
+        self._provide_hdl_text_tags_for_this_font(*font)
+
+    def _provide_hdl_text_tags_for_this_font(self, fontname, fontsize):
+        """Prepare syntax highlighting format tags for custom_text."""
+        for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
+            self.tag_configure(
+                highlight_tag_name,
+                foreground=config.HIGHLIGHT_COLORS[highlight_tag_name],
+                font=(
+                    fontname,
+                    fontsize,
+                    "normal",
+                ),
+            )
 
     def edit_in_external_editor(self) -> None:
         """Open current text in external editor (blocking), then replace content with edited result."""
@@ -163,7 +181,7 @@ class CustomText(CodeEditor):
             self._delete_character_if_overwrite_mode(event)
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
-            self.format_after_id = self.after(200, self.format, event)
+            self.format_after_id = self.after_idle(self.format, event)
 
     def _delete_character_if_overwrite_mode(self, event):
         if (
@@ -186,10 +204,14 @@ class CustomText(CodeEditor):
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
         self._update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows()
-        self.update_highlight_tags_in_all_texts()
-        if event is not None and event.keysym == "BackSpace":
-            # In order to keep the mouse-pointer inside the shrinking window:
-            self._move_mouse_to_insert_cursor()
+        if event is not None:
+            # event is None when format() is called from __init__, which happens when the design is load from a file.
+            # In this case update_highlight_tags_in_all_texts() is called from file_handling_load.py and must not
+            # be called here from each text widget.
+            self.update_highlight_tags_in_all_texts()
+            if event.keysym == "BackSpace":
+                # In order to keep the mouse-pointer inside the shrinking window:
+                self._move_mouse_to_insert_cursor()
 
     def _move_mouse_to_insert_cursor(self) -> None:
         bbox_char = self.bbox("insert")
@@ -240,13 +262,12 @@ class CustomText(CodeEditor):
         # highlight_tag_name: "control", "datatype", "function", "not_read", "not_written", "comment"]
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_delete(highlight_tag_name)
-            self._tag_add_highlight_tag(highlight_tag_name)
+            for highlight_search_pattern in project_manager.highlight_dict_ref.highlight_pattern_dict[
+                highlight_tag_name
+            ]:
+                if self.text_type != "comment":  # State comment text
+                    self._add_highlight_tag_for_single_pattern(highlight_tag_name, highlight_search_pattern)
             self._tag_configure_highlight_tag(highlight_tag_name, fontsize)
-
-    def _tag_add_highlight_tag(self, highlight_tag_name) -> None:
-        for highlight_search_pattern in project_manager.highlight_dict_ref.highlight_pattern_dict[highlight_tag_name]:
-            if self.text_type != "comment":  # State comment text
-                self._add_highlight_tag_for_single_pattern(highlight_tag_name, highlight_search_pattern)
 
     def _tag_configure_highlight_tag(self, highlight_tag_name, fontsize) -> None:
         if self.text_type not in ("condition", "action", "comment"):
