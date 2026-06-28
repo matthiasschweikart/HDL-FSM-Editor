@@ -429,17 +429,11 @@ class CustomText(CodeEditor):
     def _fill_function_names_list(self):
         self.function_names_list = []
         copy_of_text = self.get("1.0", tk.END + "- 1 chars")
-        while True:
-            match = FUNCTION_DECL_RE.search(copy_of_text)
-            if match:
-                if match.start() == match.end():
-                    break
-                function_name = match.group(0).split()[1]
-                if function_name not in self.function_names_list:
-                    self.function_names_list.append(function_name)
-                copy_of_text = re.sub(match.group(0), "", copy_of_text)
-            else:
-                break
+        match_objects = FUNCTION_DECL_RE.finditer(copy_of_text)
+        for match_object in match_objects:
+            function_name = match_object.group(0).split()[1]
+            if function_name not in self.function_names_list:
+                self.function_names_list.append(function_name)
 
     def _remove_vhdl_attributes(self, text):
         search_for_attributes = r"\w+\s+'\s+\w+"  # remove signal-name and attribute; example: "addr ' range"
