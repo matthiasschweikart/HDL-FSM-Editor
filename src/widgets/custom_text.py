@@ -292,10 +292,11 @@ class CustomText(CodeEditor):
                     "1.0 + " + str(match_object.end()) + " chars",
                 )
             else:
-                # The keyword might be some strange character, when the user stumbles of the keyboard.
+                # The highlight_search_pattern might be some strange character, if constants.py
+                # contains a value that is not a senseful regular expression.
                 # Normally this does not cause any problems, because no match_object will be created.
-                # If a match object is created, it is important that the match is removed from the text.
-                # For example for the keyword '.' the match is not removed.
+                # But if a match object is created, it is important that this match is removed from the text.
+                # For example for the highlight_search_pattern '.' the match is not removed.
                 # So a check was inserted which checks if the text has been modified here.
                 search_string = (
                     "([^a-zA-Z0-9_]|^)" + highlight_search_pattern + "([^a-zA-Z0-9_]|$)"
