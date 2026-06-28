@@ -273,68 +273,39 @@ class CustomText(CodeEditor):
         if copy_of_text == "":
             return
         copy_of_text = self._replace_strings_and_attributes_by_blanks(copy_of_text)
-        while True:
-            if highlight_tag_name == "comment":
-                match_object = re.search(
-                    highlight_search_pattern, copy_of_text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL
-                )
-                if not match_object:
-                    break
-                if match_object.start() == match_object.end():
-                    break
-                replace_string = " " * (match_object.end() - match_object.start())
-                copy_of_text = (
-                    copy_of_text[: match_object.start()] + replace_string + copy_of_text[match_object.end() :]
-                )
-                self.tag_add(
-                    "comment",
-                    "1.0 + " + str(match_object.start()) + " chars",
-                    "1.0 + " + str(match_object.end()) + " chars",
-                )
-            else:
-                # The highlight_search_pattern might be some strange character, if constants.py
-                # contains a value that is not a senseful regular expression.
-                # Normally this does not cause any problems, because no match_object will be created.
-                # But if a match object is created, it is important that this match is removed from the text.
-                # For example for the highlight_search_pattern '.' the match is not removed.
-                # So a check was inserted which checks if the text has been modified here.
-                search_string = (
-                    "([^a-zA-Z0-9_]|^)" + highlight_search_pattern + "([^a-zA-Z0-9_]|$)"
-                )  # Prevent a hit, when the keyword is part of another word.
-                try:
-                    match_object = re.search(search_string, copy_of_text, flags=re.IGNORECASE)
-                except re.error:
-                    # Happens i.e. if search_string contains "**".
-                    match_object = None
-                if not match_object:
-                    break
-                match_start, match_end = self._remove_surrounding_characters_from_the_match(
-                    match_object, highlight_search_pattern
-                )
-                old_text = copy_of_text
-                copy_of_text = (
-                    copy_of_text[:match_start] + " " * len(highlight_search_pattern) + copy_of_text[match_end:]
-                )
-                if copy_of_text == old_text:
-                    break
-                self.tag_add(
-                    highlight_tag_name, "1.0 + " + str(match_start) + " chars", "1.0 + " + str(match_end) + " chars"
-                )
+        if highlight_tag_name == "comment":
+            pattern = highlight_search_pattern
+            group_index = 0
+        else:
+            # Prevent a hit, when the keyword is part of another word:
+            pattern = r"([^a-zA-Z0-9_]|^)(" + highlight_search_pattern + r")([^a-zA-Z0-9_]|$)"
+            group_index = 2
+        match_objects = re.finditer(pattern, copy_of_text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
+        for match_object in match_objects:
+            self.tag_add(
+                highlight_tag_name,
+                "1.0 + " + str(match_object.start(group_index)) + " chars",
+                "1.0 + " + str(match_object.end(group_index)) + " chars",
+            )
 
     def _replace_strings_and_attributes_by_blanks(self, copy_of_text):
         """Replace string literals and VHDL attributes in text with spaces for safe regex search."""
-        for search_string in ["'image", "'length", '".*?"', "'.*?'"]:
-            while True:
-                match_object = re.search(search_string, copy_of_text, flags=re.IGNORECASE)
-                if match_object:
-                    if match_object.start() == match_object.end():
-                        break
-                    replace_string = " " * (match_object.end() - match_object.start())
-                    copy_of_text = (
-                        copy_of_text[: match_object.start()] + replace_string + copy_of_text[match_object.end() :]
-                    )
-                else:
-                    break
+
+        for search_string in [
+            '".*?"',
+            "'.*?'",
+            "'image",
+            "'length",
+            "'left",
+            "'right",
+            "'high",
+            "'low",
+            "'range",
+            "'reverse_range",
+            "'pos",
+            "'val",
+        ]:
+            copy_of_text = re.sub(search_string, lambda match_object: " " * len(match_object.group(0)), copy_of_text)
         return copy_of_text
 
     def _remove_surrounding_characters_from_the_match(self, match_object, keyword) -> tuple:
