@@ -48,7 +48,7 @@ def create_reset_condition_and_reset_action() -> list:
             "Error",
             [
                 "No reset condition is specified,",
-                "therefore the generated HDL will be corrupted.",
+                "therefore no HDL will be generated.",
                 "Please specify the reset condition by using the right",
                 "mouse button at the transition from the reset-connector",
                 "to the state, which shall be reached by active reset.",
