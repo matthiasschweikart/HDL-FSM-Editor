@@ -38,6 +38,7 @@ class CustomText(CodeEditor):
 
     read_variables_of_all_windows = {}
     written_variables_of_all_windows = {}
+    selection_is_active = False  # True, when a selection exists in any CustomText window.
 
     def __init__(self, *args, text_type, wrap=tk.NONE, **kwargs) -> None:
         """A text widget that report on internal widget commands"""
@@ -54,7 +55,8 @@ class CustomText(CodeEditor):
         # Overwrites the default control-o = "insert a new line", needed for opening a new file:
         self.bind("<Control-o>", lambda event: self._open())
         self.bind("<Key>", self.format_after_idle)
-        self.bind("<Button-1>", lambda event: self.tag_delete("highlight"))  # Tag is created by links in HDL/log-tab
+        self.bind("<Button-1>", lambda event: self._dehighlight_in_all_texts())  # created by HDL/log-links.
+        self.bind("<Double-Button-1>", lambda event: self._highlight_in_all_texts())
         self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
@@ -159,12 +161,13 @@ class CustomText(CodeEditor):
             self.update_custom_text_class_ports_list()
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
-        custom_text_linting.CustomTextLinting(
-            text,
-            self.text_type,
-            CustomText.read_variables_of_all_windows[self],
-            CustomText.written_variables_of_all_windows[self],
-        )
+        if self.text_type in ("condition", "action"):  # Only in this blocks variables are read or written.
+            custom_text_linting.CustomTextLinting(
+                text,
+                self.text_type,
+                CustomText.read_variables_of_all_windows[self],
+                CustomText.written_variables_of_all_windows[self],
+            )
         if event is not None:
             # event is None when format() is called from __init__, which happens when the design is load from a file.
             # In this case update_highlight_tags_in_all_texts() is called from file_handling_load.py and must not
@@ -208,6 +211,58 @@ class CustomText(CodeEditor):
                     nr_of_characters_in_line = 0
             self.config(width=max_line_length)
             self.config(height=nr_of_lines)
+
+    def _dehighlight_in_all_texts(self) -> None:
+        all_custom_text_widgets = self._get_all_custom_text_widgets()
+        for text_widget in all_custom_text_widgets:
+            text_widget.tag_remove("highlight", "1.0", tk.END)
+        CustomText.selection_is_active = False
+
+    def _highlight_in_all_texts(self) -> None:
+        self.after_idle(self._highlight_in_all_texts_after_idle)
+
+    def _highlight_in_all_texts_after_idle(self) -> None:
+        """Highlight the word under the mouse pointer in all text widgets."""
+        if self.tag_ranges(tk.SEL):
+            # If a selection exists, highlight this selection in all text widgets:
+            selected_text = self.get(tk.SEL_FIRST, tk.SEL_LAST)
+            if selected_text.strip() == "":
+                return
+            CustomText.selection_is_active = True
+            all_custom_text_widgets = self._get_all_custom_text_widgets()
+            for text_widget in all_custom_text_widgets:
+                text_widget.tag_remove("highlight", "1.0", tk.END)
+                start_index = "1.0"
+                while True:
+                    start_index = text_widget.search(selected_text, start_index, tk.END)
+                    if not start_index:
+                        break
+                    end_index = f"{start_index}+{len(selected_text)}c"
+                    text_is_not_selected = text_widget != self or start_index != self.index(tk.SEL_FIRST)
+                    if text_is_not_selected:
+                        text_widget.tag_add("highlight", start_index, end_index)
+                        text_widget.tag_raise("highlight")  # Raise the highlight tag above the other tags.
+                    start_index = end_index
+
+    def _get_all_custom_text_widgets(self):
+        all_custom_text_widgets = []
+        for _, reference in state_action.StateAction.ref_dict.items():
+            all_custom_text_widgets.append(reference.text_id)
+        for _, reference in state_comment.StateComment.ref_dict.items():
+            all_custom_text_widgets.append(reference.text_id)
+        for _, reference in condition_action.ConditionAction.ref_dict.items():
+            all_custom_text_widgets.append(reference.condition_id)
+            all_custom_text_widgets.append(reference.action_id)
+        for _, reference in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
+            all_custom_text_widgets.append(reference.text_before_id)
+            all_custom_text_widgets.append(reference.text_after_id)
+        for _, reference in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
+            all_custom_text_widgets.append(reference.text_id)
+        for _, reference in state_actions_default.StateActionsDefault.ref_dict.items():
+            all_custom_text_widgets.append(reference.text_id)
+        all_custom_text_widgets.extend(CustomText.declaration_text_widgets())
+        all_custom_text_widgets.append(project_manager.tab_hdl_ref.hdl_frame_text)
+        return all_custom_text_widgets
 
     def update_highlight_tags(self) -> None:
         """
@@ -314,7 +369,6 @@ class CustomText(CodeEditor):
     def highlight_item(self, _, __, number_of_line) -> None:
         """Highlights a line. Used when a line is clicked in the "Generated HDL" or "Compile Messages" text box."""
         self.tag_add("highlight", str(number_of_line) + ".0", str(number_of_line + 1) + ".0")
-        self.tag_config("highlight", background="orange")
         self.see(str(number_of_line) + ".0")
         self.focus_set()
         canvas_id_of_window = self._get_canvas_id_of_window()
@@ -348,11 +402,12 @@ class CustomText(CodeEditor):
     @classmethod
     def update_highlight_tags_in_all_texts(cls) -> None:
         """Update the highlight tags for not_read, not_written, control, datatype, function, and comment."""
+        # Prepare highlight_dict_ref by checking read_variables_of_all_windows and written_variables_of_all_windows:
         project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in CustomText.read_variables_of_all_windows:
-            text_ref.update_highlight_tags()
+            text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
         for text_ref in cls.declaration_text_widgets():
-            text_ref.update_highlight_tags()
+            text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
 
     @classmethod
     def refresh_highlighting_in_all_declaration_widgets(cls) -> None:

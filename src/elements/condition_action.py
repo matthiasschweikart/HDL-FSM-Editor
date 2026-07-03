@@ -204,7 +204,8 @@ class ConditionAction:
         self._hide_empty_condition_or_action()
 
     def _deselect_window(self) -> None:
-        project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
+        if not custom_text.CustomText.selection_is_active:
+            project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="Window.TFrame")
         self.condition_label.configure(style="Window.TLabel")
         self.action_label.configure(style="Window.TLabel")

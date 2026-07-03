@@ -145,7 +145,8 @@ class StateAction:
 
     def _deactivate_window(self) -> None:
         """Clear selection style and focus from the state-action window."""
-        project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
+        if not custom_text.CustomText.selection_is_active:
+            project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
         self._set_borderwidth(0, style="StateActionsWindow.TFrame")
         self.label_id.configure(style="StateActionsWindow.TLabel")
 
