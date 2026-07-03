@@ -64,6 +64,6 @@ class SashMover:
         character_height = 0
         for text in self.text_list:
             character_bbox = text.bbox("1.0")
-            if character_bbox != (0, 0, 0, 0) and character_bbox[3] is not None:
+            if character_bbox is not None and character_bbox != (0, 0, 0, 0):
                 character_height = character_bbox[3]
         return character_height
