@@ -5,7 +5,6 @@ import re
 import constants
 from codegen import hdl_generation_library
 from project_manager import project_manager
-from widgets import custom_text
 
 VHDL_KEYWORD_PATTERNS = [
     re.compile(p, re.IGNORECASE)
@@ -267,9 +266,9 @@ class CustomTextLinting:
         all_procedure_calls = []
         match_objects = re.finditer(r"(?:(?<=^)|(?<=;))(?![^;]*=)[^;]*;", text, re.IGNORECASE)
         # The regular expression looks for all expressions which are not assignments:
-        # (?:  Non capturing group (takes no characters to the match)
-        # (?<=^)  Positive lookbehind for start of string
-        # (?<=;)  Positive lookbehind for semicolon
+        # (?:  Non capturing group (adds no characters to the match)
+        # (?<=^)  Positive lookbehind for start of string '^'
+        # (?<=;)  Positive lookbehind for semicolon ';'
         # This means the character before the match must be ^ or ';'.
         # (?![^;]*=)  Negative lookahead for assignment
         # This means, when the next characters do not have ';' but end with '=', then this is no match.
@@ -294,7 +293,7 @@ class CustomTextLinting:
                         in project_manager.tab_interface_ref.interface_ports_text.readable_ports_list
                     ):
                         # If a parameter is an input port, then it is read.
-                        custom_text.CustomText.read_variables_of_all_windows[self] += [procedure_parameter]
+                        self.my_read_variables += [procedure_parameter]
                     elif (
                         procedure_parameter
                         in project_manager.tab_interface_ref.interface_ports_text.writable_ports_list
@@ -306,7 +305,7 @@ class CustomTextLinting:
                         # If a parameter is neither an input nor an output, then the parameter is probably a signal.
                         # But it is not clear if it is written or read and
                         # to avoid false alarms it is added to both lists:
-                        custom_text.CustomText.read_variables_of_all_windows[self] += [procedure_parameter]
+                        self.my_read_variables += [procedure_parameter]
                         text += " " + procedure_parameter + " <= ; "
         return text
 
@@ -323,9 +322,7 @@ class CustomTextLinting:
             for with_select in all_with_selects:
                 with_select = re.sub("^with ", " ", with_select, flags=re.I)
                 with_select = re.sub(" select$", " ", with_select, flags=re.I)
-                custom_text.CustomText.read_variables_of_all_windows[self] += (
-                    with_select.split()
-                )  # split() removes only blanks here.
+                self.my_read_variables += with_select.split()  # split() removes only blanks here.
         return text
 
     def _add_read_variables_from_conditions_to_read_variables_of_all_windows(self, text) -> str:
