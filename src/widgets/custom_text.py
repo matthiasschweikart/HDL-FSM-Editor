@@ -58,6 +58,7 @@ class CustomText(CodeEditor):
         self.bind("<Button-1>", lambda event: self._dehighlight_in_all_texts())  # created by HDL/log-links.
         self.bind("<Double-Button-1>", lambda event: self._highlight_in_all_texts())
         self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
+        self.bind("<Control-C>", self._toggle_comment)
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
         self.readable_ports_list = []
@@ -88,6 +89,58 @@ class CustomText(CodeEditor):
     def _toggle_overwrite(self):
         self.overwrite = not self.overwrite
         return "break"
+
+    def _toggle_comment(self, event):
+        comment_string = "--" if project_manager.language.get() == "VHDL" else "//"
+        start_line, end_line = self._get_range_of_lines_to_comment_or_uncomment()
+        all_lines_are_comments = self._check_if_all_lines_are_already_comments(start_line, end_line, comment_string)
+        for line_number in range(start_line, end_line + 1):
+            line_content = self.get(f"{line_number}.0", f"{line_number}.end")
+            if all_lines_are_comments:  # All lines are commented, so remove the comment string from each line.
+                self._remove_comment_from_line(line_number, line_content, comment_string)
+            else:  # At least one line is not commented, so add the comment string to all lines.
+                self._change_line_into_a_comment(line_number, line_content, comment_string, start_line)
+        self.format_after_idle(event)
+        return "break"
+
+    def _get_range_of_lines_to_comment_or_uncomment(self) -> tuple[int, int]:
+        if self.tag_ranges(tk.SEL):
+            start_index = self.index(tk.SEL_FIRST)
+            start_line = int(start_index.split(".", maxsplit=1)[0])
+            end_index = self.index(tk.SEL_LAST)
+            if end_index.endswith(".0"):
+                end_line = int(end_index.split(".", maxsplit=1)[0]) - 1
+            else:
+                end_line = int(end_index.split(".", maxsplit=1)[0])
+        else:
+            start_line = int(self.index(tk.INSERT).split(".", maxsplit=1)[0])
+            end_line = start_line
+        return start_line, end_line
+
+    def _check_if_all_lines_are_already_comments(self, start_line, end_line, comment_string):
+        for line_number in range(start_line, end_line + 1):
+            line_content = self.get(f"{line_number}.0", f"{line_number}.end")
+            if not line_content.lstrip().startswith(comment_string):
+                return False
+        return True
+
+    def _change_line_into_a_comment(self, line_number, line_content, comment_string, start_line):
+        number_of_leading_blanks = len(re.search(r"^\s*", line_content).group(0))
+        self.insert(f"{line_number}.{number_of_leading_blanks}", comment_string + " ")
+        if line_number == start_line and self.tag_nextrange(tk.SEL, f"{line_number}.0"):
+            self._extend_selection_to_new_line_start(line_number)
+
+    def _extend_selection_to_new_line_start(self, line_number):
+        self.tag_add(tk.SEL, f"{line_number}.0", tk.INSERT)
+
+    def _remove_comment_from_line(self, line_number, line_content, comment_string):
+        match_object = re.search(r"(^\s*)" + comment_string + r"(.?)", line_content)
+        comment_string_start_index = match_object.start() + len(match_object.group(1))
+        comment_string_end_index = comment_string_start_index + len(comment_string)
+        ends_with_blank = match_object.group(2) == " "
+        if ends_with_blank:
+            comment_string_end_index += 1
+        self.delete(f"{line_number}.{comment_string_start_index}", f"{line_number}.{comment_string_end_index}")
 
     def _define_text_tags(self, font):
         self.tag_configure("message_red", foreground="red")
@@ -171,7 +224,7 @@ class CustomText(CodeEditor):
         if event is not None:
             # event is None when format() is called from __init__, which happens when the design is load from a file.
             # In this case update_highlight_tags_in_all_texts() is called from file_handling_load.py and must not
-            # be called here from each text widget.
+            # be called here from each text widget (which would slow down loading).
             self.update_highlight_tags_in_all_texts()
             if event.keysym == "BackSpace":
                 # In order to keep the mouse-pointer inside the shrinking window:
