@@ -208,7 +208,10 @@ class CustomText(CodeEditor):
         """Update text box size and highlighting."""
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
-        if self.text_type in ("declarations", "variable", "action"):
+        if self.text_type in ("declarations"):
+            self.update_custom_text_class_signals_list()
+            self.update_custom_text_functions_list()
+        elif self.text_type in ("variable", "action"):
             self.update_custom_text_class_signals_list()
         elif self.text_type == "ports":
             self.update_custom_text_class_ports_list()
@@ -267,9 +270,14 @@ class CustomText(CodeEditor):
 
     def _dehighlight_in_all_texts(self) -> None:
         all_custom_text_widgets = self._get_all_custom_text_widgets()
-        for text_widget in all_custom_text_widgets:
-            text_widget.tag_remove("highlight", "1.0", tk.END)
-        CustomText.selection_is_active = False
+        # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
+        # editable text widget. This is needed, when in "generated HDL" or "Compile Messages" (disabled text widgets)
+        # a line is clicked, in order to jump to the source code. In this case the highlight tag must not be
+        # removed, because the user wants to see the highlighted line in the source code.
+        if self.cget("state") == "normal":
+            for text_widget in all_custom_text_widgets:
+                text_widget.tag_remove("highlight", "1.0", tk.END)
+            CustomText.selection_is_active = False
 
     def _highlight_in_all_texts(self) -> None:
         self.after_idle(self._highlight_in_all_texts_after_idle)
@@ -401,6 +409,15 @@ class CustomText(CodeEditor):
         self.signals_list = hdl_generation_library.get_all_declared_signal_and_variable_names(all_signal_declarations)
         self.constants_list = hdl_generation_library.get_all_declared_constant_names(all_signal_declarations)
 
+    def update_custom_text_functions_list(self) -> None:
+        """Updates the function_names_list of this CustomText object."""
+        text = self.get("1.0", tk.END).lower()
+        match_objects = re.finditer(r"function\s+(\w+)", text, re.IGNORECASE)
+        for match_object in match_objects:
+            function_name = match_object.group(1)
+            if function_name not in self.function_names_list:
+                self.function_names_list.append(function_name)
+
     def update_custom_text_class_ports_list(
         self,
     ) -> None:  # Needed at self==project_manager.tab_interface_ref.interface_ports_text
@@ -421,7 +438,8 @@ class CustomText(CodeEditor):
 
     def highlight_item(self, _, __, number_of_line) -> None:
         """Highlights a line. Used when a line is clicked in the "Generated HDL" or "Compile Messages" text box."""
-        self.tag_add("highlight", str(number_of_line) + ".0", str(number_of_line + 1) + ".0")
+        self.tag_add("highlight", str(number_of_line) + ".0", str(number_of_line) + ".end")
+        self.tag_raise("highlight")  # Raise the highlight tag above the other tags.
         self.see(str(number_of_line) + ".0")
         self.focus_set()
         canvas_id_of_window = self._get_canvas_id_of_window()

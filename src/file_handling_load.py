@@ -82,6 +82,7 @@ def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
         "1.0", design_dictionary["internals_process_combinatorial"]
     )
     project_manager.tab_internals_ref.internals_architecture_text.update_custom_text_class_signals_list()
+    project_manager.tab_internals_ref.internals_architecture_text.update_custom_text_functions_list()
     project_manager.tab_internals_ref.internals_process_clocked_text.update_custom_text_class_signals_list()
     project_manager.tab_internals_ref.internals_process_combinatorial_text.update_custom_text_class_signals_list()
 
