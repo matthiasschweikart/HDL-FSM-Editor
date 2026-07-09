@@ -105,7 +105,7 @@ class LinkDictionary:
         if widget == "":  # The code line is not entered by the user and there is no source to jump to.
             messagebox.showinfo(
                 "HDL-FSM-Editor",
-                "No source is available for this code line.\nBut you can jump to HDL by Alt-mouse-click.",
+                "No source is available for this code line.\nBut you can jump to HDL by Ctrl-mouse-click.",
             )
         else:
             hdl_item_type = self.link_dict[path_selected_file][file_line_number]["hdl_item_type"]
