@@ -70,7 +70,7 @@ class CustomTextLinting:
             text = re.sub(r"\..*?\s", " ", text)  # remove all record-element-names from their signal/variable names
         if self.text_type == "condition":
             text = self._remove_condition_keywords(text)
-            self.my_read_variables = text.split()
+            self.my_read_variables[:] = text.split()
         elif self.text_type == "action":
             text = self._process_action_read_and_written_variables(text)
             # Store the remaining variable names and remove duplicates from the list,
