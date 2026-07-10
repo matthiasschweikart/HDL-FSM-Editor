@@ -40,6 +40,7 @@ class HighLightDict:
         variables_to_read, variables_to_write = self._handle_constant_names(variables_to_read, variables_to_write)
         variables_to_write = self._remove_port_types(variables_to_write)
         variables_to_read, variables_to_write = self._remove_generics(variables_to_read, variables_to_write)
+        variables_to_write = self._remove_function_calls(variables_to_write)
         self.highlight_pattern_dict["not_written"] += variables_to_write
         self.highlight_pattern_dict["not_read"] += variables_to_read
 
@@ -153,3 +154,9 @@ class HighLightDict:
             if generic in variables_to_write:
                 variables_to_write.remove(generic)
         return variables_to_read, variables_to_write
+
+    def _remove_function_calls(self, variables_to_write) -> list[str]:
+        for function_name in project_manager.tab_internals_ref.internals_architecture_text.function_names_list:
+            if function_name in variables_to_write:
+                variables_to_write.remove(function_name)
+        return variables_to_write
