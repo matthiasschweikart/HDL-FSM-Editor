@@ -146,6 +146,8 @@ class CustomText(CodeEditor):
         self.tag_configure("message_red", foreground="red")
         self.tag_configure("message_green", foreground="green")
         self.tag_configure("highlight", background="orange")
+        self.tag_configure("generated_entity_bg", background="#F5E6D3")  # Pale brown
+        self.tag_configure("generated_arch_bg", background="#FFF9CC")  # Pale yellow
         self._provide_hdl_text_tags_for_this_font(*font)
 
     def _provide_hdl_text_tags_for_this_font(self, fontname, fontsize):
