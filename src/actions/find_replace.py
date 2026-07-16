@@ -50,7 +50,7 @@ class FindReplace:
             continue_search = self._search_in_diagram()
             if not continue_search:
                 return
-            continue_search = self._search_in_all_text_fields()
+            continue_search = self._search_in_all_text_fields()  # but not in the text fields of diagram tab
             if not continue_search:
                 return
             continue_search = self._search_in_all_entry_widgets()
@@ -181,12 +181,16 @@ class FindReplace:
             else:
                 self.number_of_hits_all += 1
                 self._move_in_foreground(GuiTab.DIAGRAM)
+                if start == 0:
+                    fontspec = project_manager.canvas.itemcget(item, "font")
+                    size = tk.font.Font(font=fontspec).cget("size")
+                    factor = 20 / size  # Zoom factor to make the text 20 pixels high
+                    object_center = project_manager.canvas.coords(item)
+                    project_manager.grid_drawer.remove_grid()
+                    canvas_editing.canvas_zoom(object_center, factor)
+                    project_manager.grid_drawer.draw_grid()
                 project_manager.canvas.select_from(item, hit_begin)
                 project_manager.canvas.select_to(item, hit_begin + len(self.search_pattern) - 1)
-                object_coords = project_manager.canvas.bbox(item)
-                canvas_editing.view_rectangle(object_coords, check_fit=False)
-                object_center = project_manager.canvas.coords(item)
-                canvas_editing.canvas_zoom(object_center, 0.25)
                 continue_search = self._ask_continue()
                 if continue_search is False:
                     break
@@ -231,22 +235,22 @@ class FindReplace:
                 self.number_of_hits_all += 1
                 self._move_in_foreground(text_field["tab"])
                 text_field["ref"].tag_add("hit", index, index + " + " + str(count.get()) + " chars")
-                text_field["ref"].tag_configure("hit", background="blue")
-                start = index + " + " + str(count.get()) + " chars"
-                if text_field["tab"] == GuiTab.DIAGRAM:
+                text_field["ref"].tag_configure("hit", background="skyblue")
+                if text_field["tab"] == GuiTab.DIAGRAM and start == "1.0":
                     object_coords = project_manager.canvas.bbox(text_field["window_id"])
                     object_coords_new = []
-                    object_coords_new.append(object_coords[0] - 100)
-                    object_coords_new.append(object_coords[1] - 100)
-                    object_coords_new.append(object_coords[2] + 300)
-                    object_coords_new.append(object_coords[3] + 300)
+                    object_coords_new.append(object_coords[0] - 0.1 * (object_coords[2] - object_coords[0]))
+                    object_coords_new.append(object_coords[1] - 0.1 * (object_coords[3] - object_coords[1]))
+                    object_coords_new.append(object_coords[2] + 0.1 * (object_coords[2] - object_coords[0]))
+                    object_coords_new.append(object_coords[3] + 0.1 * (object_coords[3] - object_coords[1]))
                     canvas_editing.view_rectangle(object_coords_new, check_fit=False)
                 else:
                     text_field["ref"].see(index)
                 continue_search = self._ask_continue()
-                text_field["ref"].tag_remove("hit", index, index + " + " + str(count.get()) + " chars")
+                text_field["ref"].tag_delete("hit")
                 if not continue_search:
                     break
+                start = index + " + " + str(count.get()) + " chars"
         return continue_search
 
     def _search_in_entry_widget(self, entry_widget_info) -> bool:
