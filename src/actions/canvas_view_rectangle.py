@@ -35,18 +35,8 @@ def _draw_view_rectangle(event, rectangle_id) -> None:  # Called by Motion-event
         project_manager.canvas.coords(rectangle_id, rectangle_coords[0], rectangle_coords[1], event_x, event_y)
 
 
-def _view_area_after_button1_release(
-    rectangle_id, funcid_canvas_draw_view_rectangle
-) -> None:  # Called by Button-1("view area"-button) or Button-3(view area per right mouse-button)-Release-Event.
-    project_manager.grid_drawer.remove_grid()
-    complete_rectangle = project_manager.canvas.coords(rectangle_id)
-    canvas_editing.view_rectangle(complete_rectangle, check_fit=False)
-    project_manager.canvas.delete(rectangle_id)
-    _restore_binding(funcid_canvas_draw_view_rectangle)
-    project_manager.grid_drawer.draw_grid()
-
-
 def _view_area_after_button3_release(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
+    # Called when "view area" was started by the right mouse button or when the context menu is opened.
     rectangle_coords = project_manager.canvas.coords(rectangle_id)
     if rectangle_coords[0] != rectangle_coords[2] and rectangle_coords[1] != rectangle_coords[3]:
         _view_area_after_button1_release(rectangle_id, funcid_canvas_draw_view_rectangle)
@@ -63,6 +53,16 @@ def _view_area_after_button3_release(rectangle_id, funcid_canvas_draw_view_recta
         if not item_found:
             tab_diagram.TabDiagram.show_canvas_background_menu(rectangle_coords)
         _restore_binding(funcid_canvas_draw_view_rectangle)
+
+
+def _view_area_after_button1_release(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
+    # Called when "view area" was started by the button "view area".
+    project_manager.grid_drawer.remove_grid()
+    complete_rectangle = project_manager.canvas.coords(rectangle_id)
+    canvas_editing.view_rectangle(complete_rectangle, check_fit=False)
+    project_manager.canvas.delete(rectangle_id)
+    _restore_binding(funcid_canvas_draw_view_rectangle)
+    project_manager.grid_drawer.draw_grid()
 
 
 def _restore_binding(funcid_canvas_draw_view_rectangle):
