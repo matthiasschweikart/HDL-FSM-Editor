@@ -42,6 +42,7 @@ def _view_area(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
     project_manager.canvas.delete(rectangle_id)
     _restore_binding(funcid_canvas_draw_view_rectangle)
     project_manager.grid_drawer.draw_grid()
+    project_manager.root.config(cursor="arrow")  # Needed if _view_area() was called by the button "view area".
 
 
 def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
