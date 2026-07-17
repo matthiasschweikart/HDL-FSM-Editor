@@ -332,24 +332,21 @@ class TransitionLine:
     @classmethod
     def _move_line(cls, line_tag, event_x, event_y, point) -> list:
         """Move line and connected condition-action line(s) if existing; lower line under states."""
-        # Move line:
         coords = project_manager.canvas.coords(line_tag)
         if point.startswith("start"):
             coords[:2] = event_x, event_y
         elif point == "next_to_start":
-            # In this case coords[6], coords[7] would be the coordinates of a loopback transition end point
-            # and should be handed over to the method _get_new_cordinates_of_not_moved_point instead
-            # of coords[0], coords[1]. But at loopback transitions the transition end point is the same as the
-            # transition start point and here it is not clear if it is a loopback transition and coords[6:8] exist:
-            not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
-                line_tag, event_x, event_y, coords[4], coords[5], coords[0], coords[1]
-            )
-            coords[2:6] = event_x, event_y, not_moved_point_x, not_moved_point_y
+            coords[2:4] = event_x, event_y
+            if cls._is_loopback_transition(line_tag):
+                coords[4], coords[5] = cls._get_new_cordinates_of_not_moved_point(
+                    event_x, event_y, coords[4], coords[5], coords[6], coords[7]
+                )
         elif point == "next_to_end":
-            not_moved_point_x, not_moved_point_y = cls._get_new_cordinates_of_not_moved_point(
-                line_tag, event_x, event_y, coords[2], coords[3], coords[0], coords[1]
-            )
-            coords[2:6] = not_moved_point_x, not_moved_point_y, event_x, event_y
+            coords[4:6] = event_x, event_y
+            if cls._is_loopback_transition(line_tag):
+                coords[2], coords[3] = cls._get_new_cordinates_of_not_moved_point(
+                    event_x, event_y, coords[2], coords[3], coords[0], coords[1]
+                )
         elif point.startswith("end"):
             coords[-2:] = event_x, event_y
         else:
@@ -361,13 +358,16 @@ class TransitionLine:
         return project_manager.canvas.coords(line_tag)
 
     @classmethod
+    def _is_loopback_transition(cls, line_tag) -> bool:
+        """Check if the transition is a loopback transition."""
+        target_tag_list = project_manager.canvas.find_withtag(line_tag + "_end")
+        startp_tag_list = project_manager.canvas.find_withtag(line_tag + "_start")
+        return target_tag_list == startp_tag_list
+
+    @classmethod
     def _get_new_cordinates_of_not_moved_point(
-        cls, transition_tag, event_x, event_y, not_moved_point_x, not_moved_point_y, start_x, start_y
+        cls, event_x, event_y, not_moved_point_x, not_moved_point_y, start_x, start_y
     ) -> list:
-        target_tag_list = project_manager.canvas.find_withtag(transition_tag + "_end")
-        startp_tag_list = project_manager.canvas.find_withtag(transition_tag + "_start")
-        if target_tag_list != startp_tag_list:
-            return not_moved_point_x, not_moved_point_y  # No loopback transition
         moved_vector_x = event_x - start_x
         moved_vector_y = event_y - start_y
         moved_vector_length = math.sqrt(moved_vector_x**2 + moved_vector_y**2)
