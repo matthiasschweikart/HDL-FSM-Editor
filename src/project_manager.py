@@ -29,8 +29,6 @@ class ProjectManager:
         self._tab_hdl_ref = None  #: tab_hdl.TabHDL
         self._tab_log_ref = None  #: tab_log.TabLog
         self._menu_bar_ref = None  #: menu_bar.MenuBar
-        self._diagram_background_color: tk.StringVar = None
-        self._diagram_background_color_error: ttk.Label = None
 
         # Service objects of the GUI:
         self._link_dict_ref = None  #: link_dictionary.LinkDictionary
@@ -390,26 +388,6 @@ class ProjectManager:
     def include_timestamp_in_output(self, value: tk.BooleanVar) -> None:
         """Set the include timestamp in output BooleanVar."""
         self._include_timestamp_in_output = value
-
-    @property
-    def diagram_background_color_error(self) -> tk.Label:
-        """Get the diagram background color error Label."""
-        return self._diagram_background_color_error
-
-    @diagram_background_color_error.setter
-    def diagram_background_color_error(self, value: tk.Label) -> None:
-        """Set the diagram background color error Label."""
-        self._diagram_background_color_error = value
-
-    @property
-    def diagram_background_color(self) -> tk.StringVar:
-        """Get the diagram background color StringVar."""
-        return self._diagram_background_color
-
-    @diagram_background_color.setter
-    def diagram_background_color(self, value: tk.StringVar) -> None:
-        """Set the diagram background color StringVar."""
-        self._diagram_background_color = value
 
     @property
     def canvas(self) -> tk.Canvas:

@@ -157,9 +157,8 @@ class TabControl:
         diagram_background_color_label.grid(row=11, column=0, sticky=tk.W)
         diagram_background_color_entry.grid(row=11, column=1, sticky="ew")
         diagram_background_color_button.grid(row=11, column=2, sticky="ew")
-        diagram_background_color_error = ttk.Label(control_frame, text="", padding=5)
-        project_manager.diagram_background_color_error = diagram_background_color_error
-        diagram_background_color_error.grid(row=12, column=1, sticky=tk.W)
+        self.diagram_background_color_error = ttk.Label(control_frame, text="", padding=5)
+        self.diagram_background_color_error.grid(row=12, column=1, sticky=tk.W)
 
         self._module_name_trace_id = None
         self._language_trace_id = None
@@ -296,13 +295,13 @@ class TabControl:
 
     def _change_color_of_diagram_background(self) -> None:
         try:
-            project_manager.canvas.configure(bg=project_manager.diagram_background_color.get())
-            project_manager.diagram_background_color_error.configure(text="")
+            project_manager.canvas.configure(bg=self.diagram_background_color.get())
+            self.diagram_background_color_error.configure(text="")
         except tk.TclError:
             project_manager.canvas.configure(bg="white")
-            project_manager.diagram_background_color_error.configure(
+            self.diagram_background_color_error.configure(
                 text="The string '"
-                + project_manager.diagram_background_color.get()
+                + self.diagram_background_color.get()
                 + "' is not a valid color definition, using 'white' instead."
             )
 
@@ -311,7 +310,7 @@ class TabControl:
         new_color = ColorChanger(project_manager.canvas.cget("bg")).ask_color()
         if new_color is not None:
             project_manager.canvas.configure(bg=new_color)
-            project_manager.diagram_background_color.set(new_color)
+            self.diagram_background_color.set(new_color)
 
     def highlight_item(self, hdl_item_type, *_):
         """

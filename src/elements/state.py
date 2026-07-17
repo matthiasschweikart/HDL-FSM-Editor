@@ -10,7 +10,6 @@ from actions import canvas_delete, canvas_editing, move_handling_canvas_item, mo
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
-from widgets.option_menu import OptionMenu
 
 
 class States:
@@ -46,7 +45,7 @@ class States:
         project_manager.canvas.tag_bind(
             self.state_id, "<Leave>", lambda event, id=self.state_id: project_manager.canvas.itemconfig(id, width=2)
         )
-        project_manager.canvas.tag_bind(self.state_id, "<Button-3>", self._show_menu)
+        project_manager.canvas.tag_bind(self.state_id, "<ButtonRelease-3>", self._show_menu)
         project_manager.canvas.tag_bind(
             self.state_id,
             "<Button-1>",
@@ -58,29 +57,39 @@ class States:
             lambda event: move_handling_canvas_item.MoveHandlingCanvasItem(event, self.text_id),
         )
         project_manager.canvas.tag_bind(self.text_id, "<Double-Button-1>", self._edit_state_name)
-        project_manager.canvas.tag_bind(self.text_id, "<Button-3>", self._show_menu)
+        project_manager.canvas.tag_bind(self.text_id, "<ButtonRelease-3>", self._show_menu)
         States.ref_dict[self.state_id] = self
         States.state_number += 1
 
     def _show_menu(self, event) -> None:
-        listbox = OptionMenu(
-            project_manager.canvas,
-            ["add action", "add comment", "change color"],
-            height=3,
-            bg="lightgrey",
-            width=14,
-            activestyle="dotbox",
-            relief=tk.RAISED,
-        )
-        [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-        window = project_manager.canvas.create_window(event_x + 40, event_y, window=listbox)
-        listbox.bind(
-            "<Button-1>",
-            lambda event, window=window, listbox=listbox, menu_x=event_x, menu_y=event_y: self._evaluate_menu(
-                event, window, listbox, menu_x, menu_y
-            ),
-        )
-        listbox.bind("<Leave>", lambda event, window=window, listbox=listbox: self._close_menu(window, listbox))
+        menu = tk.Menu(project_manager.canvas, tearoff=0)
+        menu.add_command(label="Add state action", command=lambda: self._add_action(event))
+        menu.add_command(label="Add comment", command=lambda: self._add_comment(event))
+        menu.add_command(label="Change color", command=self._change_color)
+        menu.tk_popup(event.x_root, event.y_root)
+
+    def _add_action(self, event) -> None:
+        tags = project_manager.canvas.gettags(self.state_id)
+        for tag in tags:
+            if tag.startswith("connection"):  # searching for "connection<n>_end"
+                return  # There is already a state action attached to this state.
+        event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
+        state_action.StateAction.create(event_x, event_y, self.state_id)
+        project_manager.undo_handling_ref.design_has_changed()
+
+    def _add_comment(self, event) -> None:
+        tags = project_manager.canvas.gettags(self.state_id)
+        for tag in tags:
+            if tag.endswith("comment_line_end"):
+                return  # There is already a comment attached to this state.
+        event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
+        state_comment.StateComment.create(event_x, event_y, tags)
+        project_manager.undo_handling_ref.design_has_changed()
+
+    def _change_color(self) -> None:
+        new_color = ColorChanger(constants.STATE_COLOR).ask_color()
+        project_manager.canvas.itemconfigure(self.state_id, fill=new_color)
+        project_manager.undo_handling_ref.design_has_changed()
 
     def _edit_state_name(self, event) -> None:
         project_manager.canvas.unbind("<Button-1>")
@@ -98,10 +107,6 @@ class States:
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_rounded_canvas_coordinates(event)
         project_manager.canvas.create_window(event_x, event_y, window=text_box, tag="entry-window")
         text_box.focus_set()
-
-    def _close_menu(self, window, listbox) -> None:
-        listbox.destroy()
-        project_manager.canvas.delete(window)
 
     def _update_state_name(self, text_box) -> None:
         project_manager.canvas.delete("entry-window")
@@ -124,29 +129,6 @@ class States:
             elif t.endswith("_end") and not t.endswith("_comment_line_end"):
                 transition.TransitionLine.extend_transition_to_state_middle_points(t[:-4])
                 transition.TransitionLine.shorten_to_state_border(t[:-4])
-
-    def _evaluate_menu(self, _event, window, listbox, menu_x, menu_y) -> None:
-        selected_entry = listbox.get(listbox.curselection())
-        listbox.destroy()
-        project_manager.canvas.delete(window)
-        if selected_entry == "add action":
-            tags = project_manager.canvas.gettags(self.state_id)
-            for tag in tags:
-                if tag.startswith("connection"):  # searching for "connection<n>_end"
-                    return  # There is already a state action attached to this state.
-            state_action.StateAction.create(menu_x, menu_y, self.state_id)
-            project_manager.undo_handling_ref.design_has_changed()
-        elif selected_entry == "add comment":
-            tags = project_manager.canvas.gettags(self.state_id)
-            for tag in tags:
-                if tag.endswith("comment_line_end"):
-                    return  # There is already a comment attached to this state.
-            state_comment.StateComment.create(menu_x, menu_y, tags)
-            project_manager.undo_handling_ref.design_has_changed()
-        elif selected_entry == "change color":
-            new_color = ColorChanger(constants.STATE_COLOR).ask_color()
-            project_manager.canvas.itemconfigure(self.state_id, fill=new_color)
-            project_manager.undo_handling_ref.design_has_changed()
 
     def _abort_edit_text(self, text_box, old_text) -> None:
         project_manager.canvas.delete("entry-window")

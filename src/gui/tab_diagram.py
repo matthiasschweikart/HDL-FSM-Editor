@@ -12,7 +12,6 @@ from actions import (
 )
 from constants import GuiTab
 from project_manager import project_manager
-from widgets.option_menu import OptionMenu
 
 from . import grid_drawing
 
@@ -200,43 +199,3 @@ class TabDiagram:
     def _create_font_for_state_names(self) -> None:
         project_manager.state_name_font = font.Font(font="TkDefaultFont")
         project_manager.state_name_font.configure(size=int(project_manager.fontsize))
-
-    @classmethod
-    def show_canvas_background_menu(cls, zoom_coords) -> None:
-        """Show context menu at zoom_coords for background color and grid visibility."""
-        canvas_menue_entries_list_with_hide = ["Change background color", "Hide grid"]
-        canvas_menue_entries_list_with_show = ["Change background color", "Show grid"]
-        if project_manager.grid_drawer.show_grid is True:
-            canvas_menue_entries_list = canvas_menue_entries_list_with_hide
-        else:
-            canvas_menue_entries_list = canvas_menue_entries_list_with_show
-        menu = OptionMenu(
-            project_manager.canvas,
-            canvas_menue_entries_list,
-            height=2,
-            bg="lightgrey",
-            width=25,
-            activestyle="dotbox",
-            relief=tk.RAISED,
-        )
-        menue_window = project_manager.canvas.create_window(zoom_coords[0], zoom_coords[1], window=menu)
-        menu.bind("<Button-1>", lambda event: cls._evaluate_menu(menue_window, menu))
-        menu.bind("<Leave>", lambda event: cls._close_menu(menue_window, menu))
-
-    @classmethod
-    def _evaluate_menu(cls, menue_window, menu) -> None:
-        selected_entry = menu.get(menu.curselection()[0])
-        if "Change background color" in selected_entry:
-            project_manager.tab_control_ref.choose_bg_color()
-        elif "Hide grid" in selected_entry:
-            project_manager.grid_drawer.show_grid = False
-            project_manager.grid_drawer.remove_grid()
-        elif "Show grid" in selected_entry:
-            project_manager.grid_drawer.show_grid = True
-            project_manager.grid_drawer.draw_grid()
-        cls._close_menu(menue_window, menu)
-
-    @classmethod
-    def _close_menu(cls, menue_window, menu) -> None:
-        menu.destroy()
-        project_manager.canvas.delete(menue_window)

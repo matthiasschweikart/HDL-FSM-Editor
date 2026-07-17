@@ -9,7 +9,6 @@ import constants
 from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
 from elements import condition_action
 from project_manager import project_manager
-from widgets.option_menu import OptionMenu
 
 
 class TransitionLine:
@@ -51,7 +50,7 @@ class TransitionLine:
             "<Leave>",
             lambda event: project_manager.canvas.itemconfig(self.transition_id, width=1),
         )
-        project_manager.canvas.tag_bind(self.transition_id, "<Button-3>", self._show_menu)
+        project_manager.canvas.tag_bind(self.transition_id, "<ButtonRelease-3>", self._show_menu)
         project_manager.canvas.tag_bind(
             self.priority_text,
             "<Double-Button-1>",
@@ -79,83 +78,53 @@ class TransitionLine:
         return priority_middle_x, priority_middle_y
 
     def _show_menu(self, event) -> None:
-        listbox = OptionMenu(
-            project_manager.canvas,
-            ["add condition&action", "straighten shape"],
-            height=2,
-            bg="lightgrey",
-            width=21,
-            activestyle="dotbox",
-            relief=tk.RAISED,
-        )
-        [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-        window = project_manager.canvas.create_window(event_x + 40, event_y, window=listbox)
-        listbox.bind(
-            "<Button-1>",
-            lambda event, window=window, listbox=listbox, menu_x=event_x, menu_y=event_y: self._evaluate_menu(
-                event, window, listbox, menu_x, menu_y
-            ),
-        )
-        listbox.bind("<Leave>", lambda event, window=window, listbox=listbox: self._close_menu(event, window, listbox))
+        menu = tk.Menu(project_manager.canvas, tearoff=0)
+        menu.add_command(label="add condition&action", command=lambda: self._add_condition_action(event))
+        menu.add_command(label="straighten shape", command=self._straighten_shape)
+        menu.tk_popup(event.x_root, event.y_root)
 
-    def _evaluate_menu(
-        self,
-        _event,
-        window,
-        listbox,
-        menu_x,
-        menu_y,
-    ) -> None:
-        design_was_changed = False
-        selected_entry = listbox.get(listbox.curselection())
-        if selected_entry == "add condition&action":
-            transition_tags = project_manager.canvas.gettags(self.transition_id)
-            has_condition_action = False
-            connected_to_reset_entry = False
-            for tag in transition_tags:
-                if tag.startswith("ca_connection"):
-                    has_condition_action = True
-                elif tag == "coming_from_reset_entry":
-                    connected_to_reset_entry = True
-            if has_condition_action is False:
-                condition_action.ConditionAction.create(self.transition_id, menu_x, menu_y, connected_to_reset_entry)
-                design_was_changed = True
-        elif selected_entry == "straighten shape":
-            transition_tags = project_manager.canvas.gettags(self.transition_id)
-            start_state_radius = 0
-            end_state_radius = 0
-            loopback_transition = False
-            for tag in transition_tags:
-                if tag.startswith("transition"):
-                    transition_tag = tag
-                    target_tag_list = project_manager.canvas.find_withtag(transition_tag + "_end")
-                    startp_tag_list = project_manager.canvas.find_withtag(transition_tag + "_start")
-                    if target_tag_list == startp_tag_list:
-                        loopback_transition = True
-                        break  # At a loopback transition the transition cannot be straightened.
-                    TransitionLine.extend_transition_to_state_middle_points(transition_tag)
-                elif tag.startswith("coming_from_"):
-                    start_state = tag.replace("coming_from_", "")
-                    if start_state == "reset_entry":
-                        start_state_radius = 0
-                    else:
-                        start_state_coords = project_manager.canvas.coords(start_state)
-                        start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
-                elif tag.startswith("going_to_"):
-                    end_state = tag.replace("going_to_", "")
-                    end_state_coords = project_manager.canvas.coords(end_state)
-                    end_state_radius = abs(end_state_coords[2] - end_state_coords[0]) / 2
-            if not loopback_transition:
-                self._straighten_transition(transition_tag, start_state_radius, end_state_radius)
-                design_was_changed = True
-        listbox.destroy()
-        project_manager.canvas.delete(window)
-        if design_was_changed:
+    def _add_condition_action(self, event) -> None:
+        transition_tags = project_manager.canvas.gettags(self.transition_id)
+        has_condition_action = False
+        connected_to_reset_entry = False
+        for tag in transition_tags:
+            if tag.startswith("ca_connection"):
+                has_condition_action = True
+            elif tag == "coming_from_reset_entry":
+                connected_to_reset_entry = True
+        if not has_condition_action:
+            [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+            condition_action.ConditionAction.create(self.transition_id, event_x, event_y, connected_to_reset_entry)
             project_manager.undo_handling_ref.design_has_changed()
 
-    def _close_menu(self, _event, window, listbox) -> None:
-        listbox.destroy()
-        project_manager.canvas.delete(window)
+    def _straighten_shape(self) -> None:
+        transition_tags = project_manager.canvas.gettags(self.transition_id)
+        start_state_radius = 0
+        end_state_radius = 0
+        loopback_transition = False
+        for tag in transition_tags:
+            if tag.startswith("transition"):
+                transition_tag = tag
+                target_tag_list = project_manager.canvas.find_withtag(transition_tag + "_end")
+                startp_tag_list = project_manager.canvas.find_withtag(transition_tag + "_start")
+                if target_tag_list == startp_tag_list:
+                    loopback_transition = True
+                    break  # At a loopback transition the transition cannot be straightened.
+                # TransitionLine.extend_transition_to_state_middle_points(transition_tag)
+            elif tag.startswith("coming_from_"):
+                start_state = tag.replace("coming_from_", "")
+                if start_state == "reset_entry":
+                    start_state_radius = 0
+                else:
+                    start_state_coords = project_manager.canvas.coords(start_state)
+                    start_state_radius = abs(start_state_coords[2] - start_state_coords[0]) / 2
+            elif tag.startswith("going_to_"):
+                end_state = tag.replace("going_to_", "")
+                end_state_coords = project_manager.canvas.coords(end_state)
+                end_state_radius = abs(end_state_coords[2] - end_state_coords[0]) / 2
+        if not loopback_transition:
+            self._straighten_transition(transition_tag, start_state_radius, end_state_radius)
+            project_manager.undo_handling_ref.design_has_changed()
 
     def _edit_priority(self, event, transition_tag) -> None:
         project_manager.canvas.unbind("<Button-1>")
@@ -203,7 +172,8 @@ class TransitionLine:
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
     def _straighten_transition(self, transition_tag, start_state_radius, end_state_radius):
-        old_coords = project_manager.canvas.coords(self.transition_id)
+        TransitionLine.extend_transition_to_state_middle_points(transition_tag)
+        old_coords = project_manager.canvas.coords(transition_tag)
         new_coords = []
         new_coords.append(old_coords[0])
         new_coords.append(old_coords[1])
@@ -212,7 +182,7 @@ class TransitionLine:
         new_coords = TransitionLine._shorten_vector(
             start_state_radius, new_coords[0], new_coords[1], end_state_radius, new_coords[2], new_coords[3], 1, 1
         )
-        project_manager.canvas.coords(self.transition_id, new_coords)
+        project_manager.canvas.coords(transition_tag, new_coords)
         # Calculates the position of the priority rectangle by shortening the distance between the first point of
         # the transition and the second point of the transition.
         [priority_middle_x, priority_middle_y, _, _] = TransitionLine._shorten_vector(
@@ -385,10 +355,9 @@ class TransitionLine:
         else:
             print("transition_handling: Fatal, unknown point =", point)
         project_manager.canvas.coords(line_tag, coords)
-        if project_manager.grid_drawer.show_grid:
-            list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
-            if list_of_grid_line_canvas_ids:
-                project_manager.canvas.tag_raise(line_tag, "grid_line")
+        list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
+        if list_of_grid_line_canvas_ids:
+            project_manager.canvas.tag_raise(line_tag, "grid_line")
         return project_manager.canvas.coords(line_tag)
 
     @classmethod
