@@ -21,6 +21,7 @@ class TransitionLine:
     delta_dict = {}
     diff_dict = {}
 
+    # A new transition object is created by the create() method of the TransitionLine class (see end of file).
     def __init__(self, transition_coords, tags, priority) -> None:
         self.difference_x = 0
         self.difference_y = 0
@@ -727,9 +728,12 @@ class TransitionLine:
                 cls._add_next_transition_point_(transition_id, transition_coords, event_x, event_y)
         elif transition_start_object_tag == "reset_entry" and transition_ends_at_connector is True:
             return
-        elif end_state_canvas_id == start_state_canvas_id and len(transition_coords) in (4, 6):
+        elif end_state_canvas_id == start_state_canvas_id and (
+            len(transition_coords) in (4, 6) or transition_ends_at_connector
+        ):
             # A loopback transition with only 2  points cannot be drawn.
-            # A loopback transition with only 3  points creates a transition which cannot be handled properly.
+            # A loopback transition with only 3  points creates a transition which cannot be moved properly.
+            # A loopback transition to a connector is not allowed.
             # The transition point is not accepted.
             return
         else:
