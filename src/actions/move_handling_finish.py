@@ -73,39 +73,39 @@ def _moving_of_transition_start_or_end_point_ends_at_illegal_place(item_ids_at_m
     debug_illegal_move = False
     if _a_line_is_moved_to_a_window(item_ids_at_moving_end_location):
         if debug_illegal_move:
-            print("Illegal: A line was moved to a window.")
+            print("Illegal: A transition start- or end-point was moved to a window.")
         return True
     if _a_line_is_moved_to_a_priority_rectangle(item_ids_at_moving_end_location):
         if debug_illegal_move:
-            print("Illegal: A line was moved to a priority rectangle.")
+            print("Illegal: A transition start- or end-point was moved to a priority rectangle.")
         return True
     if _a_line_start_or_end_point_is_moved_to_a_line(item_ids_at_moving_end_location):
         if debug_illegal_move:
-            print("Illegal: A line start or end point was moved to a line.")
+            print("Illegal: A transition start- or end-point was moved to a transition.")
         return True
     if _a_point_of_a_line_is_moved_illegally_to_a_reset_entry(item_ids_at_moving_end_location, move_list):
         if debug_illegal_move:
-            print("Illegal: A point of a line was moved illegally to a reset entry.")
+            print("Illegal: A transition start- or end-point was moved to a reset entry.")
         return True
     if _start_or_end_of_a_line_was_moved_to_free_space(item_ids_at_moving_end_location):
         if debug_illegal_move:
-            print("Illegal: The start or end of a line was moved to free space.")
-        return True
-    if _a_line_is_changed_into_a_loopback_transition_with_less_than_4_points(
-        item_ids_at_moving_end_location, move_list
-    ):
-        if debug_illegal_move:
-            print("Illegal: A line is changed into a loopback transition with less than 4 points.")
-        return True
-    if _a_line_is_changed_into_a_loopback_transition_from_connector_to_connector(
-        item_ids_at_moving_end_location, move_list
-    ):
-        if debug_illegal_move:
-            print("Illegal: A line is changed into a loopback transition from connector to connector.")
+            print("Illegal: A transition start- or end-point was moved to free space.")
         return True
     if _transition_connects_reset_entry_and_connector(item_ids_at_moving_end_location, move_list):
         if debug_illegal_move:
             print("Illegal: A transition connects reset entry and connector.")
+        return True
+    if _a_line_is_changed_into_a_loopback_transition_with_less_than_4_points(
+        item_ids_at_moving_end_location, move_list
+    ):
+        messagebox.showerror(
+            "Error", "A transition with less than 4 points cannot\nbe turned into a loopback transition."
+        )
+        return True
+    if _a_line_is_changed_into_a_loopback_transition_from_connector_to_connector(
+        item_ids_at_moving_end_location, move_list
+    ):
+        messagebox.showerror("Error", "No loopback transition from connector to connector is allowed.")
         return True
     return False
 
@@ -291,12 +291,7 @@ def _a_line_is_changed_into_a_loopback_transition_with_less_than_4_points(
             break
     if start_state_tag == "":
         return False  # Transition does not start at a state, no loopback transition is possible.
-    if start_state_tag == target_state_tag and len(project_manager.canvas.coords(move_list[0][0])) < 8:
-        messagebox.showerror(
-            "Error", "A transition with less than 4 points cannot\nbe turned into a loopback transition."
-        )
-        return True
-    return False
+    return start_state_tag == target_state_tag and len(project_manager.canvas.coords(move_list[0][0])) < 8
 
 
 def _a_line_is_changed_into_a_loopback_transition_from_connector_to_connector(
@@ -316,12 +311,12 @@ def _a_line_is_changed_into_a_loopback_transition_from_connector_to_connector(
         if tag.startswith("coming_from_connector"):
             connector_start_tag = tag[12:]
             break
+        if tag.startswith("going_to_connector"):
+            connector_start_tag = tag[9:]
+            break
     if connector_start_tag == "":
-        return False  # Transition does not start at a connector, no connector loopback transition is possible.
-    if connector_start_tag == target_connector_tag:
-        messagebox.showerror("Error", "No loopback transition from connector to connector is allowed.")
-        return True
-    return False
+        return False  # Transition does not start/end at a connector, no connector loopback transition is possible.
+    return connector_start_tag == target_connector_tag
 
 
 def _transition_connects_reset_entry_and_connector(item_ids_at_moving_end_location, move_list) -> bool:
