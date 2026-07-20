@@ -25,6 +25,7 @@ class TransitionLine:
     def __init__(self, transition_coords, tags, priority) -> None:
         self.difference_x = 0
         self.difference_y = 0
+        self.phi_last = 0
         rectangle_coords = self._determine_position_of_priority_rectangle(transition_coords)
         self.transition_tag = tags[0]  # "transition<n>"
         self.transition_id = project_manager.canvas.create_line(
@@ -77,8 +78,10 @@ class TransitionLine:
     def _show_menu(self, event) -> None:
         menu = tk.Menu(project_manager.canvas, tearoff=0)
         menu.add_command(label="add condition&action", command=lambda: self._add_condition_action(event))
-        # if loopback
-        menu.add_command(label="straighten shape", command=self._straighten_shape)
+        if TransitionLine._is_loopback_transition(self.transition_tag):
+            menu.add_command(label="rotate loopback transition", command=self._rotate_loopback_transition_init)
+        else:
+            menu.add_command(label="straighten shape", command=self._straighten_shape)
         menu.tk_popup(event.x_root, event.y_root)
 
     def _add_condition_action(self, event) -> None:
@@ -94,15 +97,94 @@ class TransitionLine:
             condition_action.ConditionAction.create(self.transition_tag, event_x, event_y, connected_to_reset_entry)
             project_manager.undo_handling_ref.design_has_changed()
 
+    def _rotate_loopback_transition_init(self) -> None:  # called by menu entry
+        TransitionLine.extend_transition_to_state_middle_points(self.transition_tag)
+        project_manager.canvas.itemconfig(self.transition_tag, width=3)
+        start_x, start_y = self._calculate_canvas_coords_of_menu_mouse_click_event()
+        coords = project_manager.canvas.coords(self.transition_tag)
+        vector_from_state_middle_point_to_cursor = [-coords[0] + start_x, -coords[1] + start_y]
+        self.phi_last = self._calculate_angle_of_vector(vector_from_state_middle_point_to_cursor)
+        project_manager.canvas.bind(
+            "<Motion>", lambda event: self._rotate_loopback_transition(event, coords[0], coords[1])
+        )
+        project_manager.canvas.bind(
+            "<Button-1>", lambda event: self._rotate_loopback_transition_stop(event, coords, abort=False)
+        )
+        project_manager.canvas.bind(
+            "<Escape>", lambda event: self._rotate_loopback_transition_stop(event, coords, abort=True)
+        )
+
+    def _calculate_canvas_coords_of_menu_mouse_click_event(self) -> tuple[float, float]:
+        pointer_x_in_canvas = project_manager.canvas.winfo_pointerx() - project_manager.canvas.winfo_rootx()
+        pointer_y_in_canvas = project_manager.canvas.winfo_pointery() - project_manager.canvas.winfo_rooty()
+        start_x = project_manager.canvas.canvasx(pointer_x_in_canvas)
+        start_y = project_manager.canvas.canvasy(pointer_y_in_canvas)
+        return start_x, start_y
+
+    def _calculate_angle_of_vector(self, vector) -> float:
+        """Calculate angle between x-axis and vector in radians."""
+        x, y = vector
+        return math.atan2(y, x)
+
+    def _rotate_loopback_transition(self, event, state_middle_x, state_middle_y) -> None:
+        cursor_x, cursor_y = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
+        vector_from_state_middle_point_to_cursor = [-state_middle_x + cursor_x, -state_middle_y + cursor_y]
+        phi = self._calculate_angle_of_vector(vector_from_state_middle_point_to_cursor)
+        delta_phi = phi - self.phi_last
+        self._rotate_transition_by(delta_phi)
+        self.phi_last = phi
+        TransitionLine._move_priority_rectangle(
+            cursor_x,
+            cursor_y,
+            self.transition_tag,
+            project_manager.canvas.coords(self.transition_tag),
+            "end",
+        )
+
+    def _rotate_loopback_transition_stop(self, event, old_coords, abort) -> None:
+        project_manager.canvas.unbind("<Motion>")
+        project_manager.canvas.unbind("<Button-1>")
+        project_manager.canvas.itemconfig(self.transition_tag, width=1)
+        canvas_modify_bindings.switch_to_move_mode()
+        if abort:
+            project_manager.canvas.coords(self.transition_tag, old_coords)
+        TransitionLine.shorten_to_state_border(self.transition_tag)
+        if not abort:
+            project_manager.undo_handling_ref.design_has_changed()
+
+    def _rotate_transition_by(self, delta_phi) -> None:
+        coords = project_manager.canvas.coords(self.transition_tag)
+        vector_from_start_to_second_x = coords[2] - coords[0]
+        vector_from_start_to_second_y = coords[3] - coords[1]
+        vector_from_start_to_third_x = coords[4] - coords[0]
+        vector_from_start_to_third_y = coords[5] - coords[1]
+        vector_from_start_to_second_rotated_x = (vector_from_start_to_second_x * math.cos(delta_phi)) - (
+            vector_from_start_to_second_y * math.sin(delta_phi)
+        )
+        vector_from_start_to_second_rotated_y = (vector_from_start_to_second_x * math.sin(delta_phi)) + (
+            vector_from_start_to_second_y * math.cos(delta_phi)
+        )
+        vector_from_start_to_third_rotated_x = (vector_from_start_to_third_x * math.cos(delta_phi)) - (
+            vector_from_start_to_third_y * math.sin(delta_phi)
+        )
+        vector_from_start_to_third_rotated_y = (vector_from_start_to_third_x * math.sin(delta_phi)) + (
+            vector_from_start_to_third_y * math.cos(delta_phi)
+        )
+        project_manager.canvas.coords(
+            self.transition_tag,
+            coords[0],
+            coords[1],
+            coords[0] + vector_from_start_to_second_rotated_x,
+            coords[1] + vector_from_start_to_second_rotated_y,
+            coords[0] + vector_from_start_to_third_rotated_x,
+            coords[1] + vector_from_start_to_third_rotated_y,
+            coords[6],
+            coords[7],
+        )
+
     def _straighten_shape(self) -> None:
         start_state_radius = 0
         end_state_radius = 0
-        loopback_transition = False
-        target_tag_list = project_manager.canvas.find_withtag(self.transition_tag + "_end")
-        startp_tag_list = project_manager.canvas.find_withtag(self.transition_tag + "_start")
-        if target_tag_list == startp_tag_list:
-            loopback_transition = True
-            return  # At a loopback transition the transition cannot be straightened.
         for tag in project_manager.canvas.gettags(self.transition_tag):
             if tag.startswith("coming_from_"):
                 start_state = tag.replace("coming_from_", "")
@@ -115,9 +197,8 @@ class TransitionLine:
                 end_state = tag.replace("going_to_", "")
                 end_state_coords = project_manager.canvas.coords(end_state)
                 end_state_radius = abs(end_state_coords[2] - end_state_coords[0]) / 2
-        if not loopback_transition:
-            self._straighten_transition(start_state_radius, end_state_radius)
-            project_manager.undo_handling_ref.design_has_changed()
+        self._straighten_transition(start_state_radius, end_state_radius)
+        project_manager.undo_handling_ref.design_has_changed()
 
     def _edit_priority(self, event) -> None:
         project_manager.canvas.unbind("<Button-1>")
@@ -371,7 +452,7 @@ class TransitionLine:
     def _move_priority_rectangle(cls, event_x, event_y, transition_tag, transition_coords, point) -> None:
         """Move priority rectangle."""
         # The tag "transition_tag + '_start'" is already removed from the old start state when
-        #  the transition start-point is moved. In all other cases the tag exists.
+        # the transition start-point is moved. In all other cases the tag exists.
         # So try to get the coordinates of the start state (there the priority rectangle is positioned):
         start_state_coords = project_manager.canvas.coords(transition_tag + "_start")
         if point == "start":
