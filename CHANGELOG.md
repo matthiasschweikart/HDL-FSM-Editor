@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [6.5]
+## Added
+- A loopback transition can now be rotated by using an entry in its context menu.
+- When a string is selected, all other instances of that string are also highlighted.
+- The Home button moves the insert cursor to the first non-blank character or to line begin.
+- Tab and Shift-Tab indent/unindent the selection.
+- Added Overwrite-mode for text editing.
+- The shortcut Ctrl-C comments or uncomments a not selected line (independent from the position of the insertion cursor).
+- The shortcut Ctrl-C comments or uncomments a selection (first and last line must not be selected completely).
+- New checks for illegal transitions are added.
+## Changed
+- The prettier Tkinter menu widget replaces all context menus.
+- Loading a design from a file works faster.
+- Viewing hits during "find" works better.
+- Refactoring.
+## Deprecated
+## Removed
+## Fixed
+- Highlighting procedure calls was fixed.
+## Security
+
 ## [6.4]
 ## Added
 - When moving a state, now state-comment, state-action and loopback transition are moved together with the state.
