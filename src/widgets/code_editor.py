@@ -168,6 +168,7 @@ class CodeEditor(tk.Text):
                 self.mark_set(tk.ANCHOR, self.index(tk.INSERT))
 
             self.after_idle(reset_anchor)
+        self.format_after_idle(None)  # Trigger formatting after cursor movement
 
     def _move_cursor(self, find_boundary_func: Callable[[str], str]) -> str:
         """Move cursor to token boundary; clear selection and set anchor."""

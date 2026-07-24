@@ -52,7 +52,7 @@ class StateComment:
         )
         StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
         self.text_id.insert("1.0", comment)
-        self.text_id.format(None)
+        self.text_id.format("element-insertion")
 
         self.line_id = project_manager.canvas.create_line(  # Line starts at comment, ends at state
             line_coords,

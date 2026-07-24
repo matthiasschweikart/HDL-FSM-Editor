@@ -81,9 +81,9 @@ class ConditionAction:
         project_manager.canvas.tag_lower(self.line_id)
 
         self.condition_id.insert("1.0", self.condition_text)
-        self.condition_id.format(None)
+        self.condition_id.format("element-insertion")
         self.action_id.insert("1.0", self.action_text)
-        self.action_id.format(None)
+        self.action_id.format("element-insertion")
         self._show_condition_and_action()
         self._hide_empty_condition_or_action()
 

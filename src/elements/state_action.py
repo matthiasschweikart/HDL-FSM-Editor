@@ -58,7 +58,7 @@ class StateAction:
         )
         StateAction.ref_dict[self.window_id] = self
         self.text_id.insert("1.0", action)
-        self.text_id.format(None)
+        self.text_id.format("element-insertion")
         self.line_id = project_manager.canvas.create_line(line_coords, dash=(2, 2), tags=line_tags)
         project_manager.canvas.tag_lower(self.line_id)
 

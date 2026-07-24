@@ -36,6 +36,7 @@ def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
     _load_canvas_ids(design_dictionary)  # must be done after changing the IDs by _load_canvas_elements().
     _load_log_config(design_dictionary)
     custom_text.CustomText.update_highlight_tags_in_all_texts()
+    custom_text.CustomText.highlight_brackets_in_all_texts()
 
 
 def _load_control_data(design_dictionary: dict[str, Any]) -> None:

@@ -1,6 +1,5 @@
 """All methods to change the font sizes of the text in the canvas at zoom."""
 
-import constants
 from elements import (
     condition_action,
     global_actions_clocked,
@@ -52,13 +51,13 @@ def _apply_fontsize_to_canvas_items(used_label_fontsize: float) -> None:
 def _apply_font_to_state_action(widget, used_label_fontsize: float) -> None:
     widget.label_id.configure(font=("Arial", int(used_label_fontsize)))
     widget.text_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.text_id)
+    widget.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
 
 
 def _apply_font_to_state_comment(widget, used_label_fontsize: float) -> None:
     widget.label_id.configure(font=("Arial", int(used_label_fontsize)))
     widget.text_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.text_id)
+    widget.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
 
 
 def _apply_font_to_condition_action(widget, used_label_fontsize: float) -> None:
@@ -66,8 +65,8 @@ def _apply_font_to_condition_action(widget, used_label_fontsize: float) -> None:
     widget.action_label.configure(font=("Arial", int(used_label_fontsize)))
     widget.condition_id.configure(font=("Courier", int(project_manager.fontsize)))
     widget.action_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.condition_id)
-    _configure_highlight_tags(widget.action_id)
+    widget.condition_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
+    widget.action_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
 
 
 def _apply_font_to_global_actions_clocked(widget, used_label_fontsize: float) -> None:
@@ -75,25 +74,17 @@ def _apply_font_to_global_actions_clocked(widget, used_label_fontsize: float) ->
     widget.label_after.configure(font=("Arial", int(used_label_fontsize)))
     widget.text_before_id.configure(font=("Courier", int(project_manager.fontsize)))
     widget.text_after_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.text_before_id)
-    _configure_highlight_tags(widget.text_after_id)
+    widget.text_before_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
+    widget.text_after_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
 
 
 def _apply_font_to_global_actions_combinatorial(widget, used_label_fontsize: float) -> None:
     widget.label.configure(font=("Arial", int(used_label_fontsize)))
     widget.text_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.text_id)
+    widget.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
 
 
 def _apply_font_to_state_actions_default(widget, used_label_fontsize: float) -> None:
     widget.label.configure(font=("Arial", int(used_label_fontsize)))
     widget.text_id.configure(font=("Courier", int(project_manager.fontsize)))
-    _configure_highlight_tags(widget.text_id)
-
-
-def _configure_highlight_tags(text_widget) -> None:
-    for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
-        text_widget.tag_configure(
-            highlight_tag_name,
-            font=("Courier", int(project_manager.fontsize), "normal"),
-        )
+    widget.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

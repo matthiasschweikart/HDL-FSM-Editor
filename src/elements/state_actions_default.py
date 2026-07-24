@@ -53,7 +53,7 @@ class StateActionsDefault:
         )
         StateActionsDefault.ref_dict[self.window_id] = self
         self.text_id.insert("1.0", action)
-        self.text_id.format(None)
+        self.text_id.format("element-insertion")
 
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())

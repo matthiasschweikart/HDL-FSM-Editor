@@ -68,9 +68,9 @@ class GlobalActionsClocked:
         )
         GlobalActionsClocked.ref_dict[self.window_id] = self
         self.text_before_id.insert("1.0", before)
-        self.text_before_id.format(None)
+        self.text_before_id.format("element-insertion")
         self.text_after_id.insert("1.0", after)
-        self.text_after_id.format(None)
+        self.text_after_id.format("element-insertion")
         self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
         self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
         self.frame_id.bind(

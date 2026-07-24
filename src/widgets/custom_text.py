@@ -26,6 +26,7 @@ from widgets import custom_text_linting
 
 from . import config
 from .code_editor import CodeEditor
+from .custom_text_brackets import BracketHighlighter
 
 
 class CustomText(CodeEditor):
@@ -40,23 +41,39 @@ class CustomText(CodeEditor):
     written_variables_of_all_windows = {}
     selection_is_active = False  # True, when a selection exists in any CustomText window.
 
+    BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST = ["green", "blue", "cyan", "brown"]
+    BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST = [
+        f"bracket_color_{position}{index}"
+        for index in range(len(BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST))
+        for position in ("start", "end")
+    ]
+    BRACKET_HIGHLIGHTING_NAME_BOLD_LIST = [
+        "bracket_color_wrong",
+    ]
+
     def __init__(self, *args, text_type, wrap=tk.NONE, **kwargs) -> None:
         """A text widget that report on internal widget commands"""
         super().__init__(*args, wrap=wrap, **kwargs)
+        # create a proxy for the underlying widget
+        self._orig = self._w + "_orig"
+        self.tk.call("rename", self._w, (self._orig))
+        self.tk.createcommand(self._w, self._proxy)
         self.text_type = text_type
         # text_type is in:
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         self.update_highlight_after_id = None
-        self.overwrite = None
-        # create a proxy for the underlying widget
-        self._orig = self._w + "_orig"
-        self.tk.call("rename", self._w, self._orig)
-        self.tk.createcommand(self._w, self._proxy)
+        self.format_after_id = None
+        self.overwrite = False
+        self.bracket_highlighter = BracketHighlighter(
+            self,
+            normal_tag_names=CustomText.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST,
+            normal_colors=CustomText.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST,
+        )
         # Overwrites the default control-o = "insert a new line", needed for opening a new file:
         self.bind("<Control-o>", lambda event: self._open())
-        self.bind("<Key>", self.format_after_idle)
-        self.bind("<Button-1>", lambda event: self._dehighlight_in_all_texts())  # created by HDL/log-links.
+        self.bind("<Button-1>", lambda event: self._dehighlight_in_all_texts())
         self.bind("<Double-Button-1>", lambda event: self._highlight_in_all_texts())
+        self.bind("<Key>", self.format_after_idle)
         self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
         self.bind("<Control-C>", self._toggle_comment)
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
@@ -69,7 +86,32 @@ class CustomText(CodeEditor):
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
         self._define_text_tags(kwargs.get("font"))
-        self.format_after_id = None
+
+    def _define_text_tags(self, font):
+        self.tag_configure("message_red", foreground="red")
+        self.tag_configure("message_green", foreground="green")
+        self.tag_configure("highlight", background="orange")
+        self.tag_configure("generated_entity_bg", background="#F5E6D3")  # Pale brown
+        self.tag_configure("generated_arch_bg", background="#FFF9CC")  # Pale yellow
+        self.configure_hdl_text_tags(font)
+
+    def configure_hdl_text_tags(self, font):
+        """Prepare syntax highlighting format tags for custom_text."""
+        for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
+            self.tag_configure(
+                highlight_tag_name,
+                foreground=config.HIGHLIGHT_COLORS[highlight_tag_name],
+                font=(
+                    *font,
+                    "normal",
+                ),
+            )
+        for index, name in enumerate(CustomText.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST):
+            self.tag_configure(
+                name, foreground=CustomText.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST[index // 2], font=(*font, "normal")
+            )
+        for name in CustomText.BRACKET_HIGHLIGHTING_NAME_BOLD_LIST:
+            self.tag_configure(name, foreground="red", font=(*font, "bold"))
 
     def _proxy(self, command, *args) -> None:
         cmd = (self._orig, command) + args
@@ -100,7 +142,7 @@ class CustomText(CodeEditor):
                 self._remove_comment_from_line(line_number, line_content, comment_string)
             else:  # At least one line is not commented, so add the comment string to all lines.
                 self._change_line_into_a_comment(line_number, line_content, comment_string, start_line)
-        self.format_after_idle(event)
+        self.format_after_idle(None)
         return "break"
 
     def _get_range_of_lines_to_comment_or_uncomment(self) -> tuple[int, int]:
@@ -142,27 +184,6 @@ class CustomText(CodeEditor):
             comment_string_end_index += 1
         self.delete(f"{line_number}.{comment_string_start_index}", f"{line_number}.{comment_string_end_index}")
 
-    def _define_text_tags(self, font):
-        self.tag_configure("message_red", foreground="red")
-        self.tag_configure("message_green", foreground="green")
-        self.tag_configure("highlight", background="orange")
-        self.tag_configure("generated_entity_bg", background="#F5E6D3")  # Pale brown
-        self.tag_configure("generated_arch_bg", background="#FFF9CC")  # Pale yellow
-        self._provide_hdl_text_tags_for_this_font(*font)
-
-    def _provide_hdl_text_tags_for_this_font(self, fontname, fontsize):
-        """Prepare syntax highlighting format tags for custom_text."""
-        for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
-            self.tag_configure(
-                highlight_tag_name,
-                foreground=config.HIGHLIGHT_COLORS[highlight_tag_name],
-                font=(
-                    fontname,
-                    fontsize,
-                    "normal",
-                ),
-            )
-
     def edit_in_external_editor(self) -> None:
         """Open current text in external editor (blocking), then replace content with edited result."""
         with tempfile.NamedTemporaryFile(
@@ -194,7 +215,7 @@ class CustomText(CodeEditor):
             self._delete_character_if_overwrite_mode(event)
             if self.format_after_id is not None:
                 self.after_cancel(self.format_after_id)
-            self.format_after_id = self.after_idle(self.format, event)
+            self.format_after_id = self.after(200, self.format, event)  # after_idle would slow down cursor movement.
 
     def _delete_character_if_overwrite_mode(self, event):
         if (
@@ -208,6 +229,10 @@ class CustomText(CodeEditor):
 
     def format(self, event) -> None:
         """Update text box size and highlighting."""
+        # event is "element-insertion" when an element is inserted manually or by loading a file.
+        # event is None when CodeEditor (handles Ctrl-v, Ctrl-x, Ctrl-Delete, Ctrl-Backspace) modified the text.
+        # event is None when an external editor modified the text.
+        # event is None when Ctrl-z, Ctrl-Z were pressed and undo()/redo() from this file are called.
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
         if self.text_type in ("declarations"):
@@ -226,14 +251,20 @@ class CustomText(CodeEditor):
                 CustomText.read_variables_of_all_windows[self],
                 CustomText.written_variables_of_all_windows[self],
             )
-        if event is not None:
-            # event is None when format() is called from __init__, which happens when the design is load from a file.
-            # In this case update_highlight_tags_in_all_texts() is called from file_handling_load.py and must not
-            # be called here from each text widget (which would slow down loading).
-            self.update_highlight_tags_in_all_texts()
-            if event.keysym == "BackSpace":
-                # In order to keep the mouse-pointer inside the shrinking window:
-                self._move_mouse_to_insert_cursor()
+        if event == "element-insertion":
+            # An element is inserted manually or by loading a file.
+            # If it is manually inserted, update_highlight_tags_in_all_texts() must not be called as the element is
+            # still empty (but calling it would not slow down the program).
+            # But when a file is loaded, update_highlight_tags_in_all_texts() should not be called each time a
+            # element is inserted, as this would slow down the loading of the file.
+            # In this case update_highlight_tags_in_all_texts() and highlight_brackets() are not called here but
+            # called from file_handling_load.py after the whole file is loaded.
+            return
+        self.update_highlight_tags_in_all_texts()
+        if event is not None and event.keysym == "BackSpace":
+            # In order to keep the mouse-pointer inside the shrinking window:
+            self._move_mouse_to_insert_cursor()
+        self.bracket_highlighter.highlight_brackets(project_manager.language.get())
 
     def _move_mouse_to_insert_cursor(self) -> None:
         bbox_char = self.bbox("insert")
@@ -280,6 +311,7 @@ class CustomText(CodeEditor):
             for text_widget in all_custom_text_widgets:
                 text_widget.tag_remove("highlight", "1.0", tk.END)
             CustomText.selection_is_active = False
+            self.format_after_idle(None)
 
     def _highlight_in_all_texts(self) -> None:
         self.after_idle(self._highlight_in_all_texts_after_idle)
@@ -481,6 +513,14 @@ class CustomText(CodeEditor):
             text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
         for text_ref in cls.declaration_text_widgets():
             text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
+
+    @classmethod
+    def highlight_brackets_in_all_texts(cls) -> None:
+        """Update the highlight tags for brackets"""
+        for text_ref in CustomText.read_variables_of_all_windows:
+            text_ref.bracket_highlighter.highlight_brackets(project_manager.language.get())
+        for text_ref in cls.declaration_text_widgets():
+            text_ref.bracket_highlighter.highlight_brackets(project_manager.language.get())
 
     @classmethod
     def refresh_highlighting_in_all_declaration_widgets(cls) -> None:
