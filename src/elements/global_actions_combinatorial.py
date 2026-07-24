@@ -174,3 +174,11 @@ class GlobalActionsCombinatorial:
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all combinatorial global-actions windows."""
+        for global_action_combinatorial in GlobalActionsCombinatorial.ref_dict.values():
+            global_action_combinatorial.label.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            global_action_combinatorial.text_id.configure(font=("Courier", int(project_manager.fontsize)))
+            global_action_combinatorial.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

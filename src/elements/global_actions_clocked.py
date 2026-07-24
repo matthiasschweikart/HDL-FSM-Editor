@@ -238,3 +238,16 @@ class GlobalActionsClocked:
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all clocked global-actions windows."""
+        for global_action_clocked in GlobalActionsClocked.ref_dict.values():
+            global_action_clocked.label_before.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            global_action_clocked.label_after.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            global_action_clocked.text_before_id.configure(font=("Courier", int(project_manager.fontsize)))
+            global_action_clocked.text_before_id.configure_hdl_text_tags(
+                font=("Courier", int(project_manager.fontsize))
+            )
+            global_action_clocked.text_after_id.configure(font=("Courier", int(project_manager.fontsize)))
+            global_action_clocked.text_after_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

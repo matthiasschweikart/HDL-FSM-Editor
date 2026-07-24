@@ -304,3 +304,11 @@ class States:
             if "grid_line" not in project_manager.canvas.gettags(overlapping_item):
                 return True
         return False
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all state windows."""
+        for state in States.ref_dict.values():
+            state.label_id.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            state.text_id.configure(font=("Courier", int(project_manager.fontsize)))
+            state.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

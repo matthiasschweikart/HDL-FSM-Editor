@@ -180,3 +180,11 @@ class StateActionsDefault:
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all state-actions-default windows."""
+        for state_action in StateActionsDefault.ref_dict.values():
+            state_action.label.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            state_action.text_id.configure(font=("Courier", int(project_manager.fontsize)))
+            state_action.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

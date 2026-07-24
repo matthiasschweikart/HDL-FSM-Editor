@@ -204,3 +204,11 @@ class StateComment:
                     ],
                     comment="",
                 )
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all state-comment windows."""
+        for state_comment in StateComment.ref_dict.values():
+            state_comment.label_id.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            state_comment.text_id.configure(font=("Courier", int(project_manager.fontsize)))
+            state_comment.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

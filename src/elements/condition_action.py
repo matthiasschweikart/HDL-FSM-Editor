@@ -316,3 +316,14 @@ class ConditionAction:
             line_tags=line_tags,
         )
         condition_action_ref.condition_id.focus_set()  # Puts the text input cursor into the text box.
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all condition-action windows."""
+        for condition_action in ConditionAction.ref_dict.values():
+            condition_action.condition_label.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            condition_action.condition_id.configure(font=("Courier", int(project_manager.fontsize)))
+            condition_action.condition_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
+            condition_action.action_label.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            condition_action.action_id.configure(font=("Courier", int(project_manager.fontsize)))
+            condition_action.action_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))

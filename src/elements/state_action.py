@@ -221,3 +221,11 @@ class StateAction:
             line_tags=line_tags,
             action="",
         )
+
+    @classmethod
+    def apply_new_font_size(cls) -> None:
+        """Apply new font size to all state-action windows."""
+        for state_action in StateAction.ref_dict.values():
+            state_action.label_id.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
+            state_action.text_id.configure(font=("Courier", int(project_manager.fontsize)))
+            state_action.text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
