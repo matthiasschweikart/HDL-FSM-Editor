@@ -284,12 +284,12 @@ class CustomText(CodeEditor):
         max_line_length = 0
         if self not in [
             project_manager.tab_interface_ref.interface_generics_text,
-            project_manager.tab_interface_ref.interface_package_text,
+            project_manager.tab_interface_ref.interface_packages_text,
             project_manager.tab_interface_ref.interface_ports_text,
             project_manager.tab_internals_ref.internals_architecture_text,
             project_manager.tab_internals_ref.internals_process_clocked_text,
             project_manager.tab_internals_ref.internals_process_combinatorial_text,
-            project_manager.tab_internals_ref.internals_package_text,
+            project_manager.tab_internals_ref.internals_packages_text,
         ]:
             for c in text:
                 if c != "\n":
@@ -534,10 +534,10 @@ class CustomText(CodeEditor):
         """Text widgets that show HDL declarations (interface/internals). Used for language-aware highlighting."""
         return [
             project_manager.tab_interface_ref.interface_generics_text,
-            project_manager.tab_interface_ref.interface_package_text,
+            project_manager.tab_interface_ref.interface_packages_text,
             project_manager.tab_interface_ref.interface_ports_text,
+            project_manager.tab_internals_ref.internals_packages_text,
             project_manager.tab_internals_ref.internals_architecture_text,
             project_manager.tab_internals_ref.internals_process_clocked_text,
             project_manager.tab_internals_ref.internals_process_combinatorial_text,
-            project_manager.tab_internals_ref.internals_package_text,
         ]

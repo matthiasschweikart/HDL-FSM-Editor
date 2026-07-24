@@ -44,7 +44,7 @@ def _save_control_data(design_dictionary: dict[str, Any]) -> None:
 
 
 def _save_interface_data(design_dictionary: dict[str, Any]) -> None:
-    design_dictionary["interface_package"] = project_manager.tab_interface_ref.interface_package_text.get(
+    design_dictionary["interface_package"] = project_manager.tab_interface_ref.interface_packages_text.get(
         "1.0", f"{tk.END}-1 chars"
     )
     design_dictionary["interface_generics"] = project_manager.tab_interface_ref.interface_generics_text.get(
@@ -56,7 +56,7 @@ def _save_interface_data(design_dictionary: dict[str, Any]) -> None:
 
 
 def _save_internals_data(design_dictionary: dict[str, Any]) -> None:
-    design_dictionary["internals_package"] = project_manager.tab_internals_ref.internals_package_text.get(
+    design_dictionary["internals_package"] = project_manager.tab_internals_ref.internals_packages_text.get(
         "1.0", f"{tk.END}-1 chars"
     )
     design_dictionary["internals_architecture"] = project_manager.tab_internals_ref.internals_architecture_text.get(

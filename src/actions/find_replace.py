@@ -82,7 +82,7 @@ class FindReplace:
             text_fields.append(
                 {
                     "tab": GuiTab.INTERFACE,
-                    "ref": project_manager.tab_interface_ref.interface_package_text,
+                    "ref": project_manager.tab_interface_ref.interface_packages_text,
                     "update": "Ports",
                 }
             )
@@ -98,7 +98,11 @@ class FindReplace:
         )
         if project_manager.language.get() == "VHDL":
             text_fields.append(
-                {"tab": GuiTab.INTERNALS, "ref": project_manager.tab_internals_ref.internals_package_text, "update": ""}
+                {
+                    "tab": GuiTab.INTERNALS,
+                    "ref": project_manager.tab_internals_ref.internals_packages_text,
+                    "update": "",
+                }
             )
         text_fields.append(
             {

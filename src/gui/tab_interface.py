@@ -26,7 +26,7 @@ class TabInterface:
         interface_package_info = ttk.Label(
             self.interface_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
-        self.interface_package_text = custom_text.CustomText(
+        self.interface_packages_text = custom_text.CustomText(
             self.interface_package_frame,
             text_type="package",
             height=3,
@@ -35,15 +35,15 @@ class TabInterface:
             font=("Courier", 10),
             wrap=tk.WORD,
         )
-        self.interface_package_text.insert("1.0", "library ieee;\nuse ieee.std_logic_1164.all;")
-        self.interface_package_text.update_highlight_tags()
+        self.interface_packages_text.insert("1.0", "library ieee;\nuse ieee.std_logic_1164.all;")
+        self.interface_packages_text.update_highlight_tags()
         interface_package_scroll = ttk.Scrollbar(
-            self.interface_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_package_text.yview
+            self.interface_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.interface_packages_text.yview
         )
-        self.interface_package_text.config(yscrollcommand=interface_package_scroll.set)
+        self.interface_packages_text.config(yscrollcommand=interface_package_scroll.set)
         interface_package_label.grid(row=0, column=0, sticky="wns")
         interface_package_info.grid(row=0, column=0, sticky=tk.E)
-        self.interface_package_text.grid(row=1, column=0, sticky="nsew")
+        self.interface_packages_text.grid(row=1, column=0, sticky="nsew")
         interface_package_scroll.grid(row=1, column=1, sticky="nsew")
 
         interface_generics_frame = ttk.Frame(self.paned_window)
@@ -98,12 +98,12 @@ class TabInterface:
         self.paned_window.add(interface_generics_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERFACE.value)
 
-        self.interface_package_text.bind("<Control-z>", lambda event: self.interface_package_text.undo())
-        self.interface_package_text.bind("<Control-Z>", lambda event: self.interface_package_text.redo())
-        self.interface_package_text.bind(
-            "<Control-e>", lambda event: self.interface_package_text.edit_in_external_editor()
+        self.interface_packages_text.bind("<Control-z>", lambda event: self.interface_packages_text.undo())
+        self.interface_packages_text.bind("<Control-Z>", lambda event: self.interface_packages_text.redo())
+        self.interface_packages_text.bind(
+            "<Control-e>", lambda event: self.interface_packages_text.edit_in_external_editor()
         )
-        self.interface_package_text.bind(
+        self.interface_packages_text.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
         self.interface_generics_text.bind("<Control-z>", lambda event: self.interface_generics_text.undo())
@@ -126,7 +126,7 @@ class TabInterface:
         if self._abort_after_storing_new_height():
             return
         if project_manager.language.get() == "VHDL":
-            text_list = [self.interface_package_text, self.interface_ports_text, self.interface_generics_text]
+            text_list = [self.interface_packages_text, self.interface_ports_text, self.interface_generics_text]
         else:
             text_list = [self.interface_ports_text, self.interface_generics_text]
         sash_moving.SashMover(self.paned_window, text_list)

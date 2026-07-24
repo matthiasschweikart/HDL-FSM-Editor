@@ -129,7 +129,7 @@ class HdlGeneration:
         entity = ""
 
         package_statements = hdl_generation_library.get_text_from_text_widget(
-            project_manager.tab_interface_ref.interface_package_text
+            project_manager.tab_interface_ref.interface_packages_text
         )
         entity += package_statements
         number_of_new_lines = package_statements.count("\n")
@@ -138,7 +138,7 @@ class HdlGeneration:
             file_line_number,
             "custom_text_in_interface_tab",
             number_of_new_lines,
-            project_manager.tab_interface_ref.interface_package_text,
+            project_manager.tab_interface_ref.interface_packages_text,
         )
         file_line_number += number_of_new_lines
 

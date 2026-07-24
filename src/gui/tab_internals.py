@@ -27,7 +27,7 @@ class TabInternals:
         interface_package_linfo = ttk.Label(
             self.internals_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
         )
-        self.internals_package_text = custom_text.CustomText(
+        self.internals_packages_text = custom_text.CustomText(
             self.internals_package_frame,
             text_type="package",
             height=3,
@@ -37,12 +37,12 @@ class TabInternals:
             wrap=tk.WORD,
         )
         internals_package_scroll = ttk.Scrollbar(
-            self.internals_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.internals_package_text.yview
+            self.internals_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.internals_packages_text.yview
         )
-        self.internals_package_text.config(yscrollcommand=internals_package_scroll.set)
+        self.internals_packages_text.config(yscrollcommand=internals_package_scroll.set)
         internals_package_label.grid(row=0, column=0, sticky=tk.W)
         interface_package_linfo.grid(row=0, column=0, sticky=tk.E)
-        self.internals_package_text.grid(row=1, column=0, sticky="nsew")
+        self.internals_packages_text.grid(row=1, column=0, sticky="nsew")
         internals_package_scroll.grid(row=1, column=1, sticky="nsew")
 
         internals_architecture_frame = ttk.Frame(self.paned_window)
@@ -147,12 +147,12 @@ class TabInternals:
         self.paned_window.add(internals_process_combinatorial_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERNALS.value)
 
-        self.internals_package_text.bind("<Control-z>", lambda event: self.internals_package_text.undo())
-        self.internals_package_text.bind("<Control-Z>", lambda event: self.internals_package_text.redo())
-        self.internals_package_text.bind(
-            "<Control-e>", lambda event: self.internals_package_text.edit_in_external_editor()
+        self.internals_packages_text.bind("<Control-z>", lambda event: self.internals_packages_text.undo())
+        self.internals_packages_text.bind("<Control-Z>", lambda event: self.internals_packages_text.redo())
+        self.internals_packages_text.bind(
+            "<Control-e>", lambda event: self.internals_packages_text.edit_in_external_editor()
         )
-        self.internals_package_text.bind(
+        self.internals_packages_text.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
 
@@ -197,7 +197,7 @@ class TabInternals:
             return
         if project_manager.language.get() == "VHDL":
             text_list = [
-                self.internals_package_text,
+                self.internals_packages_text,
                 self.internals_architecture_text,
                 self.internals_process_clocked_text,
                 self.internals_process_combinatorial_text,

@@ -16,7 +16,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     architecture = ""
 
     package_statements = hdl_generation_library.get_text_from_text_widget(
-        project_manager.tab_internals_ref.internals_package_text
+        project_manager.tab_internals_ref.internals_packages_text
     )
     architecture += package_statements
     number_of_new_lines = package_statements.count("\n")
@@ -25,7 +25,7 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
         file_line_number,
         "custom_text_in_internals_tab",
         number_of_new_lines,
-        project_manager.tab_internals_ref.internals_package_text,
+        project_manager.tab_internals_ref.internals_packages_text,
     )
     file_line_number += number_of_new_lines
 

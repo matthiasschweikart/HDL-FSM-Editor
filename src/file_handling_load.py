@@ -63,7 +63,7 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
 
 def _load_interface_data(design_dictionary: dict[str, Any]) -> None:
     """Load interface data including package, generics, and ports text."""
-    project_manager.tab_interface_ref.interface_package_text.insert("1.0", design_dictionary["interface_package"])
+    project_manager.tab_interface_ref.interface_packages_text.insert("1.0", design_dictionary["interface_package"])
     project_manager.tab_interface_ref.interface_generics_text.insert("1.0", design_dictionary["interface_generics"])
     project_manager.tab_interface_ref.interface_ports_text.insert("1.0", design_dictionary["interface_ports"])
     project_manager.tab_interface_ref.interface_generics_text.update_custom_text_class_generics_list()
@@ -72,7 +72,7 @@ def _load_interface_data(design_dictionary: dict[str, Any]) -> None:
 
 def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
     """Load internals data including package, architecture, and process text."""
-    project_manager.tab_internals_ref.internals_package_text.insert("1.0", design_dictionary["internals_package"])
+    project_manager.tab_internals_ref.internals_packages_text.insert("1.0", design_dictionary["internals_package"])
     project_manager.tab_internals_ref.internals_architecture_text.insert(
         "1.0", design_dictionary["internals_architecture"]
     )
