@@ -148,7 +148,6 @@ class TabControl:
 
         self.diagram_background_color = tk.StringVar(value="white")
         project_manager.diagram_background_color = self.diagram_background_color
-        self.diagram_background_color.trace_add("write", lambda *args: self._change_color_of_diagram_background())
         diagram_background_color_label = ttk.Label(control_frame, text="Diagram background color:", padding=5)
         diagram_background_color_entry = ttk.Entry(control_frame, textvariable=self.diagram_background_color, width=80)
         diagram_background_color_button = ttk.Button(

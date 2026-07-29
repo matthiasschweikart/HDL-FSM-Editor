@@ -49,6 +49,7 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.generate_path_value.set(design_dictionary["generate_path"])
     project_manager.additional_sources_value.set(design_dictionary.get("additional_sources", ""))
     project_manager.working_directory_value.set(design_dictionary.get("working_directory", ""))
+    project_manager.diagram_background_color.set(design_dictionary.get("diagram_background_color", "white"))
     # For Verilog and SystemVerilog, always use single file mode regardless of what's in the file
     if design_dictionary["language"] in ["Verilog", "SystemVerilog"]:
         project_manager.select_file_number_text.set(1)
@@ -91,7 +92,6 @@ def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
 def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:
     """Load canvas-related data including colors, dimensions, and UI state."""
     # Load diagram background color
-    project_manager.diagram_background_color.set(design_dictionary.get("diagram_background_color", "white"))
     project_manager.canvas.configure(bg=project_manager.diagram_background_color.get())
 
     # Load canvas visual parameters

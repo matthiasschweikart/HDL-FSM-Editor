@@ -35,6 +35,7 @@ def _save_control_data(design_dictionary: dict[str, Any]) -> None:
     design_dictionary["generate_path"] = project_manager.generate_path_value.get()
     design_dictionary["additional_sources"] = project_manager.additional_sources_value.get()
     design_dictionary["working_directory"] = project_manager.working_directory_value.get()
+    design_dictionary["diagram_background_color"] = project_manager.diagram_background_color.get()
     design_dictionary["number_of_files"] = project_manager.select_file_number_text.get()
     design_dictionary["reset_signal_name"] = project_manager.reset_signal_name.get()
     design_dictionary["clock_signal_name"] = project_manager.clock_signal_name.get()
@@ -80,7 +81,6 @@ def _save_log_config(design_dictionary: dict[str, Any]) -> None:
 
 
 def _save_canvas_data(design_dictionary: dict[str, Any]) -> None:
-    design_dictionary["diagram_background_color"] = project_manager.diagram_background_color.get()
     design_dictionary["state_number"] = state.States.state_number
     design_dictionary["transition_number"] = transition.TransitionLine.transition_number
     design_dictionary["connector_number"] = connector.ConnectorInstance.connector_number

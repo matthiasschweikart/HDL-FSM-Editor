@@ -66,6 +66,7 @@ class ProjectManager:
         self._previous_file: str = ""
         self._generate_path_value: tk.StringVar = None
         self._working_directory_value: tk.StringVar = None
+        self._diagram_background_color: tk.StringVar = None
         self._additional_sources_value: tk.StringVar = None
         self._select_file_number_text: tk.IntVar = None
         self._compile_cmd: tk.Entry = None
@@ -471,13 +472,23 @@ class ProjectManager:
 
     @property
     def working_directory_value(self) -> tk.StringVar:
-        """Get the reset signal name StringVar."""
+        """Get the working_directory StringVar."""
         return self._working_directory_value
 
     @working_directory_value.setter
     def working_directory_value(self, value: tk.StringVar) -> None:
-        """Set the reset signal name StringVar."""
+        """Set the working_directory StringVar."""
         self._working_directory_value = value
+
+    @property
+    def diagram_background_color(self) -> tk.StringVar:
+        """Get the diagram background color StringVar."""
+        return self._diagram_background_color
+
+    @diagram_background_color.setter
+    def diagram_background_color(self, value: tk.StringVar) -> None:
+        """Set the diagram background color StringVar."""
+        self._diagram_background_color = value
 
     @property
     def additional_sources_value(self) -> tk.StringVar:
