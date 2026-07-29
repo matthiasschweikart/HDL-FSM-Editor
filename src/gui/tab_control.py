@@ -305,7 +305,7 @@ class TabControl:
                 + "' is not a valid color definition, using 'white' instead."
             )
 
-    def choose_bg_color(self) -> None:  # also called from canvas_editing.py
+    def choose_bg_color(self) -> None:
         """Open color picker and set canvas background to the chosen color."""
         new_color = ColorChanger(project_manager.canvas.cget("bg")).ask_color()
         if new_color is not None:
