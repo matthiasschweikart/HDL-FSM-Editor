@@ -7,7 +7,6 @@ import os
 import file_handling
 import file_handling_load
 import file_handling_save
-from constants import GuiTab
 from project_manager import project_manager
 
 
@@ -33,7 +32,8 @@ class UndoHandling:
 
     def _add_changes_to_design_stack(self) -> None:
         self._remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
-        new_design = file_handling_save.save_design_to_dict()
+        new_design = {}
+        file_handling_save.save_canvas_data(new_design)
         visible_center = self._get_visible_center()
         self.stack.append([new_design, visible_center])
         self.stack_write_pointer += 1
@@ -80,15 +80,9 @@ class UndoHandling:
             project_manager.redo_button.config(state="enabled")
 
     def _set_diagram_to_version_selected_by_stack_pointer(self) -> None:
-        project_manager.tab_control_ref.deactivate_traces()  # Loading the design shall not create a new stack entry.
-        # Remove the old design:
-        current_file = project_manager.current_file
-        file_handling.clear_design()
-        project_manager.current_file = current_file
-        project_manager.notebook.show_tab(GuiTab.DIAGRAM)
+        file_handling.clear_diagram()
         design, visible_center = self.stack[self.stack_write_pointer]
-        file_handling_load.load_design_from_dict(design)
-        project_manager.tab_control_ref.activate_traces()
+        file_handling_load.load_diagram_data(design)
         self._shift_visible_center_to_window_center(visible_center)
         project_manager.grid_drawer.draw_grid()
 

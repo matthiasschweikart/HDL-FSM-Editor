@@ -89,6 +89,7 @@ def clear_design():
     project_manager.module_name.set("")
     project_manager.reset_signal_name.set("")
     project_manager.clock_signal_name.set("")
+    project_manager.include_timestamp_in_output.set(True)
     project_manager.tab_interface_ref.interface_packages_text.delete("1.0", tk.END)
     project_manager.tab_interface_ref.interface_generics_text.delete("1.0", tk.END)
     project_manager.tab_interface_ref.interface_ports_text.delete("1.0", tk.END)
@@ -99,6 +100,11 @@ def clear_design():
     project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.NORMAL)
     project_manager.tab_hdl_ref.hdl_frame_text.delete("1.0", tk.END)
     project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
+    clear_diagram()
+
+
+def clear_diagram():
+    """Clear the current design from canvas and all variables; reset to initial state."""
     project_manager.canvas.delete("all")
     condition_action.ConditionAction.conditionaction_id = 0
     condition_action.ConditionAction.ref_dict = {}
@@ -120,7 +126,6 @@ def clear_design():
     project_manager.fontsize = 10
     project_manager.label_fontsize = 8
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
-    project_manager.include_timestamp_in_output.set(True)
 
 
 def save_as() -> None:

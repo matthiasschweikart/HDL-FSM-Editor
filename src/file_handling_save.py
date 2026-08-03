@@ -25,7 +25,7 @@ def save_design_to_dict() -> dict[str, Any]:
     _save_interface_data(design_dictionary)
     _save_internals_data(design_dictionary)
     _save_log_config(design_dictionary)
-    _save_canvas_data(design_dictionary)
+    save_canvas_data(design_dictionary)
     return design_dictionary
 
 
@@ -80,7 +80,8 @@ def _save_log_config(design_dictionary: dict[str, Any]) -> None:
     design_dictionary["regex_file_line_number_quote"] = project_manager.regex_file_line_number_quote
 
 
-def _save_canvas_data(design_dictionary: dict[str, Any]) -> None:
+def save_canvas_data(design_dictionary: dict[str, Any]) -> None:
+    """Save the canvas data to the given design dictionary."""
     design_dictionary["state_number"] = state.States.state_number
     design_dictionary["transition_number"] = transition.TransitionLine.transition_number
     design_dictionary["connector_number"] = connector.ConnectorInstance.connector_number

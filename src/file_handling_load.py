@@ -23,18 +23,23 @@ from widgets import custom_text
 
 def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
     """Load the design from the given design dictionary."""
-    custom_text.CustomText.read_variables_of_all_windows.clear()
-    custom_text.CustomText.written_variables_of_all_windows.clear()
     # Bring the notebook tab with the diagram into the foreground
     project_manager.notebook.show_tab(GuiTab.DIAGRAM)
 
     _load_control_data(design_dictionary)
     _load_interface_data(design_dictionary)
     _load_internals_data(design_dictionary)
+    load_diagram_data(design_dictionary)
+    _load_log_config(design_dictionary)
+
+
+def load_diagram_data(design_dictionary: dict[str, Any]) -> None:
+    """Load only the diagram from the given design dictionary."""
+    custom_text.CustomText.read_variables_of_all_windows.clear()
+    custom_text.CustomText.written_variables_of_all_windows.clear()
     _load_canvas_data(design_dictionary)
     _load_canvas_elements(design_dictionary)
     _load_canvas_ids(design_dictionary)  # must be done after changing the IDs by _load_canvas_elements().
-    _load_log_config(design_dictionary)
     custom_text.CustomText.update_highlight_tags_in_all_texts()
     custom_text.CustomText.highlight_brackets_in_all_texts()
 

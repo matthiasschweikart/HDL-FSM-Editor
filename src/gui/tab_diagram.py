@@ -145,6 +145,8 @@ class TabDiagram:
         canvas.bind("<Button-5>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-3>", canvas_view_rectangle.start_view_rectangle)
         canvas.bind("<Configure>", self._check_for_window_resize)
+        canvas.bind("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
+        canvas.bind("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
 
         self._create_font_for_state_names()
         grid_drawer = grid_drawing.GridDraw(canvas)

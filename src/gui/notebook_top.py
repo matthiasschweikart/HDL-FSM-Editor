@@ -32,19 +32,8 @@ class NotebookTop(ttk.Notebook):
         self.bind("<<NotebookTabChanged>>", lambda event: self._handle_notebook_tab_changed_event())
 
     def _handle_notebook_tab_changed_event(self) -> None:
-        self._enable_undo_redo_if_diagram_tab_is_active_else_disable()
         self._update_hdl_tab_if_necessary()
         self._if_hdl_tab_set_focus()
-
-    def _enable_undo_redo_if_diagram_tab_is_active_else_disable(self) -> None:
-        if self.index(self.select()) == 3:  # diagram-tab is active
-            project_manager.canvas.bind_all("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
-            project_manager.canvas.bind_all("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
-        else:
-            # necessary, because if you type Control-z when another tab is active,
-            # then in the diagram tab an undo would take place.
-            project_manager.canvas.unbind_all("<Control-z>")
-            project_manager.canvas.unbind_all("<Control-Z>")
 
     def _update_hdl_tab_if_necessary(self) -> None:
         if self.index(self.select()) == 4:  # HDL-tab is active
