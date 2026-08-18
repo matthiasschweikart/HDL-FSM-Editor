@@ -112,8 +112,6 @@ class ConditionAction:
                 event, self.action_label, self.window_id
             ),
         )
-        self.condition_id.bind("<Control-z>", lambda event: self.condition_id.undo())
-        self.condition_id.bind("<Control-Z>", lambda event: self.condition_id.redo())
         self.condition_id.bind("<Control-e>", lambda event: self._edit_condition_in_external_editor())
         self.condition_id.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
@@ -125,8 +123,6 @@ class ConditionAction:
             "<FocusOut>",
             lambda event: project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete()),
         )
-        self.action_id.bind("<Control-z>", lambda event: self.action_id.undo())
-        self.action_id.bind("<Control-Z>", lambda event: self.action_id.redo())
         self.action_id.bind("<Control-e>", lambda event: self._edit_action_in_external_editor())
         self.action_id.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.action_id.bind("<Control-s>", lambda event: self._update_action())  # Update self.text at "save".

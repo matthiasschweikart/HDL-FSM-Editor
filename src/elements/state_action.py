@@ -74,8 +74,6 @@ class StateAction:
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.label_id, self.window_id),
         )
-        self.text_id.bind("<Control-z>", lambda event: self.text_id.undo())
-        self.text_id.bind("<Control-Z>", lambda event: self.text_id.redo())
         self.text_id.bind("<Control-e>", lambda event: self._edit_in_external_editor())
         self.text_id.bind("<Control-s>", lambda event: self.update_text())
         self.text_id.bind("<Control-g>", lambda event: self.update_text())

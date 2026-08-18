@@ -76,6 +76,8 @@ class CustomText(CodeEditor):
         self.bind("<Key>", self.format_after_idle)
         self.bind("<Insert>", lambda event: self._toggle_overwrite())  # Switch between insert/overwrite mode.
         self.bind("<Control-C>", self._toggle_comment)
+        self.bind("<Control-z>", lambda event: self.undo())
+        self.bind("<Control-Z>", lambda event: self.redo())
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
         self.readable_ports_list = []
@@ -229,6 +231,7 @@ class CustomText(CodeEditor):
 
     def format(self, event) -> None:
         """Update text box size and highlighting."""
+        # event is the last of several key events when multiple keys are pressed in succession.
         # event is "element-insertion" when an element is inserted manually or by loading a file.
         # event is None when CodeEditor (handles Ctrl-v, Ctrl-x, Ctrl-Delete, Ctrl-Backspace) modified the text.
         # event is None when an external editor modified the text.

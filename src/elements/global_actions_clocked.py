@@ -91,8 +91,6 @@ class GlobalActionsClocked:
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.label_after, self.window_id),
         )
-        self.text_before_id.bind("<Control-z>", lambda event: self.text_before_id.undo())
-        self.text_before_id.bind("<Control-Z>", lambda event: self.text_before_id.redo())
         self.text_before_id.bind("<Control-e>", lambda event: self._edit_before_in_external_editor())
         self.text_before_id.bind("<Control-s>", lambda event: self.update_before())
         self.text_before_id.bind("<Control-g>", lambda event: self.update_before())
@@ -104,8 +102,6 @@ class GlobalActionsClocked:
             "<FocusOut>",
             lambda event: project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete()),
         )
-        self.text_after_id.bind("<Control-z>", lambda event: self.text_after_id.undo())
-        self.text_after_id.bind("<Control-Z>", lambda event: self.text_after_id.redo())
         self.text_after_id.bind("<Control-e>", lambda event: self._edit_after_in_external_editor())
         self.text_after_id.bind("<Control-s>", lambda event: self.update_after())
         self.text_after_id.bind("<Control-g>", lambda event: self.update_after())

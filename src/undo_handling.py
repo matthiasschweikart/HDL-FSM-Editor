@@ -61,10 +61,7 @@ class UndoHandling:
 
     def undo(self) -> None:
         """Restore diagram to previous version from stack (ignored when focus is on custom text)."""
-        # As <Control-z> is bound with the bind_all-command to the diagram, this binding must be ignored, when
-        # the focus is on a customtext-widget: Then a Control-z must change the text and must not change the diagram.
-        focus = str(project_manager.canvas.focus_get())
-        if "customtext" not in focus and self.stack_write_pointer > 1:
+        if self.stack_write_pointer > 1:
             # stack_write_pointer points at an empty place in stack.
             # stack_write_pointer-1 points at the version which contains the last change
             # stack_write_pointer-2 points at the version before the last change:

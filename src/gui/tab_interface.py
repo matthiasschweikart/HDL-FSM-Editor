@@ -98,24 +98,18 @@ class TabInterface:
         self.paned_window.add(interface_generics_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERFACE.value)
 
-        self.interface_packages_text.bind("<Control-z>", lambda event: self.interface_packages_text.undo())
-        self.interface_packages_text.bind("<Control-Z>", lambda event: self.interface_packages_text.redo())
         self.interface_packages_text.bind(
             "<Control-e>", lambda event: self.interface_packages_text.edit_in_external_editor()
         )
         self.interface_packages_text.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
-        self.interface_generics_text.bind("<Control-z>", lambda event: self.interface_generics_text.undo())
-        self.interface_generics_text.bind("<Control-Z>", lambda event: self.interface_generics_text.redo())
         self.interface_generics_text.bind(
             "<Control-e>", lambda event: self.interface_generics_text.edit_in_external_editor()
         )
         self.interface_generics_text.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
-        self.interface_ports_text.bind("<Control-z>", lambda event: self.interface_ports_text.undo())
-        self.interface_ports_text.bind("<Control-Z>", lambda event: self.interface_ports_text.redo())
         self.interface_ports_text.bind("<Control-e>", lambda event: self.interface_ports_text.edit_in_external_editor())
         self.interface_ports_text.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
