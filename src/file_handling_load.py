@@ -46,6 +46,7 @@ def load_diagram_data(design_dictionary: dict[str, Any]) -> None:
 
 def _load_control_data(design_dictionary: dict[str, Any]) -> None:
     """Load control data including module name, language, paths, and signal names."""
+    project_manager.tab_control_ref.deactivate_traces()
     project_manager.module_name.set(design_dictionary["modulename"])
     old_language = project_manager.language.get()
     project_manager.language.set(design_dictionary["language"])
@@ -65,6 +66,7 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.compile_cmd.set(design_dictionary["compile_cmd"])
     project_manager.edit_cmd.set(design_dictionary["edit_cmd"])
     project_manager.include_timestamp_in_output.set(design_dictionary.get("include_timestamp_in_output", True))
+    project_manager.tab_control_ref.activate_traces()
 
 
 def _load_interface_data(design_dictionary: dict[str, Any]) -> None:
