@@ -266,6 +266,7 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
 
 def _init_undo_stack():
     project_manager.undo_handling_ref.clear_stack()
+    project_manager.undo_handling_ref.design_has_changed()  # Initialize undo stack with current design
     title = project_manager.root.title()
     project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
 
