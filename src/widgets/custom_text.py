@@ -311,7 +311,7 @@ class CustomText(CodeEditor):
     def _dehighlight_in_all_texts(self) -> None:
         all_custom_text_widgets = self._get_all_custom_text_widgets()
         # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
-        # editable text widget. This is needed, when in "generated HDL" or "Compile Messages" (disabled text widgets)
+        # editable text widget. This check is needed, when in "generated HDL"/"Compile Messages" (disabled text widgets)
         # a line is clicked, in order to jump to the source code. In this case the highlight tag must not be
         # removed, because the user wants to see the highlighted line in the source code.
         if self.cget("state") == "normal":
@@ -319,6 +319,7 @@ class CustomText(CodeEditor):
                 text_widget.tag_remove("highlight", "1.0", tk.END)
             CustomText.selection_is_active = False
             self.format_after_idle(None)
+            project_manager.canvas.focus_set()  # canvas shall react to delete-key.
 
     def _highlight_in_all_texts(self) -> None:
         self.after_idle(self._highlight_in_all_texts_after_idle)
