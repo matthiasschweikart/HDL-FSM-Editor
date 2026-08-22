@@ -247,7 +247,11 @@ class CustomText(CodeEditor):
             self.update_custom_text_class_ports_list()
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
-        if self.text_type in ("condition", "action"):  # Only in this blocks variables are read or written.
+        if (
+            self.text_type in ("condition", "action")  # Only in this blocks variables are read or written.
+            and self in CustomText.read_variables_of_all_windows
+            and self in CustomText.written_variables_of_all_windows
+        ):
             custom_text_linting.CustomTextLinting(
                 text,
                 self.text_type,
