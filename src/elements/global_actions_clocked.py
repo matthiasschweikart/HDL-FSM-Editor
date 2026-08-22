@@ -20,8 +20,8 @@ class GlobalActionsClocked:
     ref_dict = {}
 
     def __init__(self, menu_x, menu_y, padding, tags, before, after) -> None:
-        self.text_before_content = before
-        self.text_after_content = after
+        self.old_before_text = ""
+        self.old_after_text = ""
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
@@ -71,48 +71,42 @@ class GlobalActionsClocked:
         self.text_before_id.format("element-insertion")
         self.text_after_id.insert("1.0", after)
         self.text_after_id.format("element-insertion")
-        self.frame_id.bind("<Enter>", lambda event: self._activate_frame())
-        self.frame_id.bind("<Leave>", lambda event: self._deactivate_frame())
+
+        self.canvas_enter_func_id = None
+
+        self.funcid_frame_enter = self.frame_id.bind("<Enter>", lambda event: self._start_editing())
         self.frame_id.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.frame_id, self.window_id),
         )
-        self.label_before.bind("<Enter>", lambda event: self._activate_window())
-        self.label_before.bind("<Leave>", lambda event: self._deactivate_window())
+
+        self.funcid_label_before_enter = self.label_before.bind("<Enter>", lambda event: self._start_editing())
         self.label_before.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(
                 event, self.label_before, self.window_id
             ),
         )
-        self.label_after.bind("<Enter>", lambda event: self._activate_window())
-        self.label_after.bind("<Leave>", lambda event: self._deactivate_window())
+        self.funcid_label_after_enter = self.label_after.bind("<Enter>", lambda event: self._start_editing())
         self.label_after.bind(
             "<Button-1>",
             lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.label_after, self.window_id),
         )
+
+        self.funcid_text_before_enter = self.text_before_id.bind("<Enter>", lambda event: self._start_editing())
         self.text_before_id.bind("<Control-e>", lambda event: self._edit_before_in_external_editor())
-        self.text_before_id.bind("<Control-s>", lambda event: self.update_before())
-        self.text_before_id.bind("<Control-g>", lambda event: self.update_before())
         self.text_before_id.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
         self.text_before_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
-        self.text_before_id.bind(
-            "<FocusOut>",
-            lambda event: project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete()),
-        )
+
+        self.funcid_text_after_enter = self.text_after_id.bind("<Enter>", lambda event: self._start_editing())
         self.text_after_id.bind("<Control-e>", lambda event: self._edit_after_in_external_editor())
-        self.text_after_id.bind("<Control-s>", lambda event: self.update_after())
-        self.text_after_id.bind("<Control-g>", lambda event: self.update_after())
         self.text_after_id.bind(
             "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
         )
         self.text_after_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
-        self.text_after_id.bind(
-            "<FocusOut>",
-            lambda event: project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete()),
-        )
+
         ids_list = (self.label_before, self.label_after, self.text_before_id, self.text_after_id)
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
@@ -138,26 +132,64 @@ class GlobalActionsClocked:
         canvas_editing.zoom_wheel(event, event_x, event_y)
 
     def _edit_before_in_external_editor(self):
+        self._update_old_before_text()
         self.text_before_id.edit_in_external_editor()
-        self.update_before()
 
     def _edit_after_in_external_editor(self):
+        self._update_old_after_text()
         self.text_after_id.edit_in_external_editor()
-        self.update_after()
 
-    def update_before(self):
-        """Sync text_before_content from widget for Leave-check and save_in_file."""
-        # Update self.text_before_content, so that the <Leave>-check in _deactivate_frame() does not signal a design-
-        # change and that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
-        # To ensure this, save_in_file() waits for idle.
-        self.text_before_content = self.text_before_id.get("1.0", tk.END)
+    def _update_old_before_text(self):
+        self.old_before_text = self.text_before_id.get("1.0", tk.END)
 
-    def update_after(self):
-        """Sync text_after_content from widget for Leave-check and save_in_file."""
-        # Update self.text_after_content, so that the <Leave>-check in _deactivate_frame() does not signal a design-
-        # change and that save_in_file() already reads the new text, entered into the textbox before Control-s/g.
-        # To ensure this, save_in_file() waits for idle.
-        self.text_after_content = self.text_after_id.get("1.0", tk.END)
+    def _update_old_after_text(self):
+        self.old_after_text = self.text_after_id.get("1.0", tk.END)
+
+    def _old_text_differs_from_current_text(self) -> bool:
+        return (
+            self.text_before_id.get("1.0", tk.END) != self.old_before_text
+            or self.text_after_id.get("1.0", tk.END) != self.old_after_text
+        )
+
+    def _start_editing(self) -> None:
+        if self.funcid_frame_enter is not None:
+            self.frame_id.unbind("<Enter>", self.funcid_frame_enter)
+            self.funcid_frame_enter = None
+        if self.funcid_label_before_enter is not None:
+            self.label_before.unbind("<Enter>", self.funcid_label_before_enter)
+            self.funcid_label_before_enter = None
+        if self.funcid_label_after_enter is not None:
+            self.label_after.unbind("<Enter>", self.funcid_label_after_enter)
+            self.funcid_label_after_enter = None
+        if self.funcid_text_before_enter is not None:
+            self.text_before_id.unbind("<Enter>", self.funcid_text_before_enter)
+            self.funcid_text_before_enter = None
+        if self.funcid_text_after_enter is not None:
+            self.text_after_id.unbind("<Enter>", self.funcid_text_after_enter)
+            self.funcid_text_after_enter = None
+        # The binding for 'Motion' must be added with '+', as 'store_mouse_position' is also bound to 'Motion':
+        self.canvas_enter_func_id = project_manager.canvas.bind("<Motion>", lambda event: self._stop_editing(), "+")
+        self._update_old_before_text()
+        self._update_old_after_text()
+        self._set_borderwidth(1, "WindowSelected.TFrame")
+        self.label_before.configure(style="WindowSelected.TLabel")
+        self.label_after.configure(style="WindowSelected.TLabel")
+
+    def _stop_editing(self) -> None:
+        project_manager.canvas.unbind("<Motion>", self.canvas_enter_func_id)
+        project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
+        if not custom_text.CustomText.selection_is_active:
+            project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
+        self.funcid_frame_enter = self.frame_id.bind("<Enter>", lambda event: self._start_editing())
+        self.funcid_label_before_enter = self.label_before.bind("<Enter>", lambda event: self._start_editing())
+        self.funcid_label_after_enter = self.label_after.bind("<Enter>", lambda event: self._start_editing())
+        self.funcid_text_before_enter = self.text_before_id.bind("<Enter>", lambda event: self._start_editing())
+        self.funcid_text_after_enter = self.text_after_id.bind("<Enter>", lambda event: self._start_editing())
+        if self._old_text_differs_from_current_text():
+            project_manager.undo_handling_ref.design_has_changed()
+        self._set_borderwidth(0, style="Window.TFrame")
+        self.label_before.configure(style="Window.TLabel")
+        self.label_after.configure(style="Window.TLabel")
 
     def _set_borderwidth(self, borderwidth: int, style: str) -> None:
         if project_manager.canvas.find_withtag(self.window_id):  # Delete causes leave-event, but window_id is invalid.
@@ -167,34 +199,6 @@ class GlobalActionsClocked:
             # Compensate for the borderwidth of the frame.
             pos = project_manager.canvas.coords(self.window_id)
             project_manager.canvas.coords(self.window_id, (pos[0] + diff, pos[1]))
-
-    def _activate_frame(self) -> None:
-        """Activate window and cache before/after text for dirty checking."""
-        self._activate_window()
-        self.text_before_content = self.text_before_id.get("1.0", tk.END)
-        self.text_after_content = self.text_after_id.get("1.0", tk.END)
-
-    def _activate_window(self) -> None:
-        """Show window as selected (border and label style)."""
-        self._set_borderwidth(1, "GlobalActionsWindowSelected.TFrame")
-        self.label_before.configure(style="GlobalActionsWindowSelected.TLabel")
-        self.label_after.configure(style="GlobalActionsWindowSelected.TLabel")
-
-    def _deactivate_frame(self) -> None:
-        """Deactivate window and mark design changed if before/after text was edited."""
-        self._deactivate_window()
-        if self.text_before_id.get("1.0", tk.END) != self.text_before_content:
-            project_manager.undo_handling_ref.design_has_changed()
-        if self.text_after_id.get("1.0", tk.END) != self.text_after_content:
-            project_manager.undo_handling_ref.design_has_changed()
-
-    def _deactivate_window(self) -> None:
-        """Clear selection style and focus from the clocked-actions window."""
-        if not custom_text.CustomText.selection_is_active:
-            project_manager.canvas.focus_set()  # "unfocus" the Text, when the mouse leaves the text.
-        self._set_borderwidth(0, style="GlobalActionsWindow.TFrame")
-        self.label_before.configure(style="GlobalActionsWindow.TLabel")
-        self.label_after.configure(style="GlobalActionsWindow.TLabel")
 
     def move_to(self, event_x, event_y, first) -> None:
         """Reposition window to (event_x, event_y);
