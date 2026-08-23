@@ -186,6 +186,7 @@ class ConditionAction:
         )
 
     def _start_editing(self) -> None:
+        self._show_condition_and_action()
         if self.funcid_frame_enter is not None:
             self.frame_id.unbind("<Enter>", self.funcid_frame_enter)
             self.funcid_frame_enter = None
@@ -217,6 +218,7 @@ class ConditionAction:
         )
 
     def _stop_editing(self) -> None:
+        self._hide_empty_condition_or_action()
         project_manager.canvas.unbind("<Motion>", self.canvas_enter_func_id)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         if not custom_text.CustomText.selection_is_active:
