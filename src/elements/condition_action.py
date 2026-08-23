@@ -208,6 +208,13 @@ class ConditionAction:
         self._set_borderwidth(1, "WindowSelected.TFrame")
         self.condition_label.configure(style="WindowSelected.TLabel")
         self.action_label.configure(style="WindowSelected.TLabel")
+        # Move canvas_x/y_coordinate inside the window as store_mouse_position stops working inside a window item and
+        # the coordinates are checked when the delete key is pressed:
+        window_canvas_coords = project_manager.canvas.coords(self.window_id)
+        canvas_delete.CanvasDelete.canvas_x_coordinate, canvas_delete.CanvasDelete.canvas_y_coordinate = (
+            window_canvas_coords[0] + project_manager.state_radius,
+            window_canvas_coords[1],
+        )
 
     def _stop_editing(self) -> None:
         project_manager.canvas.unbind("<Motion>", self.canvas_enter_func_id)

@@ -1,6 +1,8 @@
 """
 This class provides all methods needed to delete a Canvas item and
 all its connected parts.
+Because all connected items must also be deleted, the deletion is not done by
+a binding at each canvas item, but by a binding of the key delete at the canvas.
 """
 
 from tkinter import messagebox
@@ -27,15 +29,22 @@ class CanvasDelete:
     canvas_y_coordinate = 0
 
     def __init__(self):
+        print("canvas delete was called")
         self.item_was_deleted = False
-        ids = self._find_items_to_delete()
-        for canvas_id in ids:
-            self._delete_item(canvas_id)
-        if self.item_was_deleted:
-            # Must be called only after all involved items have been completely deleted:
+        canvas_ids = self._find_canvas_ids_under_cursor()
+        # As condition&action windows are placed over transition lines, it is possible
+        # that canvas_ids contains both a transition line and a condition&action window.
+        # In this case, only the condition&action window must be deleted.
+        # Therefore the following loop over canvas_ids is not stopped, when a transition is found:
+        canvas_id_to_delete, type_of_item_to_delete, tags_of_item_to_delete = (
+            self._determine_id_and_type_and_tags_of_item_to_delete(canvas_ids)
+        )
+        if canvas_id_to_delete is not None:
+            self._dispatch_delete_by_type(canvas_id_to_delete, type_of_item_to_delete, tags_of_item_to_delete)
+            # Must be called only once after all involved items have been deleted:
             project_manager.undo_handling_ref.design_has_changed()
 
-    def _find_items_to_delete(self):
+    def _find_canvas_ids_under_cursor(self):
         ids = project_manager.canvas.find_overlapping(
             CanvasDelete.canvas_x_coordinate - 2,
             CanvasDelete.canvas_y_coordinate - 2,
@@ -44,19 +53,29 @@ class CanvasDelete:
         )
         return ids
 
-    def _delete_item(self, canvas_id):
-        item_type = project_manager.canvas.type(canvas_id)
-        if item_type is None:
-            # This item i is a member of the list stored in ids but was already deleted,
-            # when one of the items earlier in the list was deleted.
-            return
-        tags_of_item_i = project_manager.canvas.gettags(canvas_id)
-        if self._item_is_a_not_deletable_object(tags_of_item_i):
-            return
-        self.item_was_deleted = True
-        self._dispatch_delete_by_type(item_type, canvas_id, tags_of_item_i)
+    def _determine_id_and_type_and_tags_of_item_to_delete(self, canvas_ids):
+        canvas_id_to_delete = None
+        type_of_item_to_delete = None
+        tags_of_item_to_delete = None
+        for canvas_id in canvas_ids:
+            type_of_item = project_manager.canvas.type(canvas_id)
+            tags_of_item = project_manager.canvas.gettags(canvas_id)
+            if type_of_item == "line":
+                for tag in tags_of_item:
+                    if tag.startswith("transition"):  # a line can also be a grid-line or a anchor-line.
+                        canvas_id_to_delete = canvas_id
+                        type_of_item_to_delete = type_of_item
+                        tags_of_item_to_delete = tags_of_item
+                        # No return here, as a condition&action window can be on top of the transition line.
+            elif type_of_item == "rectangle":
+                for tag in tags_of_item:
+                    if tag.startswith("connector"):  # a rectangle can also be a not removable priority rectangle.
+                        return canvas_id, type_of_item, tags_of_item
+            elif type_of_item in ["oval", "polygon", "window"]:
+                return canvas_id, type_of_item, tags_of_item
+        return canvas_id_to_delete, type_of_item_to_delete, tags_of_item_to_delete
 
-    def _dispatch_delete_by_type(self, item_type, canvas_id, tags):
+    def _dispatch_delete_by_type(self, canvas_id, item_type, tags):
         if item_type == "polygon":
             reset_entry.ResetEntry.delete()
         elif item_type == "window":
@@ -98,18 +117,6 @@ class CanvasDelete:
             if tag.startswith("condition_action"):
                 condition_action.ConditionAction.ref_dict[canvas_id].delete()
                 return
-
-    def _item_is_a_not_deletable_object(self, tags_of_item_i) -> bool:
-        for single_tag in tags_of_item_i:
-            if (
-                single_tag == "grid_line"
-                or single_tag.endswith("_comment_line")  # line to state-comment
-                or single_tag.endswith("rectangle")  # transition priority rectangle
-                or single_tag.endswith("priority")  # transition priority value
-                or single_tag.startswith("connected_to_state")  # line to state-comment
-            ):
-                return True
-        return False
 
     @classmethod
     def store_mouse_position(cls, event) -> None:

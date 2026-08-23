@@ -124,6 +124,11 @@ class StateComment:
         self._update_old_text()
         self._set_borderwidth(1, "StateActionsWindowSelected.TFrame")
         self.label_id.configure(style="StateActionsWindowSelected.TLabel")
+        window_canvas_coords = project_manager.canvas.coords(self.window_id)
+        canvas_delete.CanvasDelete.canvas_x_coordinate, canvas_delete.CanvasDelete.canvas_y_coordinate = (
+            window_canvas_coords[0] + project_manager.state_radius,
+            window_canvas_coords[1],
+        )
 
     def _stop_editing(self) -> None:
         project_manager.canvas.unbind("<Motion>", self.canvas_enter_func_id)
