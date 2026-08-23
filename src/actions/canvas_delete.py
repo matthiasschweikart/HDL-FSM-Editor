@@ -29,7 +29,6 @@ class CanvasDelete:
     canvas_y_coordinate = 0
 
     def __init__(self):
-        print("canvas delete was called")
         self.item_was_deleted = False
         canvas_ids = self._find_canvas_ids_under_cursor()
         # As condition&action windows are placed over transition lines, it is possible
