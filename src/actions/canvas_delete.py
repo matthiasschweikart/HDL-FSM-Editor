@@ -31,10 +31,6 @@ class CanvasDelete:
     def __init__(self):
         self.item_was_deleted = False
         canvas_ids = self._find_canvas_ids_under_cursor()
-        # As condition&action windows are placed over transition lines, it is possible
-        # that canvas_ids contains both a transition line and a condition&action window.
-        # In this case, only the condition&action window must be deleted.
-        # Therefore the following loop over canvas_ids is not stopped, when a transition is found:
         canvas_id_to_delete, type_of_item_to_delete, tags_of_item_to_delete = (
             self._determine_id_and_type_and_tags_of_item_to_delete(canvas_ids)
         )
@@ -56,6 +52,10 @@ class CanvasDelete:
         canvas_id_to_delete = None
         type_of_item_to_delete = None
         tags_of_item_to_delete = None
+        # As condition&action windows are placed over transition lines, it is possible
+        # that canvas_ids contains both a transition line and a condition&action window.
+        # In this case, only the condition&action window must be deleted.
+        # Therefore the following loop over canvas_ids is not stopped, when a transition is found:
         for canvas_id in canvas_ids:
             type_of_item = project_manager.canvas.type(canvas_id)
             tags_of_item = project_manager.canvas.gettags(canvas_id)
