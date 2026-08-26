@@ -84,7 +84,7 @@ class HighLightDict:
         # Check if each signal or variable is written and is read:
         process_variable_list = []
         for _, ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            process_variable_list += ref.text_id.signals_list
+            process_variable_list += ref.text_ids[0].signals_list
         for signal in (
             project_manager.tab_internals_ref.internals_architecture_text.signals_list
             + project_manager.tab_internals_ref.internals_process_combinatorial_text.signals_list

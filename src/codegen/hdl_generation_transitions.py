@@ -61,7 +61,7 @@ def _get_state_comments(state_tag):
     if state_tag + "_comment_line_end" in all_tags_of_state:
         canvas_id_of_comment_window = project_manager.canvas.find_withtag(state_tag + "_comment")[0]
         reference_to_state_comment_window = state_comment.StateComment.ref_dict[canvas_id_of_comment_window]
-        canvas_id_of_comment_text_widget = reference_to_state_comment_window.text_id
+        canvas_id_of_comment_text_widget = reference_to_state_comment_window.text_ids[0]
         state_comments = canvas_id_of_comment_text_widget.get("1.0", "end")
         state_comments = re.sub(r"^\s*[0-9]*\s*", "", state_comments)  # Remove order comment at comment start.
         if state_comments == "":
@@ -114,15 +114,15 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
                     transition_action = transition_condition + transition_action
                 moved_actions_dict = {
                     "moved_action": transition_action,
-                    "moved_action_ref": condition_action_reference.action_id,
+                    "moved_action_ref": condition_action_reference.text_ids[1],
                 }
                 if transition_condition_is_a_comment:
-                    moved_actions_dict["moved_condition_ref"] = condition_action_reference.condition_id
+                    moved_actions_dict["moved_condition_ref"] = condition_action_reference.text_ids[0]
                     moved_actions_dict["moved_condition_lines"] = transition_condition.count("\n")
             else:  # transition condition is a comment and transition action is empty.
                 moved_actions_dict = {
                     "moved_action": transition_condition,
-                    "moved_action_ref": condition_action_reference.condition_id,
+                    "moved_action_ref": condition_action_reference.text_ids[0],
                 }
             transition_action_new = []
             for entry in moved_actions:
@@ -144,7 +144,7 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
                     "condition": transition_condition,
                     "target": transition_target,
                     "condition_level": condition_level,
-                    "condition_action_reference": condition_action_reference.condition_id,
+                    "condition_action_reference": condition_action_reference.text_ids[0],
                 }
             )
             condition_level_new = condition_level + 1
@@ -330,11 +330,11 @@ def _get_transition_target_condition_action(transition_tag) -> tuple[str, str, s
 
 
 def _get_transition_condition(condition_action_reference):
-    return condition_action_reference.condition_id.get("1.0", tk.END + "-1 chars")  # without "return" at the end
+    return condition_action_reference.text_ids[0].get("1.0", tk.END + "-1 chars")  # without "return" at the end
 
 
 def _get_transition_action(condition_action_reference):
-    return condition_action_reference.action_id.get("1.0", tk.END + "-1 chars")  # without "return" at the end
+    return condition_action_reference.text_ids[1].get("1.0", tk.END + "-1 chars")  # without "return" at the end
 
 
 def _check_if_condition_is_a_comment(transition_condition) -> bool:

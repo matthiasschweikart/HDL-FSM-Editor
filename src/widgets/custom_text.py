@@ -12,15 +12,6 @@ import tkinter as tk
 import constants
 import file_handling
 from actions import canvas_editing
-from codegen import hdl_generation_architecture_state_actions, hdl_generation_library
-from elements import (
-    condition_action,
-    global_actions_clocked,
-    global_actions_combinatorial,
-    state_action,
-    state_actions_default,
-    state_comment,
-)
 from project_manager import project_manager
 from widgets import custom_text_linting
 
@@ -348,21 +339,30 @@ class CustomText(CodeEditor):
                     start_index = end_index
 
     def _get_all_custom_text_widgets(self):
+        from elements import (
+            condition_action,
+            global_actions_clocked,
+            global_actions_combinatorial,
+            state_action,
+            state_actions_default,
+            state_comment,
+        )
+
         all_custom_text_widgets = []
         for _, reference in state_action.StateAction.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
         for _, reference in state_comment.StateComment.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
         for _, reference in condition_action.ConditionAction.ref_dict.items():
-            all_custom_text_widgets.append(reference.condition_id)
-            all_custom_text_widgets.append(reference.action_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
+            all_custom_text_widgets.append(reference.text_ids[1])
         for _, reference in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_before_id)
-            all_custom_text_widgets.append(reference.text_after_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
+            all_custom_text_widgets.append(reference.text_ids[1])
         for _, reference in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
         for _, reference in state_actions_default.StateActionsDefault.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_id)
+            all_custom_text_widgets.append(reference.text_ids[0])
         all_custom_text_widgets.extend(CustomText.declaration_text_widgets())
         all_custom_text_widgets.append(project_manager.tab_hdl_ref.hdl_frame_text)
         return all_custom_text_widgets
@@ -439,6 +439,8 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_signals_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""
+        from codegen import hdl_generation_library
+
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         all_signal_declarations = self.get("1.0", tk.END).lower()
         all_signal_declarations = hdl_generation_library.remove_comments_and_returns(all_signal_declarations)
@@ -464,6 +466,8 @@ class CustomText(CodeEditor):
         self,
     ) -> None:  # Needed at self==project_manager.tab_interface_ref.interface_ports_text
         """Updates the port_types_list of this CustomText object, if it is the interface_ports_text"""
+        from codegen import hdl_generation_architecture_state_actions
+
         all_port_declarations = self.get("1.0", tk.END).lower()
         self.readable_ports_list = hdl_generation_architecture_state_actions.get_all_readable_ports(
             all_port_declarations, check=False
@@ -475,6 +479,8 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_generics_list(self) -> None:
         """Updates the generics_list of this CustomText object, if it is the interface_generics_text"""
+        from codegen import hdl_generation_architecture_state_actions
+
         all_generic_declarations = project_manager.tab_interface_ref.interface_generics_text.get("1.0", tk.END).lower()
         self.generics_list = hdl_generation_architecture_state_actions.get_all_generic_names(all_generic_declarations)
 
@@ -492,23 +498,33 @@ class CustomText(CodeEditor):
             canvas_editing.canvas_zoom(zoom_center, zoom_factor)
 
     def _get_canvas_id_of_window(self) -> int | None:
+        from elements import (
+            condition_action,
+            global_actions_clocked,
+            global_actions_combinatorial,
+            state_action,
+            state_actions_default,
+            state_comment,
+        )
+
+        print("get_canvas_id_of_window called")
         for canvas_id, text_ref in state_actions_default.StateActionsDefault.ref_dict.items():
-            if text_ref.text_id == self:
+            if text_ref.text_ids[0] == self:
                 return canvas_id
         for canvas_id, text_ref in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
-            if self in (text_ref.text_before_id, text_ref.text_after_id):
+            if self in (text_ref.text_ids[0], text_ref.text_ids[1]):
                 return canvas_id
         for canvas_id, text_ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            if text_ref.text_id == self:
+            if text_ref.text_ids[0] == self:
                 return canvas_id
         for canvas_id, text_ref in state_action.StateAction.ref_dict.items():
-            if text_ref.text_id == self:
+            if text_ref.text_ids[0] == self:
                 return canvas_id
         for canvas_id, text_ref in state_comment.StateComment.ref_dict.items():
-            if text_ref.text_id == self:
+            if text_ref.text_ids[0] == self:
                 return canvas_id
         for canvas_id, text_ref in condition_action.ConditionAction.ref_dict.items():
-            if self in (text_ref.condition_id, text_ref.action_id):
+            if self in (text_ref.text_ids[0], text_ref.text_ids[1]):
                 return canvas_id
         return None
 

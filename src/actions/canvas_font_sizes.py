@@ -1,13 +1,5 @@
 """All methods to change the font sizes of the text in the canvas at zoom."""
 
-from elements import (
-    condition_action,
-    global_actions_clocked,
-    global_actions_combinatorial,
-    state_action,
-    state_actions_default,
-    state_comment,
-)
 from project_manager import project_manager
 
 
@@ -28,6 +20,16 @@ def _modify_font_sizes_of_all_canvas_items(factor) -> None:
 
 
 def _apply_fontsize_to_canvas_window_items() -> None:
+    # Import here to avoid circular imports during module initialization.
+    from elements import (
+        condition_action,
+        global_actions_clocked,
+        global_actions_combinatorial,
+        state_action,
+        state_actions_default,
+        state_comment,
+    )
+
     condition_action.ConditionAction.apply_new_font_size()
     global_actions_clocked.GlobalActionsClocked.apply_new_font_size()
     global_actions_combinatorial.GlobalActionsCombinatorial.apply_new_font_size()

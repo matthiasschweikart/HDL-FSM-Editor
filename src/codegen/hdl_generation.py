@@ -321,7 +321,7 @@ class HdlGeneration:
                         state_tag_list.append(tag)
                     else:
                         reference_to_state_comment_window = state_comment.StateComment.ref_dict[single_element_list[0]]
-                        state_comments = reference_to_state_comment_window.text_id.get("1.0", "end - 1 chars")
+                        state_comments = reference_to_state_comment_window.text_ids[0].get("1.0", "end - 1 chars")
                         state_comments_list = state_comments.split("\n")
                         first_line_of_state_comments = state_comments_list[0].strip()
                         if first_line_of_state_comments == "":

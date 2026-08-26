@@ -54,12 +54,12 @@ def create_reset_condition_and_reset_action() -> list:
                 "to the state, which shall be reached by active reset.",
             ],
         )
-    reference_to_reset_condition_custom_text = ref.condition_id
+    reference_to_reset_condition_custom_text = ref.text_ids[0]
     condition = reference_to_reset_condition_custom_text.get("1.0", tk.END + "-1 chars")  # without "return" at the end
     all_reset_transition_tags = project_manager.canvas.gettags(reset_transition_tag)
     target_state_name = _get_target_state_name(all_reset_transition_tags)
     action = "state <= " + target_state_name + ";\n"
-    reference_to_reset_action_custom_text = ref.action_id
+    reference_to_reset_action_custom_text = ref.text_ids[1]
     action_text = reference_to_reset_action_custom_text.get(
         "1.0", tk.END
     )  # action_text will always have a return as last character.
@@ -77,7 +77,7 @@ def _get_reset_transition_tag() -> str:
     return reset_transition_tag
 
 
-def _get_condition_action_reference_of_transition(transition_tag) -> None:
+def _get_condition_action_reference_of_transition(transition_tag):
     tags = project_manager.canvas.gettags(transition_tag)
     for tag in tags:
         if tag.startswith("ca_connection"):  # Complete tag: ca_connection<n>_end
@@ -103,7 +103,7 @@ def create_global_actions_before() -> tuple[str, str] | tuple:
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
         ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
-        return ref.text_before_id, ref.text_before_id.get("1.0", tk.END)
+        return ref.text_ids[0], ref.text_ids[0].get("1.0", tk.END)
     return "", ""
 
 
@@ -112,7 +112,7 @@ def create_global_actions_after() -> tuple[str, str] | tuple:
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
         ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
-        return ref.text_after_id, ref.text_after_id.get("1.0", tk.END)
+        return ref.text_ids[1], ref.text_ids[1].get("1.0", tk.END)
     return "", ""
 
 
@@ -121,7 +121,7 @@ def create_concurrent_actions() -> tuple[str, str] | tuple:
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions_combinatorial1")
     if canvas_item_ids != ():
         ref = global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[canvas_item_ids[0]]
-        return ref.text_id, ref.text_id.get("1.0", tk.END)
+        return ref.text_ids[0], ref.text_ids[0].get("1.0", tk.END)
     return "", ""
 
 

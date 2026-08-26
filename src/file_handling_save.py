@@ -121,18 +121,20 @@ def _save_window_item(design_dictionary: dict[str, Any], canvas_id: int) -> None
     if canvas_id in state_action.StateAction.ref_dict:
         ref = state_action.StateAction.ref_dict[canvas_id]
         design_dictionary["window_state_action_block"].append(
-            [coords, ref.text_id.get("1.0", f"{tk.END}-1 chars"), tags]
+            [coords, ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"), tags]
         )
     elif canvas_id in state_comment.StateComment.ref_dict:
         ref = state_comment.StateComment.ref_dict[canvas_id]
-        design_dictionary["window_state_comment"].append([coords, ref.text_id.get("1.0", f"{tk.END}-1 chars"), tags])
+        design_dictionary["window_state_comment"].append(
+            [coords, ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"), tags]
+        )
     elif canvas_id in condition_action.ConditionAction.ref_dict:
         ref = condition_action.ConditionAction.ref_dict[canvas_id]
         design_dictionary["window_condition_action_block"].append(
             [
                 coords,
-                ref.condition_id.get("1.0", f"{tk.END}-1 chars"),
-                ref.action_id.get("1.0", f"{tk.END}-1 chars"),
+                ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"),
+                ref.text_ids[1].get("1.0", f"{tk.END}-1 chars"),
                 tags,
             ]
         )
@@ -141,20 +143,20 @@ def _save_window_item(design_dictionary: dict[str, Any], canvas_id: int) -> None
         design_dictionary["window_global_actions"].append(
             [
                 coords,
-                ref.text_before_id.get("1.0", f"{tk.END}-1 chars"),
-                ref.text_after_id.get("1.0", f"{tk.END}-1 chars"),
+                ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"),
+                ref.text_ids[1].get("1.0", f"{tk.END}-1 chars"),
                 tags,
             ]
         )
     elif canvas_id in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict:
         ref = global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[canvas_id]
         design_dictionary["window_global_actions_combinatorial"].append(
-            [coords, ref.text_id.get("1.0", f"{tk.END}-1 chars"), tags]
+            [coords, ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"), tags]
         )
     elif canvas_id in state_actions_default.StateActionsDefault.ref_dict:
         ref = state_actions_default.StateActionsDefault.ref_dict[canvas_id]
         design_dictionary["window_state_actions_default"].append(
-            [coords, ref.text_id.get("1.0", f"{tk.END}-1 chars"), tags]
+            [coords, ref.text_ids[0].get("1.0", f"{tk.END}-1 chars"), tags]
         )
     else:
         print("file_handling: Fatal, unknown dictionary key ", canvas_id)

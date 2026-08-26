@@ -7,18 +7,6 @@ a binding at each canvas item, but by a binding of the key delete at the canvas.
 
 from tkinter import messagebox
 
-from elements import (
-    condition_action,
-    connector,
-    global_actions_clocked,
-    global_actions_combinatorial,
-    reset_entry,
-    state,
-    state_action,
-    state_actions_default,
-    state_comment,
-    transition,
-)
 from project_manager import project_manager
 
 
@@ -76,14 +64,22 @@ class CanvasDelete:
 
     def _dispatch_delete_by_type(self, canvas_id, item_type, tags):
         if item_type == "polygon":
+            from elements import reset_entry
+
             reset_entry.ResetEntry.delete()
         elif item_type == "window":
             self._delete_window_item(canvas_id, tags)
         elif item_type == "oval":
+            from elements import state
+
             state.States.ref_dict[canvas_id].delete()
         elif item_type == "rectangle":
+            from elements import connector
+
             connector.ConnectorInstance.ref_dict[canvas_id].delete()
         elif item_type == "line":
+            from elements import transition
+
             transition.TransitionLine.ref_dict[canvas_id].delete()
         elif item_type == "text":  # Text of reset entry
             pass
@@ -99,21 +95,33 @@ class CanvasDelete:
     def _delete_window_item(self, canvas_id, tags):
         for tag in tags:
             if tag.startswith("state_actions_default"):
+                from elements import state_actions_default
+
                 state_actions_default.StateActionsDefault.ref_dict[canvas_id].delete()
                 return
             if tag == "global_actions1":
+                from elements import global_actions_clocked
+
                 global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_id].delete()
                 return
             if tag == "global_actions_combinatorial1":
+                from elements import global_actions_combinatorial
+
                 global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[canvas_id].delete()
                 return
             if tag.startswith("state_action"):
+                from elements import state_action
+
                 state_action.StateAction.ref_dict[canvas_id].delete()
                 return
             if tag.endswith("_comment"):
+                from elements import state_comment
+
                 state_comment.StateComment.ref_dict[canvas_id].delete()
                 return
             if tag.startswith("condition_action"):
+                from elements import condition_action
+
                 condition_action.ConditionAction.ref_dict[canvas_id].delete()
                 return
 

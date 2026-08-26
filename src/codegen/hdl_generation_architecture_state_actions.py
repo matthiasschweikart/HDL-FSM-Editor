@@ -100,7 +100,7 @@ def _create_state_action_process_for_vhdl(
             file_line_number,
             "custom_text_in_diagram_tab",
             number_of_lines - 1,
-            reference_to_default_state_actions_custom_text.text_id,
+            reference_to_default_state_actions_custom_text.text_ids[0],
         )
         file_line_number += number_of_lines - 1
 
@@ -228,8 +228,8 @@ def _create_state_action_list(state_tag_list_sorted):
                 state_action_ids = project_manager.canvas.find_withtag(connection_name + "_start")
                 if state_action_ids:
                     ref = state_action.StateAction.ref_dict[state_action_ids[0]]
-                    state_action_text = ref.text_id.get("1.0", tk.END)
-                    state_action_reference = ref.text_id
+                    state_action_text = ref.text_ids[0].get("1.0", tk.END)
+                    state_action_reference = ref.text_ids[0]
                     break
         state_name = project_manager.canvas.itemcget(state_tag + "_name", "text")
         state_action_list.append([state_name, state_action_text, state_action_reference])
@@ -288,7 +288,7 @@ def _get_default_state_actions() -> str:
         return ""
     ref = state_actions_default.StateActionsDefault.ref_dict[item_ids[0]]
     comment = "--" if project_manager.language.get() == "VHDL" else "//"
-    return comment + " Default State Actions:\n" + ref.text_id.get("1.0", tk.END)
+    return comment + " Default State Actions:\n" + ref.text_ids[0].get("1.0", tk.END)
 
 
 def _create_when_entry(state_action_entry) -> str:

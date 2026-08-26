@@ -3,7 +3,6 @@
 import re
 
 import constants
-from codegen import hdl_generation_library
 from project_manager import project_manager
 
 VHDL_KEYWORD_PATTERNS = [
@@ -45,6 +44,8 @@ class CustomTextLinting:
     """This class analyzes the given text and determines which variables are read and which are written."""
 
     def __init__(self, text, text_type, my_read_variables, my_written_variables) -> None:
+        from codegen import hdl_generation_library
+
         self.text_type = text_type
         self.function_names_list = []
         self.my_read_variables = my_read_variables
