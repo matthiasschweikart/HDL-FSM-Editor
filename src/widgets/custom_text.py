@@ -507,7 +507,6 @@ class CustomText(CodeEditor):
             state_comment,
         )
 
-        print("get_canvas_id_of_window called")
         for canvas_id, text_ref in state_actions_default.StateActionsDefault.ref_dict.items():
             if text_ref.text_ids[0] == self:
                 return canvas_id
