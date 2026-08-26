@@ -4,7 +4,7 @@ Class for combinatorial actions independent from the state machine
 
 import tkinter as tk
 
-from actions import canvas_editing, canvas_modify_bindings
+from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_canvas_window
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -17,7 +17,17 @@ class GlobalActionsCombinatorial(CanvasWindow):
 
     ref_dict = {}
 
-    def __init__(self, menu_x, menu_y, padding, tags, actions) -> None:
+    def __init__(
+        self,
+        menu_x,
+        menu_y,
+        padding,
+        tags,
+        actions,
+        move_handling_class,
+        canvas_delete_class,
+        zoom_wheel_function,
+    ) -> None:
         entry_dicts = [
             {
                 "label_text": "Global actions combinatorial: ",
@@ -25,7 +35,17 @@ class GlobalActionsCombinatorial(CanvasWindow):
                 "text": actions,
             }
         ]
-        super().__init__(menu_x, menu_y, tags, padding, entry_dicts, additional_move_func=None)
+        super().__init__(
+            menu_x,
+            menu_y,
+            tags,
+            padding,
+            move_handling_class,
+            canvas_delete_class,
+            zoom_wheel_function,
+            entry_dicts,
+            additional_move_func=None,
+        )
         GlobalActionsCombinatorial.ref_dict[self.window_id] = self
 
     def delete(self):
@@ -46,7 +66,10 @@ class GlobalActionsCombinatorial(CanvasWindow):
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
             padding=1,
-            tags=("global_actions_combinatorial1"),
+            tags=("global_actions_combinatorial1",),
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
             actions="",
         )
         project_manager.undo_handling_ref.design_has_changed()

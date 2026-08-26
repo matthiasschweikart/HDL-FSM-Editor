@@ -4,6 +4,7 @@ import tkinter as tk
 from typing import Any
 
 import constants
+from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from constants import GuiTab
 from elements import (
     condition_action,
@@ -281,6 +282,9 @@ def _load_state_action_blocks(design_dictionary: dict[str, Any], state_action_li
                     line_coords=line_coords,
                     line_tags=line_tags,
                     action=text,
+                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    canvas_delete_class=canvas_delete.CanvasDelete,
+                    zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
 
 
@@ -293,7 +297,15 @@ def _load_state_comment_blocks(
         tags = definition[2]
         line_coords = state_comment_line_dictionary[tags[0]]["coords"]
         state_comment.StateComment(
-            coords[0] - 100, coords[1], padding=1, tags=tags, line_coords=line_coords, comment=text
+            coords[0] - 100,
+            coords[1],
+            padding=1,
+            tags=tags,
+            line_coords=line_coords,
+            comment=text,
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
 
 
@@ -304,7 +316,15 @@ def _load_global_actions_clocked(design_dictionary: dict[str, Any]) -> None:
         text_after = definition[2]
         tags = definition[3]
         global_actions_clocked.GlobalActionsClocked(
-            coords[0], coords[1], padding=1, tags=tags, before=text_before, after=text_after
+            coords[0],
+            coords[1],
+            padding=1,
+            tags=tags,
+            before=text_before,
+            after=text_after,
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
 
 
@@ -314,7 +334,14 @@ def _load_global_actions_combinatorial(design_dictionary: dict[str, Any]) -> Non
         text = definition[1]
         tags = definition[2]
         global_actions_combinatorial.GlobalActionsCombinatorial(
-            coords[0], coords[1], padding=1, tags=tags, actions=text
+            coords[0],
+            coords[1],
+            padding=1,
+            tags=tags,
+            actions=text,
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
 
 
@@ -323,7 +350,16 @@ def _load_state_actions_default(design_dictionary: dict[str, Any]) -> None:
         coords = definition[0]
         text = definition[1]
         tags = definition[2]
-        state_actions_default.StateActionsDefault(coords[0], coords[1], padding=1, tags=tags, action=text)
+        state_actions_default.StateActionsDefault(
+            coords[0],
+            coords[1],
+            padding=1,
+            tags=tags,
+            action=text,
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
+        )
 
 
 def _load_condition_action_blocks(
@@ -350,6 +386,9 @@ def _load_condition_action_blocks(
                     action=action,
                     line_coords=line_coords,
                     line_tags=line_tags,
+                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    canvas_delete_class=canvas_delete.CanvasDelete,
+                    zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
                 break
 

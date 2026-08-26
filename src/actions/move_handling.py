@@ -4,6 +4,18 @@ This module contains a method to decide which graphical object must be moved.
 
 import constants
 from actions import canvas_editing
+from elements import (
+    condition_action,
+    connector,
+    global_actions_clocked,
+    global_actions_combinatorial,
+    reset_entry,
+    state,
+    state_action,
+    state_actions_default,
+    state_comment,
+    transition,
+)
 from project_manager import project_manager
 
 
@@ -15,8 +27,6 @@ def move_do(event, move_list, first, move_to_grid=False) -> None:
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
     """Apply move to (event_x, event_y) for each item in move_list; respect grid and proximity checks."""
-    from elements import connector, reset_entry, state, transition
-
     if _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y):
         return
     for entry in move_list:
@@ -47,15 +57,6 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
             connector.ConnectorInstance.move_to(event_x, event_y, item_id, first, move_to_grid)
         elif item_type == "window":
             # breaks circular import, so import here instead of at the top of the file:
-            from elements import (
-                condition_action,
-                global_actions_clocked,
-                global_actions_combinatorial,
-                state_action,
-                state_actions_default,
-                state_comment,
-            )
-
             if item_id in state_action.StateAction.ref_dict:
                 ref = state_action.StateAction.ref_dict[item_id]
             elif item_id in state_comment.StateComment.ref_dict:
@@ -74,8 +75,6 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
 
 
 def _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y) -> bool:
-    from elements import connector, state
-
     for entry in move_list:
         moved_object_item_id = entry[0]
         moved_object_must_be_checked = False

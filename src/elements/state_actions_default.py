@@ -4,7 +4,7 @@ Handles the combinatorial default actions for all states.
 
 import tkinter as tk
 
-from actions import canvas_editing, canvas_modify_bindings
+from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_canvas_window
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -17,7 +17,17 @@ class StateActionsDefault(CanvasWindow):
 
     ref_dict = {}
 
-    def __init__(self, coord_x, coord_y, padding, tags, action) -> None:
+    def __init__(
+        self,
+        coord_x,
+        coord_y,
+        padding,
+        tags,
+        action,
+        move_handling_class,
+        canvas_delete_class,
+        zoom_wheel_function,
+    ) -> None:
         entry_dicts = [
             {
                 "label_text": "Default state actions (combinatorial): ",
@@ -25,7 +35,17 @@ class StateActionsDefault(CanvasWindow):
                 "text": action,
             }
         ]
-        super().__init__(coord_x, coord_y, tags, padding, entry_dicts, additional_move_func=None)
+        super().__init__(
+            coord_x,
+            coord_y,
+            tags,
+            padding,
+            move_handling_class,
+            canvas_delete_class,
+            zoom_wheel_function,
+            entry_dicts,
+            additional_move_func=None,
+        )
         StateActionsDefault.ref_dict[self.window_id] = self
 
     def delete(self):
@@ -48,6 +68,9 @@ class StateActionsDefault(CanvasWindow):
             padding=1,
             tags=("state_actions_default",),
             action="",
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()

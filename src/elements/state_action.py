@@ -2,6 +2,7 @@
 Handles the state action of all states.
 """
 
+from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -22,6 +23,9 @@ class StateAction(CanvasWindow):
         line_coords,
         line_tags,
         action,
+        move_handling_class,
+        canvas_delete_class,
+        zoom_wheel_function,
     ) -> None:
         entry_dicts = [
             {
@@ -30,7 +34,17 @@ class StateAction(CanvasWindow):
                 "text": action,
             }
         ]
-        super().__init__(coord_x, coord_y, tags, padding, entry_dicts, additional_move_func=None)
+        super().__init__(
+            coord_x,
+            coord_y,
+            tags,
+            padding,
+            move_handling_class,
+            canvas_delete_class,
+            zoom_wheel_function,
+            entry_dicts,
+            additional_move_func=None,
+        )
         StateAction.state_action_id += 1
         StateAction.ref_dict[self.window_id] = self
         self.line_id = project_manager.canvas.create_line(line_coords, dash=(2, 2), tags=line_tags)
@@ -73,6 +87,9 @@ class StateAction(CanvasWindow):
             line_coords=line_coords,
             line_tags=line_tags,
             action="",
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
 
     @classmethod

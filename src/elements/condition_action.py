@@ -5,6 +5,7 @@ This class handles the condition&action box which can be activated for each tran
 
 import tkinter as tk
 
+from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -27,6 +28,9 @@ class ConditionAction(CanvasWindow):
         action,
         line_coords,
         line_tags,
+        move_handling_class,
+        canvas_delete_class,
+        zoom_wheel_function,
     ) -> None:
         label_text_for_action = (
             "Transition actions (asynchronous):" if connected_to_reset_entry else "Transition actions (clocked):"
@@ -35,7 +39,17 @@ class ConditionAction(CanvasWindow):
             {"label_text": "Transition condition: ", "text_type": "condition", "text": condition},
             {"label_text": label_text_for_action, "text_type": "action", "text": action},
         ]
-        super().__init__(menu_x, menu_y, tags, padding, entry_dicts, additional_move_func=self.move_line)
+        super().__init__(
+            menu_x,
+            menu_y,
+            tags,
+            padding,
+            move_handling_class,
+            canvas_delete_class,
+            zoom_wheel_function,
+            entry_dicts,
+            additional_move_func=self.move_line,
+        )
         self.line_id = project_manager.canvas.create_line(
             menu_x,
             menu_y,
@@ -110,6 +124,9 @@ class ConditionAction(CanvasWindow):
             action="",
             line_coords=line_coords,
             line_tags=line_tags,
+            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            canvas_delete_class=canvas_delete.CanvasDelete,
+            zoom_wheel_function=canvas_editing.zoom_wheel,
         )
         condition_action_ref.text_ids[0].focus_set()  # Puts the text input cursor into the text box.
 

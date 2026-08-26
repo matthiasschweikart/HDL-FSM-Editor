@@ -2,6 +2,7 @@
 This class handles "state-comments".
 """
 
+from actions import canvas_delete, canvas_editing, move_handling_canvas_window
 from elements.canvas_window import CanvasWindow
 from project_manager import project_manager
 
@@ -13,7 +14,18 @@ class StateComment(CanvasWindow):
 
     ref_dict = {}
 
-    def __init__(self, coord_x, coord_y, padding, tags, line_coords, comment) -> None:
+    def __init__(
+        self,
+        coord_x,
+        coord_y,
+        padding,
+        tags,
+        line_coords,
+        comment,
+        move_handling_class,
+        canvas_delete_class,
+        zoom_wheel_function,
+    ) -> None:
         entry_dicts = [
             {
                 "label_text": "State-Comment: ",
@@ -21,7 +33,17 @@ class StateComment(CanvasWindow):
                 "text": comment,
             }
         ]
-        super().__init__(coord_x + 100, coord_y, tags, padding, entry_dicts, additional_move_func=None)
+        super().__init__(
+            coord_x + 100,
+            coord_y,
+            tags,
+            padding,
+            move_handling_class,
+            canvas_delete_class,
+            zoom_wheel_function,
+            entry_dicts,
+            additional_move_func=None,
+        )
         StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
         self.text_ids[0].config(fg="blue")
         # Line starts at comment, ends at state:
@@ -55,6 +77,9 @@ class StateComment(CanvasWindow):
                         (state_coords[3] + state_coords[1]) / 2,
                     ],
                     comment="",
+                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    canvas_delete_class=canvas_delete.CanvasDelete,
+                    zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
 
     @classmethod
