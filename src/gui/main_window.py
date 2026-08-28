@@ -7,6 +7,7 @@ import sys
 import tkinter as tk
 import urllib.error
 import urllib.request
+from collections import ChainMap
 from pathlib import Path
 from tkinter import ttk
 
@@ -17,6 +18,14 @@ import undo_handling
 import write_data_creator
 from actions import canvas_editing
 from constants import GuiTab
+from elements import (
+    condition_action,
+    global_actions_clocked,
+    global_actions_combinatorial,
+    state_action,
+    state_actions_default,
+    state_comment,
+)
 from gui import menu_bar, notebook_top
 from project_manager import project_manager
 
@@ -41,6 +50,14 @@ class MainWindow:
         project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
         project_manager.menu_bar_ref = menu_bar.MenuBar(row=0, column=0)
         project_manager.write_data_creator_ref = write_data_creator.WriteDataCreator(project_manager.state_radius)
+        project_manager.canvas_windows_ref_dict = ChainMap(
+            condition_action.ConditionAction.ref_dict,
+            global_actions_clocked.GlobalActionsClocked.ref_dict,
+            global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict,
+            state_action.StateAction.ref_dict,
+            state_actions_default.StateActionsDefault.ref_dict,
+            state_comment.StateComment.ref_dict,
+        )
 
         # Set the application icon
         try:

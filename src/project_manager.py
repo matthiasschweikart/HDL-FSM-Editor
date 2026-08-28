@@ -75,6 +75,8 @@ class ProjectManager:
         self._date_of_hdl_file_shown_in_hdl_tab: float = 0.0
         self._date_of_hdl_file2_shown_in_hdl_tab: float = 0.0
 
+        self._canvas_windows_ref_dict = {}
+
     @property
     def highlight_dict_ref(self):  # -> linting.HighLightDict:
         """Get the highlight dictionary."""
@@ -576,24 +578,34 @@ class ProjectManager:
         self._abs_zoom_factor = value
 
     @property
-    def write_data_creator_ref(self) -> float:
+    def write_data_creator_ref(self) -> object:
         """Get the write_data_creator reference."""
         return self._write_data_creator_ref
 
     @write_data_creator_ref.setter
-    def write_data_creator_ref(self, value: float) -> None:
+    def write_data_creator_ref(self, value: object) -> None:
         """Set the write_data_creator reference."""
         self._write_data_creator_ref = value
 
     @property
-    def undo_handling_ref(self) -> float:
+    def undo_handling_ref(self) -> object:
         """Get the undo_handling reference."""
         return self._undo_handling_ref
 
     @undo_handling_ref.setter
-    def undo_handling_ref(self, value: float) -> None:
+    def undo_handling_ref(self, value: object) -> None:
         """Set the undo_handling reference."""
         self._undo_handling_ref = value
+
+    @property
+    def canvas_windows_ref_dict(self) -> dict:
+        """Get the dictionary of canvas windows references."""
+        return self._canvas_windows_ref_dict
+
+    @canvas_windows_ref_dict.setter
+    def canvas_windows_ref_dict(self, value: dict) -> None:
+        """Set the dictionary of canvas windows references."""
+        self._canvas_windows_ref_dict = value
 
     # def update(self, **kwargs) -> None:
     #     """Update multiple state attributes."""

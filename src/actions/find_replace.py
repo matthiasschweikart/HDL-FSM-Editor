@@ -8,14 +8,6 @@ from tkinter import messagebox
 
 from actions import canvas_editing
 from constants import GuiTab
-from elements import (
-    condition_action,
-    global_actions_clocked,
-    global_actions_combinatorial,
-    state_action,
-    state_actions_default,
-    state_comment,
-)
 from project_manager import project_manager
 
 
@@ -67,8 +59,7 @@ class FindReplace:
         continue_search = True
         for item in all_canvas_items:
             if project_manager.canvas.type(item) == "window":
-                text_ids = self._get_text_ids_of_canvas_window(item)
-                continue_search = self._search_in_all_text_fields_of_canvas_window(item, text_ids)
+                continue_search = self._search_in_all_text_fields_of_canvas_window(item)
             elif project_manager.canvas.type(item) == "text":
                 continue_search = self._search_in_canvas_text(item)
             if continue_search is False:
@@ -140,26 +131,8 @@ class FindReplace:
                 continue_search = self._search_in_entry_widget(entry_widget_info)
         return continue_search
 
-    def _get_text_ids_of_canvas_window(self, item) -> list:
-        text_ids = []
-        if item in state_action.StateAction.ref_dict:
-            text_ids.append(state_action.StateAction.ref_dict[item].text_id)
-        elif item in condition_action.ConditionAction.ref_dict:
-            text_ids.append(condition_action.ConditionAction.ref_dict[item].condition_id)
-            text_ids.append(condition_action.ConditionAction.ref_dict[item].action_id)
-        elif item in global_actions_clocked.GlobalActionsClocked.ref_dict:
-            text_ids.append(global_actions_clocked.GlobalActionsClocked.ref_dict[item].text_before_id)
-            text_ids.append(global_actions_clocked.GlobalActionsClocked.ref_dict[item].text_after_id)
-        elif item in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict:
-            text_ids.append(global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[item].text_id)
-        elif item in state_actions_default.StateActionsDefault.ref_dict:
-            text_ids.append(state_actions_default.StateActionsDefault.ref_dict[item].text_id)
-        elif item in state_comment.StateComment.ref_dict:
-            text_ids.append(state_comment.StateComment.ref_dict[item].text_id)
-        return text_ids
-
-    def _search_in_all_text_fields_of_canvas_window(self, item, text_ids_of_actions) -> bool:
-        for text_id in text_ids_of_actions:
+    def _search_in_all_text_fields_of_canvas_window(self, item) -> bool:
+        for text_id in project_manager.canvas_windows_ref_dict[item].text_ids:
             text_field = {"tab": GuiTab.DIAGRAM, "ref": text_id, "update": "", "window_id": item}
             continue_search = self._search_in_text_field(text_field)
             if not continue_search:

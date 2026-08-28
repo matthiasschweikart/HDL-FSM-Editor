@@ -339,32 +339,9 @@ class CustomText(CodeEditor):
                     start_index = end_index
 
     def _get_all_custom_text_widgets(self):
-        from elements import (
-            condition_action,
-            global_actions_clocked,
-            global_actions_combinatorial,
-            state_action,
-            state_actions_default,
-            state_comment,
-        )
-
         all_custom_text_widgets = []
-        for _, reference in state_action.StateAction.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-        for _, reference in state_comment.StateComment.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-        for _, reference in condition_action.ConditionAction.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-            all_custom_text_widgets.append(reference.text_ids[1])
-        for _, reference in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-            all_custom_text_widgets.append(reference.text_ids[1])
-        for _, reference in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-        for _, reference in state_actions_default.StateActionsDefault.ref_dict.items():
-            all_custom_text_widgets.append(reference.text_ids[0])
-        all_custom_text_widgets.extend(CustomText.declaration_text_widgets())
-        all_custom_text_widgets.append(project_manager.tab_hdl_ref.hdl_frame_text)
+        for element_ref in project_manager.canvas_windows_ref_dict.values():
+            all_custom_text_widgets.extend(element_ref.text_ids)
         return all_custom_text_widgets
 
     def update_highlight_tags(self) -> None:
@@ -498,32 +475,8 @@ class CustomText(CodeEditor):
             canvas_editing.canvas_zoom(zoom_center, zoom_factor)
 
     def _get_canvas_id_of_window(self) -> int | None:
-        from elements import (
-            condition_action,
-            global_actions_clocked,
-            global_actions_combinatorial,
-            state_action,
-            state_actions_default,
-            state_comment,
-        )
-
-        for canvas_id, text_ref in state_actions_default.StateActionsDefault.ref_dict.items():
-            if text_ref.text_ids[0] == self:
-                return canvas_id
-        for canvas_id, text_ref in global_actions_clocked.GlobalActionsClocked.ref_dict.items():
-            if self in (text_ref.text_ids[0], text_ref.text_ids[1]):
-                return canvas_id
-        for canvas_id, text_ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            if text_ref.text_ids[0] == self:
-                return canvas_id
-        for canvas_id, text_ref in state_action.StateAction.ref_dict.items():
-            if text_ref.text_ids[0] == self:
-                return canvas_id
-        for canvas_id, text_ref in state_comment.StateComment.ref_dict.items():
-            if text_ref.text_ids[0] == self:
-                return canvas_id
-        for canvas_id, text_ref in condition_action.ConditionAction.ref_dict.items():
-            if self in (text_ref.text_ids[0], text_ref.text_ids[1]):
+        for canvas_id, element_ref in project_manager.canvas_windows_ref_dict.items():
+            if self in element_ref.text_ids:
                 return canvas_id
         return None
 
