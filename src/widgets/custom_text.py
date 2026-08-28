@@ -12,7 +12,7 @@ import tkinter as tk
 import constants
 import file_handling
 from actions import canvas_editing
-from codegen import hdl_generation_library
+from codegen import hdl_generation_architecture_state_actions, hdl_generation_library
 from project_manager import project_manager
 from widgets import custom_text_linting
 
@@ -442,8 +442,6 @@ class CustomText(CodeEditor):
         self,
     ) -> None:  # Needed at self==project_manager.tab_interface_ref.interface_ports_text
         """Updates the port_types_list of this CustomText object, if it is the interface_ports_text"""
-        from codegen import hdl_generation_architecture_state_actions
-
         all_port_declarations = self.get("1.0", tk.END).lower()
         self.readable_ports_list = hdl_generation_architecture_state_actions.get_all_readable_ports(
             all_port_declarations, check=False
@@ -455,8 +453,6 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_generics_list(self) -> None:
         """Updates the generics_list of this CustomText object, if it is the interface_generics_text"""
-        from codegen import hdl_generation_architecture_state_actions
-
         all_generic_declarations = project_manager.tab_interface_ref.interface_generics_text.get("1.0", tk.END).lower()
         self.generics_list = hdl_generation_architecture_state_actions.get_all_generic_names(all_generic_declarations)
 
