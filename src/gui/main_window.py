@@ -47,8 +47,8 @@ class MainWindow:
         project_manager.undo_handling_ref = undo_handling.UndoHandling()
         project_manager.link_dict_ref = link_dictionary.LinkDictionary()
         project_manager.highlight_dict_ref = linting.HighLightDict()
-        project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
         project_manager.menu_bar_ref = menu_bar.MenuBar(row=0, column=0)
+        project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
         project_manager.write_data_creator_ref = write_data_creator.WriteDataCreator(project_manager.state_radius)
         project_manager.canvas_windows_ref_dict = ChainMap(
             condition_action.ConditionAction.ref_dict,
