@@ -42,4 +42,8 @@
         "textvariable",
         "VHDL"
     ],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  }
 }
