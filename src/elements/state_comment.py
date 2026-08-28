@@ -81,9 +81,3 @@ class StateComment(CanvasWindow):
                     canvas_delete_class=canvas_delete.CanvasDelete,
                     zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
-
-    @classmethod
-    def apply_new_font_size(cls) -> None:
-        """Apply new font size to all state-comment windows."""
-        for state_comment in StateComment.ref_dict.values():
-            state_comment.apply_new_font_size_to_canvas_window()

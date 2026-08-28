@@ -74,9 +74,3 @@ class StateActionsDefault(CanvasWindow):
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
-
-    @classmethod
-    def apply_new_font_size(cls) -> None:
-        """Apply new font size to all state-actions-default windows."""
-        for state_action in StateActionsDefault.ref_dict.values():
-            state_action.apply_new_font_size_to_canvas_window()

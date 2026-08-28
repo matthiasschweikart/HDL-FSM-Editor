@@ -129,9 +129,3 @@ class ConditionAction(CanvasWindow):
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )
         condition_action_ref.text_ids[0].focus_set()  # Puts the text input cursor into the text box.
-
-    @classmethod
-    def apply_new_font_size(cls) -> None:
-        """Apply new font size to all condition-action windows."""
-        for condition_action in ConditionAction.ref_dict.values():
-            condition_action.apply_new_font_size_to_canvas_window()

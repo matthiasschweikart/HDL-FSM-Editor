@@ -21,4 +21,4 @@ def _modify_font_sizes_of_all_canvas_items(factor) -> None:
 
 def _apply_fontsize_to_canvas_window_items() -> None:
     for element_ref in project_manager.canvas_windows_ref_dict.values():
-        element_ref.apply_new_font_size()
+        element_ref.apply_new_font_size_to_canvas_window()

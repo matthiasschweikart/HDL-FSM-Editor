@@ -74,9 +74,3 @@ class GlobalActionsCombinatorial(CanvasWindow):
         )
         project_manager.undo_handling_ref.design_has_changed()
         canvas_modify_bindings.switch_to_move_mode()
-
-    @classmethod
-    def apply_new_font_size(cls) -> None:
-        """Apply new font size to all combinatorial global-actions windows."""
-        for global_action_combinatorial in GlobalActionsCombinatorial.ref_dict.values():
-            global_action_combinatorial.apply_new_font_size_to_canvas_window()
