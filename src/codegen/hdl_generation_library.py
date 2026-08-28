@@ -5,7 +5,6 @@ This module contains methods used at HDL generation.
 import re
 import tkinter as tk
 
-from elements import condition_action, global_actions_clocked, global_actions_combinatorial
 from project_manager import project_manager
 
 from .exceptions import GenerationError
@@ -84,7 +83,7 @@ def _get_condition_action_reference_of_transition(transition_tag):
             condition_action_number = tag[13:-4]
             condition_action_tag = "condition_action" + condition_action_number
             condition_action_canvas_item_id = project_manager.canvas.find_withtag(condition_action_tag)[0]
-            condition_action_reference = condition_action.ConditionAction.ref_dict[condition_action_canvas_item_id]
+            condition_action_reference = project_manager.canvas_windows_ref_dict[condition_action_canvas_item_id]
             return condition_action_reference
     return None
 
@@ -102,7 +101,7 @@ def create_global_actions_before() -> tuple[str, str] | tuple:
     """Return (widget_ref, text) for clocked global 'before' block, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
-        ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
+        ref = project_manager.canvas_windows_ref_dict[canvas_item_ids[0]]
         return ref.text_ids[0], ref.text_ids[0].get("1.0", tk.END)
     return "", ""
 
@@ -111,7 +110,7 @@ def create_global_actions_after() -> tuple[str, str] | tuple:
     """Return (widget_ref, text) for clocked global 'after' block, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions1")
     if canvas_item_ids != ():
-        ref = global_actions_clocked.GlobalActionsClocked.ref_dict[canvas_item_ids[0]]
+        ref = project_manager.canvas_windows_ref_dict[canvas_item_ids[0]]
         return ref.text_ids[1], ref.text_ids[1].get("1.0", tk.END)
     return "", ""
 
@@ -120,7 +119,7 @@ def create_concurrent_actions() -> tuple[str, str] | tuple:
     """Return (widget_ref, text) for combinatorial global actions, or ('', '') if none."""
     canvas_item_ids = project_manager.canvas.find_withtag("global_actions_combinatorial1")
     if canvas_item_ids != ():
-        ref = global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[canvas_item_ids[0]]
+        ref = project_manager.canvas_windows_ref_dict[canvas_item_ids[0]]
         return ref.text_ids[0], ref.text_ids[0].get("1.0", tk.END)
     return "", ""
 

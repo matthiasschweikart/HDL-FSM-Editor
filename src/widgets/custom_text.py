@@ -12,6 +12,7 @@ import tkinter as tk
 import constants
 import file_handling
 from actions import canvas_editing
+from codegen import hdl_generation_library
 from project_manager import project_manager
 from widgets import custom_text_linting
 
@@ -416,8 +417,6 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_signals_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""
-        from codegen import hdl_generation_library
-
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         all_signal_declarations = self.get("1.0", tk.END).lower()
         all_signal_declarations = hdl_generation_library.remove_comments_and_returns(all_signal_declarations)
