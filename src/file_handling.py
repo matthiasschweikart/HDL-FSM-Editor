@@ -22,6 +22,7 @@ from elements import (
     state,
     state_action,
     state_actions_default,
+    state_comment,
     transition,
 )
 from project_manager import project_manager
@@ -107,13 +108,14 @@ def clear_diagram():
     """Clear the current design from canvas and all variables; reset to initial state."""
     project_manager.canvas.delete("all")
     condition_action.ConditionAction.conditionaction_id = 0
-    condition_action.ConditionAction.ref_dict = {}
+    condition_action.ConditionAction.ref_dict.clear()
     connector.ConnectorInstance.connector_number = 0
-    global_actions_clocked.GlobalActionsClocked.ref_dict = {}
-    global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict = {}
+    global_actions_clocked.GlobalActionsClocked.ref_dict.clear()
+    global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.clear()
     state_action.StateAction.state_action_id = 0
-    state_action.StateAction.ref_dict = {}
-    state_actions_default.StateActionsDefault.ref_dict = {}
+    state_action.StateAction.ref_dict.clear()
+    state_actions_default.StateActionsDefault.ref_dict.clear()
+    state_comment.StateComment.ref_dict.clear()
     state.States.state_number = 0
     transition.TransitionLine.transition_number = 0
     project_manager.reset_entry_button.config(state=tk.NORMAL)
