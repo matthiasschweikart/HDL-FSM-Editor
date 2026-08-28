@@ -4,18 +4,7 @@ This module contains a method to decide which graphical object must be moved.
 
 import constants
 from actions import canvas_editing
-from elements import (
-    condition_action,
-    connector,
-    global_actions_clocked,
-    global_actions_combinatorial,
-    reset_entry,
-    state,
-    state_action,
-    state_actions_default,
-    state_comment,
-    transition,
-)
+from elements import connector, reset_entry, state, transition
 from project_manager import project_manager
 
 
@@ -56,18 +45,7 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
         elif item_type == "rectangle":
             connector.ConnectorInstance.move_to(event_x, event_y, item_id, first, move_to_grid)
         elif item_type == "window":
-            if item_id in state_action.StateAction.ref_dict:
-                ref = state_action.StateAction.ref_dict[item_id]
-            elif item_id in state_comment.StateComment.ref_dict:
-                ref = state_comment.StateComment.ref_dict[item_id]
-            elif item_id in state_actions_default.StateActionsDefault.ref_dict:
-                ref = state_actions_default.StateActionsDefault.ref_dict[item_id]
-            elif item_id in global_actions_clocked.GlobalActionsClocked.ref_dict:
-                ref = global_actions_clocked.GlobalActionsClocked.ref_dict[item_id]
-            elif item_id in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict:
-                ref = global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict[item_id]
-            else:
-                ref = condition_action.ConditionAction.ref_dict[item_id]
+            ref = project_manager.canvas_windows_ref_dict[item_id]
             ref.move_to(event_x, event_y, first)
         else:
             print("move: Fatal, unknown canvas type", "|" + item_type + "|")
