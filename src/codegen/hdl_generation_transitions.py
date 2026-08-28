@@ -321,7 +321,6 @@ def _get_transition_target_condition_action(transition_tag) -> tuple[str, str, s
             condition_action_number = tag[13:-4]
             condition_action_tag = "condition_action" + condition_action_number
             condition_action_canvas_item_id = project_manager.canvas.find_withtag(condition_action_tag)[0]
-            # condition_action_reference = condition_action.ConditionAction.ref_dict[condition_action_canvas_item_id]
             condition_action_reference = project_manager.canvas_windows_ref_dict[condition_action_canvas_item_id]
             if condition_action_reference is not None:
                 transition_condition = _get_transition_condition(condition_action_reference)
