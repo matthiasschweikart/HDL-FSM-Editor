@@ -56,7 +56,6 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
         elif item_type == "rectangle":
             connector.ConnectorInstance.move_to(event_x, event_y, item_id, first, move_to_grid)
         elif item_type == "window":
-            # breaks circular import, so import here instead of at the top of the file:
             if item_id in state_action.StateAction.ref_dict:
                 ref = state_action.StateAction.ref_dict[item_id]
             elif item_id in state_comment.StateComment.ref_dict:
