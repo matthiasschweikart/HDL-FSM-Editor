@@ -13,7 +13,6 @@ import file_handling
 import tag_plausibility
 import update_hdl_tab
 from constants import GuiTab
-from elements import state_comment
 from project_manager import project_manager
 
 from . import hdl_generation_architecture, hdl_generation_library, hdl_generation_module, sensitivity_check_hfe
@@ -320,7 +319,9 @@ class HdlGeneration:
                     if not single_element_list:
                         state_tag_list.append(tag)
                     else:
-                        reference_to_state_comment_window = state_comment.StateComment.ref_dict[single_element_list[0]]
+                        reference_to_state_comment_window = project_manager.canvas_windows_ref_dict[
+                            single_element_list[0]
+                        ]
                         state_comments = reference_to_state_comment_window.text_ids[0].get("1.0", "end - 1 chars")
                         state_comments_list = state_comments.split("\n")
                         first_line_of_state_comments = state_comments_list[0].strip()
