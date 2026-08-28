@@ -92,8 +92,8 @@ class MainWindow:
         project_manager.root.tk.call("tcl_wordBreakAfter", "", 0)
         # this defines what tcl considers to be a "word". For more
         # information see http://www.tcl.tk/man/tcl8.5/TclCmd/library.htm#M19
-        project_manager.root.tk.call("set", "tcl_wordchars", "[a-zA-Z0-9_]")
-        project_manager.root.tk.call("set", "tcl_nonwordchars", "[^a-zA-Z0-9_]")
+        project_manager.root.tk.call("set", "tcl_wordchars", "[a-zA-Z0-9_:<=]")
+        project_manager.root.tk.call("set", "tcl_nonwordchars", "[^a-zA-Z0-9_:<=]")
 
     def check_version(self) -> str:
         """Fetch website and print whether a newer version is available."""
