@@ -6,9 +6,8 @@ This method is used to create a transition-specification for HDL generation from
 import re
 import tkinter as tk
 
-import actions.canvas_editing as canvas_editing
+from actions import canvas_editing
 from codegen import hdl_generation_library
-from elements import condition_action, state_comment
 from project_manager import project_manager
 
 from .exceptions import GenerationError
@@ -60,7 +59,7 @@ def _get_state_comments(state_tag):
     all_tags_of_state = project_manager.canvas.gettags(state_tag)
     if state_tag + "_comment_line_end" in all_tags_of_state:
         canvas_id_of_comment_window = project_manager.canvas.find_withtag(state_tag + "_comment")[0]
-        reference_to_state_comment_window = state_comment.StateComment.ref_dict[canvas_id_of_comment_window]
+        reference_to_state_comment_window = project_manager.canvas_windows_ref_dict[canvas_id_of_comment_window]
         canvas_id_of_comment_text_widget = reference_to_state_comment_window.text_ids[0]
         state_comments = canvas_id_of_comment_text_widget.get("1.0", "end")
         state_comments = re.sub(r"^\s*[0-9]*\s*", "", state_comments)  # Remove order comment at comment start.
@@ -322,7 +321,8 @@ def _get_transition_target_condition_action(transition_tag) -> tuple[str, str, s
             condition_action_number = tag[13:-4]
             condition_action_tag = "condition_action" + condition_action_number
             condition_action_canvas_item_id = project_manager.canvas.find_withtag(condition_action_tag)[0]
-            condition_action_reference = condition_action.ConditionAction.ref_dict[condition_action_canvas_item_id]
+            # condition_action_reference = condition_action.ConditionAction.ref_dict[condition_action_canvas_item_id]
+            condition_action_reference = project_manager.canvas_windows_ref_dict[condition_action_canvas_item_id]
             if condition_action_reference is not None:
                 transition_condition = _get_transition_condition(condition_action_reference)
                 transition_action = _get_transition_action(condition_action_reference)
