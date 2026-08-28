@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from actions import canvas_editing, move_handling, move_handling_canvas_item, move_handling_initialization
-from elements import condition_action, transition
+from elements import transition
 from project_manager import project_manager
 
 
@@ -140,7 +140,7 @@ def _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transiti
         elif tag.startswith("ca_connection"):
             condition_action_line_tag = tag[:-4]
             condition_action_window_id = project_manager.canvas.find_withtag(condition_action_line_tag + "_anchor")[0]
-            ref = condition_action.ConditionAction.ref_dict[condition_action_window_id]
+            ref = project_manager.canvas_windows_ref_dict[condition_action_window_id]
     for target_id in item_ids_at_moving_end_location:
         if project_manager.canvas.type(target_id) not in ["oval", "rectangle", "polygon"]:
             continue
@@ -219,7 +219,7 @@ def _hide_the_connection_line_of_moved_condition_action_window(move_list) -> Non
             tags = project_manager.canvas.gettags(move_list_entry[0])
             for t in tags:
                 if t.startswith("condition_action"):
-                    ref = condition_action.ConditionAction.ref_dict[move_list_entry[0]]
+                    ref = project_manager.canvas_windows_ref_dict[move_list_entry[0]]
                     ref.hide_line()
 
 
