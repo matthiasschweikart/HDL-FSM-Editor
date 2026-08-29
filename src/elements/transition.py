@@ -76,6 +76,7 @@ class TransitionLine:
         return priority_middle_x, priority_middle_y
 
     def _show_menu(self, event) -> None:
+        canvas_modify_bindings.switch_to_move_mode()
         menu = tk.Menu(project_manager.canvas, tearoff=0)
         menu.add_command(label="add condition&action", command=lambda: self._add_condition_action(event))
         if TransitionLine._is_loopback_transition(self.transition_tag):
@@ -104,14 +105,27 @@ class TransitionLine:
         coords = project_manager.canvas.coords(self.transition_tag)
         vector_from_state_middle_point_to_cursor = [-coords[0] + start_x, -coords[1] + start_y]
         self.phi_last = self._calculate_angle_of_vector(vector_from_state_middle_point_to_cursor)
+        connection_tag = ""
+        condition_action_box_coords = []
+        tags_of_transition = project_manager.canvas.gettags(self.transition_tag)
+        for tag in tags_of_transition:
+            if tag.startswith("ca_connection"):
+                connection_tag = tag[:-4]
+                condition_action_box_coords = project_manager.canvas.coords(connection_tag + "_anchor")
         project_manager.canvas.bind(
-            "<Motion>", lambda event: self._rotate_loopback_transition(event, coords[0], coords[1])
+            "<Motion>", lambda event: self._rotate_loopback_transition(event, coords[0], coords[1], connection_tag)
         )
         project_manager.canvas.bind(
-            "<Button-1>", lambda event: self._rotate_loopback_transition_stop(event, coords, abort=False)
+            "<Button-1>",
+            lambda event: self._rotate_loopback_transition_stop(
+                event, coords, connection_tag, condition_action_box_coords, abort=False
+            ),
         )
         project_manager.canvas.bind(
-            "<Escape>", lambda event: self._rotate_loopback_transition_stop(event, coords, abort=True)
+            "<Escape>",
+            lambda event: self._rotate_loopback_transition_stop(
+                event, coords, connection_tag, condition_action_box_coords, abort=True
+            ),
         )
 
     def _calculate_canvas_coords_of_menu_mouse_click_event(self) -> tuple[float, float]:
@@ -126,12 +140,12 @@ class TransitionLine:
         x, y = vector
         return math.atan2(y, x)
 
-    def _rotate_loopback_transition(self, event, state_middle_x, state_middle_y) -> None:
+    def _rotate_loopback_transition(self, event, state_center_x, state_center_y, connection_tag) -> None:
         cursor_x, cursor_y = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-        vector_from_state_middle_point_to_cursor = [-state_middle_x + cursor_x, -state_middle_y + cursor_y]
+        vector_from_state_middle_point_to_cursor = [-state_center_x + cursor_x, -state_center_y + cursor_y]
         phi = self._calculate_angle_of_vector(vector_from_state_middle_point_to_cursor)
         delta_phi = phi - self.phi_last
-        self._rotate_transition_by(delta_phi)
+        self._rotate_transition_by(delta_phi, connection_tag)
         self.phi_last = phi
         TransitionLine._move_priority_rectangle(
             cursor_x,
@@ -141,46 +155,87 @@ class TransitionLine:
             "end",
         )
 
-    def _rotate_loopback_transition_stop(self, event, old_coords, abort) -> None:
+    def _rotate_loopback_transition_stop(
+        self, event, old_coords, connection_tag, condition_action_box_coords, abort
+    ) -> None:
         project_manager.canvas.unbind("<Motion>")
         project_manager.canvas.unbind("<Button-1>")
         project_manager.canvas.itemconfig(self.transition_tag, width=1)
         canvas_modify_bindings.switch_to_move_mode()
         if abort:
             project_manager.canvas.coords(self.transition_tag, old_coords)
+            if connection_tag != "":
+                project_manager.canvas.coords(connection_tag + "_anchor", *condition_action_box_coords)
         TransitionLine.shorten_to_state_border(self.transition_tag)
         if not abort:
+            if connection_tag != "":
+                self._adjust_anchor_of_connection_line(connection_tag)
             project_manager.undo_handling_ref.design_has_changed()
 
-    def _rotate_transition_by(self, delta_phi) -> None:
-        coords = project_manager.canvas.coords(self.transition_tag)
-        vector_from_start_to_second_x = coords[2] - coords[0]
-        vector_from_start_to_second_y = coords[3] - coords[1]
-        vector_from_start_to_third_x = coords[4] - coords[0]
-        vector_from_start_to_third_y = coords[5] - coords[1]
-        vector_from_start_to_second_rotated_x = (vector_from_start_to_second_x * math.cos(delta_phi)) - (
-            vector_from_start_to_second_y * math.sin(delta_phi)
-        )
-        vector_from_start_to_second_rotated_y = (vector_from_start_to_second_x * math.sin(delta_phi)) + (
-            vector_from_start_to_second_y * math.cos(delta_phi)
-        )
-        vector_from_start_to_third_rotated_x = (vector_from_start_to_third_x * math.cos(delta_phi)) - (
-            vector_from_start_to_third_y * math.sin(delta_phi)
-        )
-        vector_from_start_to_third_rotated_y = (vector_from_start_to_third_x * math.sin(delta_phi)) + (
-            vector_from_start_to_third_y * math.cos(delta_phi)
-        )
+    def _adjust_anchor_of_connection_line(self, connection_tag):
+        new_transition_coords = project_manager.canvas.coords(self.transition_tag)
         project_manager.canvas.coords(
-            self.transition_tag,
-            coords[0],
-            coords[1],
-            coords[0] + vector_from_start_to_second_rotated_x,
-            coords[1] + vector_from_start_to_second_rotated_y,
-            coords[0] + vector_from_start_to_third_rotated_x,
-            coords[1] + vector_from_start_to_third_rotated_y,
-            coords[6],
-            coords[7],
+            connection_tag,
+            *new_transition_coords[-2:],  # not relevant, are determined new when line is shown
+            *new_transition_coords[0:2],
         )
+
+    def _rotate_transition_by(self, delta_phi, connection_tag) -> None:
+        transition_coords = project_manager.canvas.coords(self.transition_tag)
+        new_transition_coords = self._calculate_rotated_transition_coords(transition_coords, delta_phi)
+        project_manager.canvas.coords(self.transition_tag, *new_transition_coords)
+        if connection_tag != "":  # There is a condition and action box connected to this transition
+            window_bbox_coords = project_manager.canvas.bbox(connection_tag + "_anchor")
+            new_anchor = self._calculate_anchor_of_rotated_box(transition_coords[0:2], window_bbox_coords, delta_phi)
+            project_manager.canvas.coords(connection_tag + "_anchor", *new_anchor)
+
+    def _calculate_rotated_transition_coords(self, transition_coords, delta_phi):
+        # As the loopback transition is already extended to the center of the state,
+        # the start point and the end point of the transition are identical.
+        # Therefore, we only need to rotate the 2 intermediate control points around the start point.
+        start_point = (transition_coords[0], transition_coords[1])
+        second_point = (transition_coords[2], transition_coords[3])
+        third_point = (transition_coords[4], transition_coords[5])
+        vector_from_start_to_second = (second_point[0] - start_point[0], second_point[1] - start_point[1])
+        vector_from_start_to_third = (third_point[0] - start_point[0], third_point[1] - start_point[1])
+        vector_from_start_to_second_rotated = self._rotate(vector_from_start_to_second, delta_phi)
+        vector_from_start_to_third_rotated = self._rotate(vector_from_start_to_third, delta_phi)
+        return [
+            start_point[0],
+            start_point[1],
+            start_point[0] + vector_from_start_to_second_rotated[0],
+            start_point[1] + vector_from_start_to_second_rotated[1],
+            start_point[0] + vector_from_start_to_third_rotated[0],
+            start_point[1] + vector_from_start_to_third_rotated[1],
+            transition_coords[6],
+            transition_coords[7],
+        ]
+
+    def _calculate_anchor_of_rotated_box(self, start_point, window_bbox_coords, delta_phi):
+        # The rotation of a condition&action box is implemented by rotating its
+        # center point around the center of the connected state:
+        center_of_box = self._get_center_of_condition_and_action_box(window_bbox_coords)
+        vector_from_start_to_center = (center_of_box[0] - start_point[0], center_of_box[1] - start_point[1])
+        vector_from_start_to_center_rotated = self._rotate(vector_from_start_to_center, delta_phi)
+        new_center = (
+            start_point[0] + vector_from_start_to_center_rotated[0],
+            start_point[1] + vector_from_start_to_center_rotated[1],
+        )
+        new_anchor = (
+            new_center[0] - (window_bbox_coords[2] - window_bbox_coords[0]) / 2,
+            new_center[1],
+        )
+        return new_anchor
+
+    def _rotate(self, vector, delta_phi):
+        rotated_x = (vector[0] * math.cos(delta_phi)) - (vector[1] * math.sin(delta_phi))
+        rotated_y = (vector[0] * math.sin(delta_phi)) + (vector[1] * math.cos(delta_phi))
+        return rotated_x, rotated_y
+
+    def _get_center_of_condition_and_action_box(self, window_bbox_coords):
+        window_center_x = (window_bbox_coords[0] + window_bbox_coords[2]) / 2
+        window_center_y = (window_bbox_coords[1] + window_bbox_coords[3]) / 2
+        return window_center_x, window_center_y
 
     def _straighten_shape(self) -> None:
         start_state_radius = 0
