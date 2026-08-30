@@ -78,9 +78,9 @@ class ConnectorInstance:
         project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
-    def move_to(cls, event_x, event_y, rectangle_id, first, last) -> None:
+    def move_to(cls, event_x, event_y, rectangle_id, first, move_to_grid) -> None:
         """Move connector rectangle to (event_x, event_y);
-        Updates the move offset when first is True."""
+        Updates the move offset when first is True; snaps to grid when move_to_grid is True."""
         # global difference_x, difference_y
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
@@ -89,7 +89,7 @@ class ConnectorInstance:
             cls.difference_x, cls.difference_y = -event_x + middle_point[0], -event_y + middle_point[1]
         # Keep the distance between event and anchor point constant (important for moving with connected transitions):
         event_x, event_y = event_x + cls.difference_x, event_y + cls.difference_y
-        if last is True:
+        if move_to_grid is True:
             event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
             event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
         edge_length = ConnectorInstance._determine_edge_length_of_the_rectangle(rectangle_id)

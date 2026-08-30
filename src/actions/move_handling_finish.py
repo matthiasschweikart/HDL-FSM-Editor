@@ -195,12 +195,14 @@ def _shorten_all_moved_transitions_to_the_state_borders(move_list) -> None:
 
 def _move_all_ca_connection_end_points_to_the_new_transition_start_points(move_list) -> None:
     for move_list_entry in move_list:
-        if (
-            project_manager.canvas.type(move_list_entry[0]) == "line"
-        ):  # and move_list[n][1]=="start": # Only transition-lines are stored in move_list.
+        if project_manager.canvas.type(move_list_entry[0]) == "line":  # transition or connection/ca_connection
+            ca_connection_tag = None
+            transition_tag = None
             tags_of_moved_object = project_manager.canvas.gettags(move_list_entry[0])
             for tag in tags_of_moved_object:
-                if tag.startswith("ca_connection"):
+                if tag.startswith("ca_connection") and tag.endswith("_end"):
+                    # The moved transition has a connection line to a condition&action box.
+                    # The end point of this connection line must be moved to the new start point of the transition.
                     ca_connection_tag = tag[:-4]
                     ca_connection_coords = project_manager.canvas.coords(ca_connection_tag)
                     transition_coords = project_manager.canvas.coords(move_list_entry[0])
@@ -208,9 +210,31 @@ def _move_all_ca_connection_end_points_to_the_new_transition_start_points(move_l
                         ca_connection_tag,
                         ca_connection_coords[0],
                         ca_connection_coords[1],
-                        transition_coords[0],
-                        transition_coords[1],
+                        transition_coords[0],  # move end-point of the ca_connection to the transition start point
+                        transition_coords[1],  # move end-point of the ca_connection to the transition start point
                     )
+                elif tag.startswith("ca_connection"):
+                    # The moved line is a ca_connection (happens at moved loopback transition with condition&action box)
+                    # Wait until the transition_tag is found in the subsequent tags.
+                    ca_connection_tag = tag
+                elif tag.startswith("connected_to_transition"):
+                    # The moved line is a ca_connection (happens at moved loopback transition with condition&action box)
+                    # Wait until the ca_connection_tag is found in the subsequent tags.
+                    transition_tag = tag[13:]
+            if ca_connection_tag is not None and transition_tag is not None:
+                # Move the end point of the ca_connection line to the start point of the transition.
+                # The start point of the ca_connection line is moved together with the condition&action box.
+                transition_coords = project_manager.canvas.coords(transition_tag)
+                ca_connection_coords = project_manager.canvas.coords(ca_connection_tag)
+                project_manager.canvas.coords(
+                    ca_connection_tag,
+                    ca_connection_coords[0],
+                    ca_connection_coords[1],
+                    transition_coords[0],
+                    transition_coords[1],
+                )
+                ca_connection_tag = None
+                transition_tag = None
 
 
 def _hide_the_connection_line_of_moved_condition_action_window(move_list) -> None:

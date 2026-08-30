@@ -211,7 +211,7 @@ class States:
         del States.ref_dict[self.state_id]
 
     @classmethod
-    def move_to(cls, event_x, event_y, state_id, first, last) -> None:
+    def move_to(cls, event_x, event_y, state_id, first, move_to_grid) -> list:
         """Reposition state oval and name; snap to grid when last; abort if overlapping another state/connector."""
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
@@ -220,7 +220,7 @@ class States:
             cls.difference_x, cls.difference_y = -event_x + center[0], -event_y + center[1]
         # When moving the center, keep the distance between event and anchor point constant:
         new_center_x, new_center_y = event_x + cls.difference_x, event_y + cls.difference_y
-        if last is True:
+        if move_to_grid is True:
             new_center_x, new_center_y = cls._move_center_to_grid(new_center_x, new_center_y)
         text_tag = cls._determine_the_tag_of_the_state_name(state_id)
         state_radius = cls._determine_the_radius_of_the_state(state_id)
@@ -234,6 +234,7 @@ class States:
         project_manager.canvas.coords(text_tag, new_center_x, new_center_y)
         project_manager.canvas.tag_raise(state_id, "all")
         project_manager.canvas.tag_raise(text_tag, state_id)
+        return new_center_x, new_center_y
 
     @classmethod
     def _calculate_center(cls, coords) -> list:

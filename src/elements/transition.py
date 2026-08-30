@@ -357,20 +357,26 @@ class TransitionLine:
             project_manager.canvas.itemconfigure(tag_of_outgoing_transition + "priority", state=tk.HIDDEN)
 
     @classmethod
-    def move_to(cls, event_x, event_y, line_id, point, first, move_list, last=False) -> None:
+    #                    event_x, event_y, item_id, item_point_to_move, first, move_list, move_to_grid
+
+    def move_to(cls, event_x, event_y, line_id, point, first, move_list, move_to_grid=False) -> None:
         """Move line point (start*/next_to_start/next_to_end/end*) to (event_x, event_y);
         Records the move offset when first is True, else maintains the offset.
-        Snaps to grid when last is True to keep being attached to state or connector."""
+        Snaps to grid when move_to_grid is True to keep being attached to state or connector."""
         # point can be:
         # At transitions           : "start", "next_to_start", "next_to_end", "end"
         # At comment lines         : "start_comment_line", "end_comment_line"
         # At lines to state actions: "start_connection", "end_connection"
+        # At ca_connection lines   : "start_connection"
         if first is True:
             cls._set_difference(event_x, event_y, line_id, point, move_list)
         # Keep the distance between event and anchor point constant:
-        event_x, event_y = event_x + cls.diff_dict[point][0], event_y + cls.diff_dict[point][1]
+        event_x, event_y = (
+            event_x + cls.diff_dict[str(line_id) + point][0],
+            event_y + cls.diff_dict[str(line_id) + point][1],
+        )
         # Needed, because the object, to which the transition is connected to, snaps to grid.
-        if last is True:
+        if move_to_grid is True:
             tags_of_line = project_manager.canvas.gettags(line_id)
             disable_snap_to_grid = False
             for tag in tags_of_line:
@@ -418,7 +424,8 @@ class TransitionLine:
             and point in ("start", "end")
         ):
             # Only the start or the end point of a transition is moved, so the line begin shall jump to the cursor:
-            cls.diff_dict[point] = (0, 0, line_id)
+            # cls.diff_dict[str(line_id) + point] = (0, 0, line_id)
+            cls.diff_dict[str(line_id) + point] = (0, 0)
             return
         # A middle point of a transition is moved or
         # a line is moved, because it is connected to a moving object:
@@ -431,9 +438,10 @@ class TransitionLine:
         elif point.startswith("end"):
             point_to_move = [coords[-2], coords[-1]]
         else:
-            print("transition_handling: Fatal, unknown point =", point)
+            print("transition_handling 2: Fatal, unknown point =", point)
             return
-        cls.diff_dict[point] = (-event_x + point_to_move[0], -event_y + point_to_move[1], line_id)
+        # cls.diff_dict[str(line_id) + point] = (-event_x + point_to_move[0], -event_y + point_to_move[1], line_id)
+        cls.diff_dict[str(line_id) + point] = (-event_x + point_to_move[0], -event_y + point_to_move[1])
 
     @classmethod
     def _determine_line_tag(cls, line_id) -> str:
@@ -445,6 +453,10 @@ class TransitionLine:
                 single_tag.startswith("transition")
                 or single_tag.startswith("connection")
                 or single_tag.endswith("comment_line")
+                or (
+                    single_tag.startswith("ca_connection")
+                    and not (single_tag.endswith("_end") or single_tag.endswith("_anchor"))
+                )
             ):
                 line_tag = single_tag
                 break
@@ -471,7 +483,7 @@ class TransitionLine:
         elif point.startswith("end"):
             coords[-2:] = event_x, event_y
         else:
-            print("transition_handling: Fatal, unknown point =", point)
+            print("transition_handling 1: Fatal, unknown point =", point)
         project_manager.canvas.coords(line_tag, coords)
         list_of_grid_line_canvas_ids = project_manager.canvas.find_withtag("grid_line")
         if list_of_grid_line_canvas_ids:

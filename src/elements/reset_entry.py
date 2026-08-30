@@ -52,8 +52,8 @@ class ResetEntry:
         project_manager.canvas.delete("reset_text")
 
     @classmethod
-    def move_to(cls, event_x, event_y, polygon_id, first, last) -> None:
-        """Reposition reset-entry polygon and text; snap to grid when last is True."""
+    def move_to(cls, event_x, event_y, polygon_id, first, move_to_grid) -> None:
+        """Reposition reset-entry polygon and text; snap to grid when move_to_grid is True."""
         if first is True:
             # Calculate the difference between the "anchor" point and the event:
             coords = project_manager.canvas.coords(polygon_id)
@@ -61,7 +61,7 @@ class ResetEntry:
             cls.difference_x, cls.difference_y = -event_x + middle_point[0], -event_y + middle_point[1]
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + cls.difference_x, event_y + cls.difference_y
-        if last is True:
+        if move_to_grid is True:
             event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
             event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
         width = cls._determine_width_of_the_polygon(polygon_id)
