@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [6.6]
+## Added
+- Corresponding brackets in the HDL are now colored.
+- Illegal loopback transitions at connectors cannot be created anymore.
+- When a loopback transition is rotated, its condition&action box is also rotated.
+- Selection by double click is adapted to be able to select assignment operators.
+## Changed
+Refactoring.
+## Deprecated
+## Removed
+## Fixed
+- When a textbox had to be deleted in the diagram, sometimes the delete key did not work.
+- When a design file was loaded, immediately a not needed tmp-file was created.
+- At Undo in the diagram sometimes also an Undo in the interface/internals-tab happened.
+- "view area" selecting very small areas sometimes caused the tool to freeze. Fixed.
+## Security
+
 ## [6.5]
 ## Added
 - A loopback transition can now be rotated by using an entry in its context menu.
