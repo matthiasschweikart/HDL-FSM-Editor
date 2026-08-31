@@ -143,7 +143,7 @@ class TabDiagram:
         canvas.bind("<MouseWheel>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-4>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-5>", TabDiagram.scroll_wheel)
-        canvas.bind("<Button-3>", canvas_view_rectangle.start_view_rectangle)
+        canvas.bind("<Button-3>", lambda event: self.run_start_view_rectangle(event, canvas))
         canvas.bind("<Configure>", self._check_for_window_resize)
         canvas.bind("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
         canvas.bind("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
@@ -151,6 +151,12 @@ class TabDiagram:
         self._create_font_for_state_names()
         grid_drawer = grid_drawing.GridDraw(canvas)
         project_manager.grid_drawer = grid_drawer
+
+    def run_start_view_rectangle(self, event, canvas) -> None:
+        """Unbind events to create robustness"""
+        canvas.unbind("<Button-1>")
+        canvas.unbind("<Button-3>")
+        canvas_view_rectangle.start_view_rectangle(event)
 
     def _zoom_by_wheel(self, event) -> None:
         event_coords = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)

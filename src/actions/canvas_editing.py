@@ -15,11 +15,12 @@ def view_all() -> None:
     project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if complete_rectangle is not None:
-        view_rectangle(complete_rectangle, check_fit=True)
+        view_rectangle(complete_rectangle)
+        _decrement_font_size_if_window_is_too_wide()
     project_manager.grid_drawer.draw_grid()
 
 
-def view_rectangle(rectangle_to_view, check_fit) -> None:
+def view_rectangle(rectangle_to_view) -> None:
     """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
     if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
         return
@@ -29,8 +30,6 @@ def view_rectangle(rectangle_to_view, check_fit) -> None:
     center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
     _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
     canvas_zoom(center_of_rectangle_to_view, factor)
-    if check_fit:
-        _decrement_font_size_if_window_is_too_wide()
     project_manager.grid_drawer.draw_grid()
 
 
@@ -71,15 +70,15 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
     # Modify factor, so that fontsize is always an integer:
     zoom_factor = _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor)
-    if zoom_factor == 0:
+    if zoom_factor == 0 or project_manager.fontsize * zoom_factor > 300:  # do not accept fontsize above 300
         return
     project_manager.abs_zoom_factor *= zoom_factor
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
-    new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     # Must be called before shifting the canvas, because otherwise the scrollregion is not adapted to the new
     # zoom factor and the canvas cannot be shifted to the correct position:
     _adapt_scroll_region(zoom_factor)
+    new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
     canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
 

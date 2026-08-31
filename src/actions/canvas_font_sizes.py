@@ -16,9 +16,5 @@ def _modify_font_sizes_of_all_canvas_items(factor) -> None:
     project_manager.label_fontsize *= factor
     # Configure the font which was created by TabDiagram._create_font_for_state_names() and is used for all state names:
     project_manager.state_name_font.configure(size=int(project_manager.fontsize))
-    _apply_fontsize_to_canvas_window_items()
-
-
-def _apply_fontsize_to_canvas_window_items() -> None:
     for element_ref in project_manager.canvas_windows_ref_dict.values():
         element_ref.apply_new_font_size_to_canvas_window()

@@ -290,8 +290,7 @@ def _check_for_equal_priorities(transition_tags_and_priority_sorted, state_tag) 
                     object_coords[1] - 2 * (object_coords[3] - object_coords[1]),
                     object_coords[2] + 2 * (object_coords[2] - object_coords[0]),
                     object_coords[3] + 2 * (object_coords[3] - object_coords[1]),
-                ],
-                check_fit=False,
+                ]
             )
             state_name = project_manager.canvas.itemcget(state_tag + "_name", "text")
             if state_name == "":

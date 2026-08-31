@@ -36,12 +36,12 @@ def _draw_view_rectangle(event, rectangle_id) -> None:  # Called by Motion-event
 
 def _view_area(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
     # Called when "view area" was started by the button "view area".
-    project_manager.grid_drawer.remove_grid()
-    complete_rectangle = project_manager.canvas.coords(rectangle_id)
-    canvas_editing.view_rectangle(complete_rectangle, check_fit=False)
-    project_manager.canvas.delete(rectangle_id)
+    # Restore bindings first, because binding to Motion will not work anymore,
+    # as the view rectangle is about to be removed here.
     _restore_binding(funcid_canvas_draw_view_rectangle)
-    project_manager.grid_drawer.draw_grid()
+    rectangle_coords = project_manager.canvas.coords(rectangle_id)
+    project_manager.canvas.delete(rectangle_id)
+    canvas_editing.view_rectangle(rectangle_coords)
     project_manager.root.config(cursor="arrow")  # Needed if _view_area() was called by the button "view area".
 
 
@@ -51,6 +51,7 @@ def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectan
     if rectangle_coords[0] != rectangle_coords[2] and rectangle_coords[1] != rectangle_coords[3]:
         _view_area(rectangle_id, funcid_canvas_draw_view_rectangle)
     else:
+        _restore_binding(funcid_canvas_draw_view_rectangle)
         project_manager.canvas.delete(rectangle_id)
         overlapping_canvas_ids = project_manager.canvas.find_overlapping(
             rectangle_coords[0] - 5, rectangle_coords[1] - 5, rectangle_coords[0] + 5, rectangle_coords[1] + 5
@@ -62,7 +63,6 @@ def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectan
                 item_found = True
         if not item_found:
             project_manager.grid_drawer.show_context_menu()
-        _restore_binding(funcid_canvas_draw_view_rectangle)
 
 
 def _restore_binding(funcid_canvas_draw_view_rectangle):
@@ -71,3 +71,7 @@ def _restore_binding(funcid_canvas_draw_view_rectangle):
     project_manager.canvas.unbind("<ButtonRelease-3>")
     # Restore the original binding (Button-1 is bound to start_view_rectangle(), when "view area"-Button was used):
     project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
+    project_manager.canvas.bind(
+        "<Button-3>",
+        lambda event: project_manager.tab_diagram_ref.run_start_view_rectangle(event, project_manager.canvas),
+    )

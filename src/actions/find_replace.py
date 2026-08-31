@@ -220,7 +220,7 @@ class FindReplace:
                     object_coords_new.append(object_coords[1] - 0.1 * (object_coords[3] - object_coords[1]))
                     object_coords_new.append(object_coords[2] + 0.1 * (object_coords[2] - object_coords[0]))
                     object_coords_new.append(object_coords[3] + 0.1 * (object_coords[3] - object_coords[1]))
-                    canvas_editing.view_rectangle(object_coords_new, check_fit=False)
+                    canvas_editing.view_rectangle(object_coords_new)
                 else:
                     text_field["ref"].see(index)
                 continue_search = self._ask_continue()
