@@ -78,7 +78,7 @@ class ConnectorInstance:
         project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod
-    def move_to(cls, event_x, event_y, rectangle_id, first, move_to_grid) -> None:
+    def move_to(cls, event_x, event_y, rectangle_id, first, move_to_grid) -> tuple:
         """Move connector rectangle to (event_x, event_y);
         Updates the move offset when first is True; snaps to grid when move_to_grid is True."""
         # global difference_x, difference_y
@@ -100,6 +100,7 @@ class ConnectorInstance:
             event_x, event_y, edge_length
         )
         project_manager.canvas.coords(rectangle_id, *new_upper_left_corner, *new_lower_right_corner)
+        return event_x, event_y
 
     @classmethod
     def _calculate_middle_point(cls, coords) -> list:

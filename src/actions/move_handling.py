@@ -22,41 +22,27 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
     for entry in move_list:
         item_id = entry[0]
         item_type = project_manager.canvas.type(item_id)
+        # At the last move these elements snap to the grid and modify the event coordinates accordingly:
         if item_type == "oval":
-            # A state changes event coordinates if move_to_grid is True:
             new_event_x, new_event_y = state.States.move_to(event_x, event_y, item_id, first, move_to_grid)
+        elif item_type == "polygon":
+            new_event_x, new_event_y = reset_entry.ResetEntry.move_to(event_x, event_y, item_id, first, move_to_grid)
+        elif item_type == "rectangle":
+            new_event_x, new_event_y = connector.ConnectorInstance.move_to(
+                event_x, event_y, item_id, first, move_to_grid
+            )
     for entry in move_list:
         item_id = entry[0]
         item_point_to_move = entry[1]
         item_type = project_manager.canvas.type(item_id)
-        if item_type == "oval":
-            pass  # Already done (in order to update new_event_x and new_event_y)
-        elif item_type == "polygon":
-            reset_entry.ResetEntry.move_to(event_x, event_y, item_id, first, move_to_grid)
-        elif item_type == "line":
+        if item_type == "line":
             tags = project_manager.canvas.gettags(item_id)
-            if tags[0].startswith("transition"):
-                transition.TransitionLine.move_to(
-                    event_x, event_y, item_id, item_point_to_move, first, move_list, move_to_grid
-                )
-            elif tags[0].endswith("comment_line"):
-                transition.TransitionLine.move_to(
-                    event_x, event_y, item_id, item_point_to_move + "_comment_line", first, move_list, move_to_grid
-                )
-            elif tags[0].startswith("connection") or tags[0].startswith("ca_connection"):
-                transition.TransitionLine.move_to(
-                    event_x, event_y, item_id, item_point_to_move, first, move_list, move_to_grid
-                )
-            else:
-                print("move: Fatal, unknown line type with tags", item_id, tags)
-        elif item_type == "rectangle":
-            connector.ConnectorInstance.move_to(event_x, event_y, item_id, first, move_to_grid)
+            if tags[0].endswith("comment_line"):  # Other line-tags are: "transition", "connection", "ca_connection"
+                item_point_to_move += "_comment_line"
+            transition.TransitionLine.move_to(new_event_x, new_event_y, item_id, item_point_to_move, first, move_list)
         elif item_type == "window":
             ref = project_manager.canvas_windows_ref_dict[item_id]
-            # Use new_event_x/y in order to move the window in the same way, when the state snaps to the grid.
             ref.move_to(new_event_x, new_event_y, first)
-        else:
-            print("move: Fatal, unknown canvas type", "|" + item_type + "|")
 
 
 def _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y) -> bool:

@@ -119,13 +119,13 @@ def _move_the_line_to_the_center_of_the_target(
         if target_type == "polygon":
             polygon_coords = project_manager.canvas.coords(target)
             transition.TransitionLine.move_to(
-                polygon_coords[4], polygon_coords[5], transition_id, transition_point, False, move_list, False
+                polygon_coords[4], polygon_coords[5], transition_id, transition_point, False, move_list
             )
         elif target_type in ["oval", "rectangle"]:
             state_middle_x = (target_coords[2] + target_coords[0]) / 2
             state_middle_y = (target_coords[3] + target_coords[1]) / 2
             transition.TransitionLine.move_to(
-                state_middle_x, state_middle_y, transition_id, transition_point, False, move_list, False
+                state_middle_x, state_middle_y, transition_id, transition_point, False, move_list
             )
 
 

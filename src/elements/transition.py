@@ -18,7 +18,6 @@ class TransitionLine:
 
     transition_number = 0
     ref_dict = {}
-    delta_dict = {}
     diff_dict = {}
 
     # A new transition object is created by the create() method of the TransitionLine class (see end of file).
@@ -357,9 +356,7 @@ class TransitionLine:
             project_manager.canvas.itemconfigure(tag_of_outgoing_transition + "priority", state=tk.HIDDEN)
 
     @classmethod
-    #                    event_x, event_y, item_id, item_point_to_move, first, move_list, move_to_grid
-
-    def move_to(cls, event_x, event_y, line_id, point, first, move_list, move_to_grid=False) -> None:
+    def move_to(cls, event_x, event_y, line_id, point, first, move_list) -> None:
         """Move line point (start*/next_to_start/next_to_end/end*) to (event_x, event_y);
         Records the move offset when first is True, else maintains the offset.
         Snaps to grid when move_to_grid is True to keep being attached to state or connector."""
@@ -375,40 +372,6 @@ class TransitionLine:
             event_x + cls.diff_dict[str(line_id) + point][0],
             event_y + cls.diff_dict[str(line_id) + point][1],
         )
-        # Needed, because the object, to which the transition is connected to, snaps to grid.
-        if move_to_grid is True:
-            tags_of_line = project_manager.canvas.gettags(line_id)
-            disable_snap_to_grid = False
-            for tag in tags_of_line:
-                # move_to() is also called for connection to state-action and for comment_line moving,
-                # where the startpoint shall not snap to grid.
-                if (tag.startswith("connection") or tag.endswith("_comment_line")) and point == "start":
-                    disable_snap_to_grid = True
-            if disable_snap_to_grid:
-                moved_event_x = event_x
-                moved_event_y = event_y
-            elif point in ("start", "end", "end_comment_line", "end_connection"):
-                moved_event_x = project_manager.state_radius * round(event_x / project_manager.state_radius)
-                moved_event_y = project_manager.state_radius * round(event_y / project_manager.state_radius)
-                if point == "start":
-                    # Store the delta caused by snap to grid for "next_to_start" and "next_to_end":
-                    cls.delta_dict[point] = (moved_event_x - event_x, moved_event_y - event_y, line_id)
-                else:
-                    cls.delta_dict[point] = (0, 0, 0)
-            else:
-                # This is not a start or end point. If a loopback transition is moved together with its state,
-                # it is relevant that this transition point is not snapped to the grid, because otherwise
-                # the loopback transition could change its shape. Instead it must be moved by the same amount
-                # as the start point of the transition when this point snapped to the grid.
-                moved_event_x = event_x
-                moved_event_y = event_y
-                if "start" in cls.delta_dict and cls.delta_dict["start"][2] == line_id:
-                    # This fix will be also used, if the transition start point was first moved alone by moving its
-                    # connected state, an then a middle point of the transition is moved. But in this case this
-                    # small fix does not matter:
-                    moved_event_x = event_x + cls.delta_dict["start"][0]
-                    moved_event_y = event_y + cls.delta_dict["start"][1]
-            event_x, event_y = moved_event_x, moved_event_y
         line_tag = cls._determine_line_tag(line_id)
         project_manager.canvas.tag_lower(line_tag)
         line_coords = cls._move_line(line_tag, event_x, event_y, point)
