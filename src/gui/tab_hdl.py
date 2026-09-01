@@ -43,6 +43,7 @@ class TabHDL:
 
         self.hdl_frame_text.bind("<Motion>", self._cursor_move_hdl_tab)
         self.hdl_frame_text.bind("<Control-G>", self._jump_to_line)
+        self.hdl_frame_text.unbind("<<TextModified>>")
 
         project_manager.notebook.add(hdl_frame, sticky=tk.N + tk.E + tk.W + tk.S, text=GuiTab.GENERATED_HDL.value)
 

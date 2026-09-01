@@ -147,40 +147,6 @@ class TabInternals:
         self.paned_window.add(internals_process_combinatorial_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERNALS.value)
 
-        self.internals_packages_text.bind(
-            "<Control-e>", lambda event: self.internals_packages_text.edit_in_external_editor()
-        )
-        self.internals_packages_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-
-        self.internals_architecture_text.bind(
-            "<Control-e>", lambda event: self.internals_architecture_text.edit_in_external_editor()
-        )
-        self.internals_architecture_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-
-        self.internals_process_clocked_text.bind(
-            "<Control-e>", lambda event: self.internals_process_clocked_text.edit_in_external_editor()
-        )
-        self.internals_process_clocked_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-
-        # self.internals_process_combinatorial_text.bind(
-        #     "<Control-z>", lambda event: self.internals_process_combinatorial_text.undo()
-        # )
-        # self.internals_process_combinatorial_text.bind(
-        #     "<Control-Z>", lambda event: self.internals_process_combinatorial_text.redo()
-        # )
-        self.internals_process_combinatorial_text.bind(
-            "<Control-e>", lambda event: self.internals_process_combinatorial_text.edit_in_external_editor()
-        )
-        self.internals_process_combinatorial_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-
     def adjust_sash_positions(self) -> None:
         """Adjust sash positions of paned window if the window is increased."""
         if self._abort_after_storing_new_height():

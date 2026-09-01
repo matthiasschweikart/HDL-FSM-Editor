@@ -59,6 +59,7 @@ class TabLog:
         log_frame_button_frame.columnconfigure(2, weight=1)
 
         self.log_frame_text.bind("<Motion>", self._cursor_move_log_tab)
+        self.log_frame_text.unbind("<<TextModified>>")
 
         project_manager.notebook.add(log_frame, sticky=tk.N + tk.E + tk.W + tk.S, text=GuiTab.COMPILE_MSG.value)
         self._debug_active = tk.IntVar()
