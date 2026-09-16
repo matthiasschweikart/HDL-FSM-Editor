@@ -98,23 +98,6 @@ class TabInterface:
         self.paned_window.add(interface_generics_frame, weight=1)
         project_manager.notebook.add(self.paned_window, sticky="nsew", text=GuiTab.INTERFACE.value)
 
-        self.interface_packages_text.bind(
-            "<Control-e>", lambda event: self.interface_packages_text.edit_in_external_editor()
-        )
-        self.interface_packages_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-        self.interface_generics_text.bind(
-            "<Control-e>", lambda event: self.interface_generics_text.edit_in_external_editor()
-        )
-        self.interface_generics_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-        self.interface_ports_text.bind("<Control-e>", lambda event: self.interface_ports_text.edit_in_external_editor())
-        self.interface_ports_text.bind(
-            "<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title()
-        )
-
     def adjust_sash_positions(self) -> None:
         """Adjust sash positions of paned window if the window is increased."""
         if self._abort_after_storing_new_height():

@@ -99,7 +99,6 @@ class CanvasWindow:
                 text_id.bind("<Enter>", lambda event: self._start_editing(canvas_delete_class))
             )
             text_id.bind("<Control-e>", lambda event, i=i, text_id=text_id: self._edit_in_external_editor(i, text_id))
-            text_id.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
             text_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")

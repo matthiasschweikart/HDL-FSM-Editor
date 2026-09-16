@@ -70,6 +70,8 @@ class CustomText(CodeEditor):
         self.bind("<Control-C>", self._toggle_comment)
         self.bind("<Control-z>", lambda event: self.undo())
         self.bind("<Control-Z>", lambda event: self.redo())
+        self.bind("<Control-e>", lambda event: self.edit_in_external_editor())
+        self.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.constants_list = []
         self.readable_ports_list = []
