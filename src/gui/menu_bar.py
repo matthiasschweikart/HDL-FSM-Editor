@@ -48,6 +48,15 @@ class MenuBar:
             label="Compile", accelerator="Ctrl+p", command=compile_handling.compile_hdl, font=("Arial", 10)
         )
 
+        prefs_menu_button = ttk.Menubutton(menue_frame, text="Prefs", style="Window.TMenubutton")
+        self.prefs_menu = tk.Menu(prefs_menu_button, tearoff=0)
+        prefs_menu_button.configure(menu=self.prefs_menu)
+        self.prefs_menu.add_command(
+            label="Dark Mode",
+            command=project_manager.main_window.switch_to_dark_mode,
+            font=("Arial", 10),
+        )
+
         tool_title = ttk.Label(menue_frame, text="HDL-FSM-Editor", font=("Arial", 15))
 
         search_frame = ttk.Frame(menue_frame, borderwidth=2)
@@ -124,9 +133,10 @@ class MenuBar:
 
         file_menu_button.grid(row=0, column=0)
         hdl_menu_button.grid(row=0, column=1)
-        tool_title.grid(row=0, column=2)
-        search_frame.grid(row=0, column=3)
-        info_menu_button.grid(row=0, column=4)
+        # prefs_menu_button.grid(row=0, column=2, sticky="w")
+        tool_title.grid(row=0, column=3)
+        search_frame.grid(row=0, column=4)
+        info_menu_button.grid(row=0, column=5)
 
         # Bindings of the menus:
         project_manager.root.bind_all("<Control-o>", lambda event: file_handling.open_file())
@@ -163,3 +173,10 @@ class MenuBar:
         if os.path.isfile(project_manager.current_file + ".tmp"):
             os.remove(project_manager.current_file + ".tmp")
         sys.exit()
+
+    def switch_menu_entry_to(self, mode: str) -> None:
+        """Switch the menu entry to the specified mode."""
+        if mode == "Dark Mode":
+            self.prefs_menu.entryconfig(0, label=mode, command=project_manager.main_window.switch_to_dark_mode)
+        elif mode == "Normal Mode":
+            self.prefs_menu.entryconfig(0, label=mode, command=project_manager.main_window.switch_to_normal_mode)

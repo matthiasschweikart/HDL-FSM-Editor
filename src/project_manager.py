@@ -13,6 +13,7 @@ class ProjectManager:
     def __init__(self) -> None:
         # Graphical elements of the GUI:
         self._root: tk.Tk = None
+        self._main_window = None
         self._notebook: ttk.Notebook = None
         self._canvas: tk.Canvas = None
         self._entry_widgets: list = []  # List of entry widgets of control-tab
@@ -421,6 +422,16 @@ class ProjectManager:
     def root(self, value: tk.Tk) -> None:
         """Set the root Tk widget."""
         self._root = value
+
+    @property
+    def main_window(self) -> tk.Tk:
+        """Get the main window Tk widget."""
+        return self._main_window
+
+    @main_window.setter
+    def main_window(self, value: tk.Tk) -> None:
+        """Set the main window Tk widget."""
+        self._main_window = value
 
     @property
     def language(self) -> tk.StringVar:
