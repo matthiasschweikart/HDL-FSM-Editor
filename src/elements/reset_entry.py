@@ -50,6 +50,7 @@ class ResetEntry:
                 transition.TransitionLine.ref_dict[canvas_id].delete()
         project_manager.canvas.delete("reset_entry")
         project_manager.canvas.delete("reset_text")
+        project_manager.reset_entry_button.config(state=tk.NORMAL)
 
     @classmethod
     def move_to(cls, event_x, event_y, polygon_id, first, move_to_grid) -> tuple:
