@@ -5,9 +5,8 @@ Module handling transitions on the canvas.
 import math
 import tkinter as tk
 
-import constants
 from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
-from elements import condition_action
+from elements import condition_action, state
 from project_manager import project_manager
 
 
@@ -27,9 +26,7 @@ class TransitionLine:
         self.phi_last = 0
         rectangle_coords = self._determine_position_of_priority_rectangle(transition_coords)
         self.transition_tag = tags[0]  # "transition<n>"
-        self.transition_id = project_manager.canvas.create_line(
-            transition_coords, arrow="last", fill="blue", smooth=True, tags=tags
-        )
+        self.transition_id = project_manager.canvas.create_line(transition_coords, arrow="last", smooth=True, tags=tags)
         self.priority_text = project_manager.canvas.create_text(
             rectangle_coords,
             text=priority,
@@ -39,7 +36,7 @@ class TransitionLine:
         self.priority_rectangle = project_manager.canvas.create_rectangle(
             project_manager.canvas.bbox(self.priority_text),
             tag=self.transition_tag + "rectangle",
-            fill=constants.STATE_COLOR,
+            fill=state.STATE_COLOR,
         )
         project_manager.canvas.tag_bind(
             self.transition_tag,
@@ -59,6 +56,18 @@ class TransitionLine:
         project_manager.canvas.tag_raise(self.priority_text)
         TransitionLine.ref_dict[self.transition_id] = self
         TransitionLine.transition_number += 1
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
+
+    def configure_mode(self, mode):
+        """Apply highlight colors based on the mode"""
+        if mode == "Dark Mode":
+            project_manager.canvas.itemconfigure(self.transition_id, fill="lawn green")
+        else:
+            project_manager.canvas.itemconfigure(self.transition_id, fill="blue")
 
     def _determine_position_of_priority_rectangle(self, transition_coords):
         # Determine middle of the priority rectangle position by calculating a shortened transition:
@@ -734,10 +743,11 @@ class TransitionLine:
                 element_type = project_manager.canvas.type(canvas_id)
                 if cls._is_legal_start_point(canvas_id, element_type):
                     line_start_x, line_start_y = cls._determine_transition_start_point(canvas_id, element_type)
+                    mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
                     transition_id = project_manager.canvas.create_line(
                         [line_start_x, line_start_y, line_start_x, line_start_y],
                         arrow="last",
-                        fill="blue",
+                        fill="blue" if mode == "Dark Mode" else "lawn green",
                         smooth=True,
                     )
                     project_manager.canvas.tag_lower(transition_id)  # Line should be under states/connectors

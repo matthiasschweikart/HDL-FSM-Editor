@@ -346,7 +346,6 @@ _VERILOG_KEYWORDS_ALL_UNUSED = (
 
 
 CONNECTOR_COLOR = "violet"
-STATE_COLOR = "cyan"
 
 
 # class GuiTab(StrEnum): # StrEnum does not exist in Linux Mint

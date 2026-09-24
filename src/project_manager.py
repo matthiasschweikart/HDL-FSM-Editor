@@ -30,6 +30,7 @@ class ProjectManager:
         self._tab_hdl_ref = None  #: tab_hdl.TabHDL
         self._tab_log_ref = None  #: tab_log.TabLog
         self._menu_bar_ref = None  #: menu_bar.MenuBar
+        self._style_admin_ref = None  #: style_admin.StyleAdmin
 
         # Service objects of the GUI:
         self._link_dict_ref = None  #: link_dictionary.LinkDictionary
@@ -162,6 +163,16 @@ class ProjectManager:
     def menu_bar_ref(self, value):  # value : menu_bar.MenuBar) -> None:
         """Set the menu bar reference."""
         self._menu_bar_ref = value
+
+    @property
+    def style_admin_ref(self):  # -> style_admin.StyleAdmin:
+        """Get the style admin reference."""
+        return self._style_admin_ref
+
+    @style_admin_ref.setter
+    def style_admin_ref(self, value):  # value : style_admin.StyleAdmin) -> None:
+        """Set the style admin reference."""
+        self._style_admin_ref = value
 
     @property
     def tab_log_ref(self):  # -> tab_log.TabLog:

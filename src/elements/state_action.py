@@ -49,6 +49,18 @@ class StateAction(CanvasWindow):
         StateAction.ref_dict[self.window_id] = self
         self.line_id = project_manager.canvas.create_line(line_coords, dash=(2, 2), tags=line_tags)
         project_manager.canvas.tag_lower(self.line_id)
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
+
+    def configure_mode(self, mode):
+        """Apply highlight colors based on the mode"""
+        if mode == "Dark Mode":
+            project_manager.canvas.itemconfigure(self.line_id, fill="antique white")
+        else:
+            project_manager.canvas.itemconfigure(self.line_id, fill="black")
 
     def delete(self):
         """Remove state-action window, connection line, tags, and ref_dict entry."""

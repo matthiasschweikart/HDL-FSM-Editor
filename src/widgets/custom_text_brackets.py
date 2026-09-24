@@ -11,11 +11,11 @@ class BracketHighlighter:
         self,
         text_widget,
         normal_tag_names,
-        normal_colors,
+        number_of_normal_colors,
     ):
         self.text_widget = text_widget
         self.normal_tag_names = normal_tag_names
-        self.normal_colors = normal_colors
+        self.number_of_normal_colors = number_of_normal_colors
 
     def highlight_brackets(self, language) -> None:
         """Highlight matching brackets in the text."""
@@ -47,7 +47,7 @@ class BracketHighlighter:
                         continue_loop = True
                     last_index = index
                     last_char = char_dict["bracket_char"]
-                color_number = (color_number + 1) % len(self.normal_colors)
+                color_number = (color_number + 1) % self.number_of_normal_colors
         self._show_corresponding_brackets(bracket_dicts)
 
     def _show_corresponding_brackets(self, bracket_dicts) -> None:

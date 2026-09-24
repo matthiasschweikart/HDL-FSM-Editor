@@ -26,13 +26,16 @@ class TabLog:
         log_frame.columnconfigure(0, weight=1)  # Column for text
         log_frame.columnconfigure(1, weight=0)  # Column for scrollbar
 
-        log_frame_button_frame = ttk.Frame(log_frame)
-        self.log_frame_text = custom_text.CustomText(
-            log_frame, text_type="log", undo=False, wrap=tk.WORD, font=("Courier", 10)
-        )
+        log_frame_button_frame = ttk.Frame(log_frame, style="My.TFrame")
+        self.log_frame_text = custom_text.CustomText(log_frame, text_type="log", undo=False, wrap=tk.WORD, font_size=10)
+        self.log_frame_text.configure(highlightthickness=0)  # hide focus border
         self.log_frame_text.config(state=tk.DISABLED)
         log_frame_text_scroll = ttk.Scrollbar(
-            log_frame, orient=tk.VERTICAL, cursor="arrow", command=self.log_frame_text.yview
+            log_frame,
+            orient=tk.VERTICAL,
+            cursor="arrow",
+            command=self.log_frame_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.log_frame_text.config(yscrollcommand=log_frame_text_scroll.set)
         log_frame_button_frame.grid(row=0, column=0, sticky=(tk.W, tk.E))
@@ -40,18 +43,23 @@ class TabLog:
         log_frame_text_scroll.grid(row=1, column=1, sticky=(tk.N, tk.W, tk.E, tk.S))
 
         log_frame_clear_button = ttk.Button(
-            log_frame_button_frame, takefocus=False, text="Clear", style="Find.TButton", command=self._clear_log_tab
+            log_frame_button_frame,
+            takefocus=False,
+            text="Clear",
+            style="My.TButton",
+            command=self._clear_log_tab,
         )
         log_frame_regex_button = ttk.Button(
             log_frame_button_frame,
             takefocus=False,
             text="Define Regex for Hyperlinks",
-            style="Find.TButton",
+            style="My.TButton",
             command=self._edit_regex,
         )
         log_frame_label = ttk.Label(
             log_frame_button_frame,
             text="Follow links by left mouse button: Without modifier to source, with Ctrl to generated HDL",
+            style="My.TLabel",
         )
         log_frame_clear_button.grid(row=0, column=0, sticky=tk.W)
         log_frame_regex_button.grid(row=0, column=1, sticky=tk.W)

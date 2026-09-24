@@ -20,14 +20,14 @@ class TabDiagram:
     """Module for creating the diagram tab in the notebook."""
 
     def __init__(self) -> None:
-        diagram_frame = ttk.Frame(project_manager.notebook, borderwidth=0, relief="flat")
+        diagram_frame = ttk.Frame(project_manager.notebook, borderwidth=0, relief="flat", style="My.TFrame")
         diagram_frame.grid()
         diagram_frame.columnconfigure(0, weight=1)  # tkinter method (grid_columnconfigure is tcl method)
         diagram_frame.rowconfigure(0, weight=1)
         project_manager.notebook.add(diagram_frame, sticky="nsew", text=GuiTab.DIAGRAM.value)
         # Create the elements of the drawing area:
-        h = ttk.Scrollbar(diagram_frame, orient=tk.HORIZONTAL, cursor="arrow", style="Horizontal.TScrollbar")
-        v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL, cursor="arrow")
+        h = ttk.Scrollbar(diagram_frame, orient=tk.HORIZONTAL, cursor="arrow", style="My.Horizontal.TScrollbar")
+        v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL, cursor="arrow", style="My.Vertical.TScrollbar")
         canvas = tk.Canvas(
             diagram_frame,
             borderwidth=2,
@@ -40,7 +40,11 @@ class TabDiagram:
         project_manager.canvas = canvas
         h["command"] = self._scroll_xview
         v["command"] = self._scroll_yview
-        button_frame = ttk.Frame(diagram_frame, padding="3 3 3 3", borderwidth=1)
+        button_frame = ttk.Frame(
+            diagram_frame,
+            borderwidth=1,
+            style="My.TFrame",
+        )
 
         # Layout of the drawing area:
         canvas.grid(column=0, row=0, sticky="nsew")
@@ -53,7 +57,7 @@ class TabDiagram:
         button_frame.grid(column=0, row=2, sticky="swe")
 
         # Implement the buttons of the drawing area:
-        undo_redo_frame = ttk.Frame(button_frame, borderwidth=2)
+        undo_redo_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
         undo_button = ttk.Button(
             undo_redo_frame,
             text="Undo (Ctrl-z)",
@@ -73,7 +77,7 @@ class TabDiagram:
         undo_button.grid(row=0, column=0)
         redo_button.grid(row=0, column=1)
 
-        action_frame = ttk.Frame(button_frame, borderwidth=2)
+        action_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
         state_action_default_button = ttk.Button(
             action_frame, text="Default State Actions (combinatorial)", style="DefaultStateActions.TButton"
         )

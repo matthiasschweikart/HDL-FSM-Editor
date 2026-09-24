@@ -5,11 +5,12 @@ Module handling states on the canvas.
 import tkinter as tk
 from tkinter import messagebox
 
-import constants
 from actions import canvas_delete, canvas_editing, move_handling_canvas_item, move_handling_initialization
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
+
+STATE_COLOR = "cyan"
 
 
 class States:
@@ -60,6 +61,24 @@ class States:
         project_manager.canvas.tag_bind(self.text_id, "<ButtonRelease-3>", self._show_menu)
         States.ref_dict[self.state_id] = self
         States.state_number += 1
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
+
+    def configure_mode(self, mode):
+        """Apply highlight colors based on the mode"""
+        if mode == "Dark Mode":
+            fill_color = "cornflower blue"
+            outline_color = "cyan"
+        else:
+            fill_color = STATE_COLOR
+            outline_color = "blue"
+        actual_fill_color = project_manager.canvas.itemcget(self.state_id, "fill")
+        if actual_fill_color in ("cornflower blue", "blue"):  # The user has not changed the color manually.
+            project_manager.canvas.itemconfigure(self.state_id, fill=fill_color)
+        project_manager.canvas.itemconfigure(self.state_id, outline=outline_color)
 
     def _show_menu(self, event) -> None:
         menu = tk.Menu(project_manager.canvas, tearoff=0)
@@ -87,7 +106,7 @@ class States:
         project_manager.undo_handling_ref.design_has_changed()
 
     def _change_color(self) -> None:
-        new_color = ColorChanger(constants.STATE_COLOR).ask_color()
+        new_color = ColorChanger(STATE_COLOR).ask_color()
         project_manager.canvas.itemconfigure(self.state_id, fill=new_color)
         project_manager.undo_handling_ref.design_has_changed()
 
@@ -286,7 +305,7 @@ class States:
             coords,
             tags=["state" + str(States.state_number)],
             text="S" + str(States.state_number),
-            fill_color=constants.STATE_COLOR,
+            fill_color=STATE_COLOR,
         )
         # design_has_changed cannot be called by state.States, because state.States must be called
         # when an Undo is performed, which shall not create a new entry in the Undo-Stack.

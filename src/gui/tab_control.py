@@ -17,7 +17,7 @@ class TabControl:
     """Control panel for project configuration (module name, language, paths, etc.)."""
 
     def __init__(self) -> None:
-        control_frame = ttk.Frame(project_manager.notebook, takefocus=False)
+        control_frame = ttk.Frame(project_manager.notebook, takefocus=False, style="My.TFrame")
         control_frame.grid(sticky=(tk.W, tk.E))
         control_frame.columnconfigure(0, weight=0)  # column contains the labels.
         control_frame.columnconfigure(1, weight=1)  # column contains the entry boxes.
@@ -26,8 +26,8 @@ class TabControl:
         self.module_name = tk.StringVar()
         project_manager.module_name = self.module_name
         self.module_name.set("")
-        module_name_label = ttk.Label(control_frame, text="Module-Name:", padding=5)
-        self.module_name_entry = ttk.Entry(control_frame, textvariable=self.module_name)
+        module_name_label = ttk.Label(control_frame, text="Module-Name:", padding=5, style="My.TLabel")
+        self.module_name_entry = ttk.Entry(control_frame, textvariable=self.module_name, style="My.TEntry")
         module_name_label.grid(row=0, column=0, sticky=tk.W)
         self.module_name_entry.grid(row=0, column=1, sticky=(tk.W, tk.E))
         self.module_name_entry.select_clear()
@@ -36,9 +36,13 @@ class TabControl:
         project_manager.language = self.language
         self.language.set("VHDL")
         self.last_language = "VHDL"
-        language_label = ttk.Label(control_frame, text="Language:", padding=5)
+        language_label = ttk.Label(control_frame, text="Language:", padding=5, style="My.TLabel")
         language_combobox = ttk.Combobox(
-            control_frame, textvariable=self.language, values=("VHDL", "Verilog", "SystemVerilog"), state="readonly"
+            control_frame,
+            textvariable=self.language,
+            values=("VHDL", "Verilog", "SystemVerilog"),
+            state="readonly",
+            style="My.TCombobox",
         )
         language_combobox.bind("<<ComboboxSelected>>", lambda event: self.switch_language_mode())
         language_label.grid(row=1, column=0, sticky=tk.W)
@@ -46,34 +50,50 @@ class TabControl:
 
         self.generate_path_value = tk.StringVar(value="")
         project_manager.generate_path_value = self.generate_path_value
-        generate_path_label = ttk.Label(control_frame, text="Directory for generated HDL:", padding=5)
-        generate_path_entry = ttk.Entry(control_frame, textvariable=self.generate_path_value, width=80)
-        generate_path_button = ttk.Button(control_frame, text="Select...", command=self._set_path, style="Path.TButton")
+        generate_path_label = ttk.Label(
+            control_frame, text="Directory for generated HDL:", padding=5, style="My.TLabel"
+        )
+        generate_path_entry = ttk.Entry(
+            control_frame, textvariable=self.generate_path_value, width=80, style="My.TEntry"
+        )
+        generate_path_button = ttk.Button(control_frame, text="Select...", command=self._set_path, style="My.TButton")
         generate_path_label.grid(row=2, column=0, sticky=tk.W)
         generate_path_entry.grid(row=2, column=1, sticky="ew")
         generate_path_button.grid(row=2, column=2, sticky="ew")
 
-        select_file_number_label = ttk.Label(control_frame, text="Generation attributes:", padding=5)
-        select_file_number_frame = ttk.Frame(control_frame)
+        select_file_number_label = ttk.Label(control_frame, text="Generation attributes:", padding=5, style="My.TLabel")
+        select_file_number_frame = ttk.Frame(control_frame, style="My.TFrame")
         select_file_number_label.grid(row=3, column=0, sticky=tk.W)
         select_file_number_frame.grid(row=3, column=1, sticky=(tk.W, tk.E))
-
+        self.include_timestamp_in_output = tk.BooleanVar(value=True)
+        project_manager.include_timestamp_in_output = self.include_timestamp_in_output
+        include_timestamp_checkbox = ttk.Checkbutton(
+            select_file_number_frame,
+            variable=self.include_timestamp_in_output,
+            takefocus=False,
+            style="My.TCheckbutton",
+        )
+        include_timestamp_label = ttk.Label(
+            select_file_number_frame, text="Include timestamp in generated HDL files", width=40, style="My.TLabel"
+        )
         self.select_file_number_text = tk.IntVar()
         project_manager.select_file_number_text = self.select_file_number_text
         self.select_file_number_text.set(2)
         self.select_file_number_radio_button1 = ttk.Radiobutton(
-            select_file_number_frame, takefocus=False, variable=self.select_file_number_text, text="1 file", value=1
+            select_file_number_frame,
+            takefocus=False,
+            variable=self.select_file_number_text,
+            text="1 file",
+            value=1,
+            style="My.TRadiobutton",
         )
         self.select_file_number_radio_button2 = ttk.Radiobutton(
-            select_file_number_frame, takefocus=False, variable=self.select_file_number_text, text="2 files", value=2
-        )
-        self.include_timestamp_in_output = tk.BooleanVar(value=True)
-        project_manager.include_timestamp_in_output = self.include_timestamp_in_output
-        include_timestamp_checkbox = ttk.Checkbutton(
-            select_file_number_frame, variable=self.include_timestamp_in_output
-        )
-        include_timestamp_label = ttk.Label(
-            select_file_number_frame, text="Include timestamp in generated HDL files", width=40
+            select_file_number_frame,
+            takefocus=False,
+            variable=self.select_file_number_text,
+            text="2 files",
+            value=2,
+            style="My.TRadiobutton",
         )
         include_timestamp_checkbox.grid(row=0, column=0, sticky=tk.W)
         include_timestamp_label.grid(row=0, column=1, sticky=tk.W)
@@ -83,24 +103,32 @@ class TabControl:
         self.reset_signal_name = tk.StringVar()
         project_manager.reset_signal_name = self.reset_signal_name
         self.reset_signal_name.set("")
-        reset_signal_name_label = ttk.Label(control_frame, text="Name of asynchronous reset input port:", padding=5)
-        reset_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=self.reset_signal_name)
+        reset_signal_name_label = ttk.Label(
+            control_frame, text="Name of asynchronous reset input port:", padding=5, style="My.TLabel"
+        )
+        reset_signal_name_entry = ttk.Entry(
+            control_frame, width=23, textvariable=self.reset_signal_name, style="My.TEntry"
+        )
         reset_signal_name_label.grid(row=4, column=0, sticky=tk.W)
         reset_signal_name_entry.grid(row=4, column=1, sticky=tk.W)
 
         self.clock_signal_name = tk.StringVar()
         project_manager.clock_signal_name = self.clock_signal_name
         self.clock_signal_name.set("")
-        clock_signal_name_label = ttk.Label(control_frame, text="Name of clock input port:", padding=5)
-        self.clock_signal_name_entry = ttk.Entry(control_frame, width=23, textvariable=self.clock_signal_name)
+        clock_signal_name_label = ttk.Label(
+            control_frame, text="Name of clock input port:", padding=5, style="My.TLabel"
+        )
+        self.clock_signal_name_entry = ttk.Entry(
+            control_frame, width=23, textvariable=self.clock_signal_name, style="My.TEntry"
+        )
         clock_signal_name_label.grid(row=5, column=0, sticky=tk.W)
         self.clock_signal_name_entry.grid(row=5, column=1, sticky=tk.W)
 
         self.compile_cmd = tk.StringVar()
         project_manager.compile_cmd = self.compile_cmd
         self.compile_cmd.set("ghdl -a $file1 $file2; ghdl -e $name; ghdl -r $name")
-        compile_cmd_label = ttk.Label(control_frame, text="Compile command:", padding=5)
-        compile_cmd_entry = ttk.Entry(control_frame, width=23, textvariable=self.compile_cmd)
+        compile_cmd_label = ttk.Label(control_frame, text="Compile command:", padding=5, style="My.TLabel")
+        compile_cmd_entry = ttk.Entry(control_frame, width=23, textvariable=self.compile_cmd, style="My.TEntry")
         compile_cmd_label.grid(row=6, column=0, sticky=tk.W)
         compile_cmd_entry.grid(row=6, column=1, sticky="ew")
 
@@ -109,14 +137,17 @@ class TabControl:
             text="Variables for compile command:\n$file1\t= Entity-File\n$file2\t= Architecture-File\n"
             "$file\t= File with Entity and Architecture\n$name\t= Module Name",
             padding=5,
+            style="My.TLabel",
         )
         self.compile_cmd_docu.grid(row=7, column=1, sticky=tk.W)
 
         self.edit_cmd = tk.StringVar()
         project_manager.edit_cmd = self.edit_cmd
         self.edit_cmd.set("C:/Program Files/Notepad++/notepad++.exe -nosession -multiInst")
-        edit_cmd_label = ttk.Label(control_frame, text="Edit command (executed by Ctrl+e):", padding=5)
-        edit_cmd_entry = ttk.Entry(control_frame, width=23, textvariable=self.edit_cmd)
+        edit_cmd_label = ttk.Label(
+            control_frame, text="Edit command (executed by Ctrl+e):", padding=5, style="My.TLabel"
+        )
+        edit_cmd_entry = ttk.Entry(control_frame, width=23, textvariable=self.edit_cmd, style="My.TEntry")
         edit_cmd_label.grid(row=8, column=0, sticky=tk.W)
         edit_cmd_entry.grid(row=8, column=1, sticky="ew")
 
@@ -126,10 +157,13 @@ class TabControl:
             control_frame,
             text="Additional sources:\n(used only by HDL-SCHEM-Editor, must\nbe added manually to compile command)",
             padding=5,
+            style="My.TLabel",
         )
-        additional_sources_entry = ttk.Entry(control_frame, textvariable=self.additional_sources_value, width=80)
+        additional_sources_entry = ttk.Entry(
+            control_frame, textvariable=self.additional_sources_value, width=80, style="My.TEntry"
+        )
         additional_sources_button = ttk.Button(
-            control_frame, text="Select...", command=self._add_path, style="Path.TButton"
+            control_frame, text="Select...", command=self._add_path, style="My.TButton"
         )
         additional_sources_label.grid(row=9, column=0, sticky=tk.W)
         additional_sources_entry.grid(row=9, column=1, sticky=(tk.W, tk.E))
@@ -137,10 +171,12 @@ class TabControl:
 
         self.working_directory_value = tk.StringVar(value="")
         project_manager.working_directory_value = self.working_directory_value
-        working_directory_label = ttk.Label(control_frame, text="Working directory:", padding=5)
-        working_directory_entry = ttk.Entry(control_frame, textvariable=self.working_directory_value, width=80)
+        working_directory_label = ttk.Label(control_frame, text="Working directory:", padding=5, style="My.TLabel")
+        working_directory_entry = ttk.Entry(
+            control_frame, textvariable=self.working_directory_value, width=80, style="My.TEntry"
+        )
         working_directory_button = ttk.Button(
-            control_frame, text="Select...", command=self._set_working_directory, style="Path.TButton"
+            control_frame, text="Select...", command=self._set_working_directory, style="My.TButton"
         )
         working_directory_label.grid(row=10, column=0, sticky=tk.W)
         working_directory_entry.grid(row=10, column=1, sticky="ew")
@@ -148,15 +184,19 @@ class TabControl:
 
         self.diagram_background_color = tk.StringVar(value="white")
         project_manager.diagram_background_color = self.diagram_background_color
-        diagram_background_color_label = ttk.Label(control_frame, text="Diagram background color:", padding=5)
-        diagram_background_color_entry = ttk.Entry(control_frame, textvariable=self.diagram_background_color, width=80)
+        diagram_background_color_label = ttk.Label(
+            control_frame, text="Diagram background color:", padding=5, style="My.TLabel"
+        )
+        diagram_background_color_entry = ttk.Entry(
+            control_frame, textvariable=self.diagram_background_color, width=80, style="My.TEntry"
+        )
         diagram_background_color_button = ttk.Button(
-            control_frame, text="Choose color...", command=self.choose_bg_color, style="Path.TButton"
+            control_frame, text="Choose color...", command=self.choose_bg_color, style="My.TButton"
         )
         diagram_background_color_label.grid(row=11, column=0, sticky=tk.W)
         diagram_background_color_entry.grid(row=11, column=1, sticky="ew")
         diagram_background_color_button.grid(row=11, column=2, sticky="ew")
-        self.diagram_background_color_error = ttk.Label(control_frame, text="", padding=5)
+        self.diagram_background_color_error = ttk.Label(control_frame, text="", padding=5, style="My.TLabel")
         self.diagram_background_color_error.grid(row=12, column=1, sticky=tk.W)
 
         self._module_name_trace_id = None

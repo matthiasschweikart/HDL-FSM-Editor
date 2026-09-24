@@ -53,11 +53,8 @@ class RegexDialog(simpledialog.Dialog):
         is_valid = self.validate_regex(pattern)
 
         if is_valid:
-            self.pattern_entry.configure(style="TEntry")
+            self.pattern_entry.configure(style="My.TEntry")
         else:
-            # Create a custom style for invalid regex with light red background
-            style = ttk.Style()
-            style.configure("InvalidRegex.TEntry", fieldbackground="#ffcccc")
             self.pattern_entry.configure(style="InvalidRegex.TEntry")
 
     def body(self, master: tk.Frame) -> tk.Widget | None:
@@ -70,10 +67,11 @@ class RegexDialog(simpledialog.Dialog):
             master,
             text="Regex to extract file name and line number from simulator messages:",
             justify="left",
+            style="My.TLabel",
         ).grid(row=0, column=0, sticky="ew", padx=0, pady=0)
 
         # Pattern entry
-        self.pattern_entry = ttk.Entry(master)
+        self.pattern_entry = ttk.Entry(master, style="My.TEntry")
         self.pattern_entry.grid(row=1, column=0, sticky="ew", padx=0, pady=0)
         self.pattern_entry.insert(0, self.current_pattern)
         # Bind the validation function to key release events
@@ -82,36 +80,38 @@ class RegexDialog(simpledialog.Dialog):
         self.on_pattern_change(None)
 
         # Group identifiers frame
-        id_frame = ttk.Frame(master)
+        id_frame = ttk.Frame(master, style="My.TFrame")
         id_frame.grid(row=2, column=0, sticky="ew", padx=0, pady=0)
 
         # Filename group
-        ttk.Label(id_frame, text="Group identifier for file-name:", justify="left").grid(
+        ttk.Label(id_frame, text="Group identifier for file-name:", justify="left", style="My.TLabel").grid(
             row=0, column=0, sticky="w", padx=0, pady=0
         )
-        self.filename_entry = ttk.Entry(id_frame, width=40)
+        self.filename_entry = ttk.Entry(id_frame, width=40, style="My.TEntry")
         self.filename_entry.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
         self.filename_entry.insert(0, self.current_filename_group)
 
         # Line number group
-        ttk.Label(id_frame, text="Group identifier for line-number:", justify="left").grid(
+        ttk.Label(id_frame, text="Group identifier for line-number:", justify="left", style="My.TLabel").grid(
             row=1, column=0, sticky="w", padx=0, pady=0
         )
-        self.line_number_entry = ttk.Entry(id_frame, width=40)
+        self.line_number_entry = ttk.Entry(id_frame, width=40, style="My.TEntry")
         self.line_number_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
         self.line_number_entry.insert(0, self.current_line_number_group)
 
         # Debug options frame
-        debug_frame = ttk.Frame(master)
+        debug_frame = ttk.Frame(master, style="My.TFrame")
         debug_frame.grid(row=3, column=0, sticky="ew", padx=0, pady=2)
-        ttk.Label(debug_frame, text="Debug Regex at STDOUT:", padding=0).grid(row=0, column=0, sticky="w")
+        ttk.Label(debug_frame, text="Debug Regex at STDOUT:", padding=0, style="My.TLabel").grid(
+            row=0, column=0, sticky="w"
+        )
         self.debug_var = tk.IntVar(value=2 if self.current_debug_active else 1)
-        ttk.Radiobutton(debug_frame, takefocus=False, variable=self.debug_var, text="Inactive", value=1).grid(
-            row=0, column=1, sticky="w"
-        )
-        ttk.Radiobutton(debug_frame, takefocus=False, variable=self.debug_var, text="Active", value=2).grid(
-            row=0, column=2, sticky="w"
-        )
+        ttk.Radiobutton(
+            debug_frame, takefocus=False, variable=self.debug_var, text="Inactive", value=1, style="My.TRadiobutton"
+        ).grid(row=0, column=1, sticky="w")
+        ttk.Radiobutton(
+            debug_frame, takefocus=False, variable=self.debug_var, text="Active", value=2, style="My.TRadiobutton"
+        ).grid(row=0, column=2, sticky="w")
 
         # Configure grid weights
         master.columnconfigure(0, weight=1)

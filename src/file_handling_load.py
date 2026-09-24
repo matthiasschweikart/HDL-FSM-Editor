@@ -3,9 +3,7 @@
 import tkinter as tk
 from typing import Any
 
-import constants
 from actions import canvas_delete, canvas_editing, move_handling_canvas_window
-from constants import GuiTab
 from elements import (
     condition_action,
     connector,
@@ -24,9 +22,6 @@ from widgets import custom_text
 
 def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
     """Load the design from the given design dictionary."""
-    # Bring the notebook tab with the diagram into the foreground
-    project_manager.notebook.show_tab(GuiTab.DIAGRAM)
-
     _load_control_data(design_dictionary)
     _load_interface_data(design_dictionary)
     _load_internals_data(design_dictionary)
@@ -167,7 +162,7 @@ def _load_canvas_states(design_dictionary: dict[str, Any]) -> list[str]:
     for definition in design_dictionary["state"]:
         coords = definition[0]
         tags = definition[1]
-        fill_color = definition[2] if len(definition) == 3 else constants.STATE_COLOR
+        fill_color = definition[2] if len(definition) == 3 else state.STATE_COLOR
         single_id = _single_outgoing_transition_id(tags)
         if single_id:
             hide_list.append(single_id)

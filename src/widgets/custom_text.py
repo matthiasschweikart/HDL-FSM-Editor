@@ -33,19 +33,15 @@ class CustomText(CodeEditor):
     written_variables_of_all_windows = {}
     selection_is_active = False  # True, when a selection exists in any CustomText window.
 
-    BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST = ["green", "blue", "cyan", "brown"]
-    BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST = [
-        f"bracket_color_{position}{index}"
-        for index in range(len(BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST))
-        for position in ("start", "end")
-    ]
-    BRACKET_HIGHLIGHTING_NAME_BOLD_LIST = [
-        "bracket_color_wrong",
-    ]
-
-    def __init__(self, *args, text_type, wrap=tk.NONE, **kwargs) -> None:
+    def __init__(self, *args, text_type, font_size, wrap=tk.NONE, **kwargs) -> None:
         """A text widget that report on internal widget commands"""
-        super().__init__(*args, wrap=wrap, **kwargs)
+        super().__init__(
+            *args,
+            font=(project_manager.style_admin_ref.font_name, font_size),
+            wrap=wrap,
+            highlightthickness=1,  # show focus border
+            **kwargs,
+        )
         # create a proxy for the underlying widget
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, (self._orig))
@@ -58,8 +54,8 @@ class CustomText(CodeEditor):
         self.overwrite = False
         self.bracket_highlighter = BracketHighlighter(
             self,
-            normal_tag_names=CustomText.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST,
-            normal_colors=CustomText.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST,
+            normal_tag_names=config.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST,
+            number_of_normal_colors=len(config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST),
         )
         # Overwrites the default control-o = "insert a new line", needed for opening a new file:
         self.bind("<Control-o>", lambda event: self._open())
@@ -81,33 +77,68 @@ class CustomText(CodeEditor):
         self.function_names_list = []
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
-        self._define_text_tags(kwargs.get("font"))
-
-    def _define_text_tags(self, font):
         self.tag_configure("message_red", foreground="red")
         self.tag_configure("message_green", foreground="green")
         self.tag_configure("highlight", background="orange")
-        self.tag_configure("generated_entity_bg", background="#F5E6D3")  # Pale brown
-        self.tag_configure("generated_arch_bg", background="#FFF9CC")  # Pale yellow
-        self.configure_hdl_text_tags(font)
+        self.tag_configure(
+            "bracket_color_wrong", foreground="red", font=(project_manager.style_admin_ref.font_name, font_size, "bold")
+        )
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
 
-    def configure_hdl_text_tags(self, font):
-        """Prepare syntax highlighting format tags for custom_text."""
+    def configure_mode(self, mode):
+        """Apply the appropriate highlight colors based on the mode."""
+        if mode == "Dark Mode":
+            foreground = "linen"
+            background = "black"
+            insertbackground = "white"  # Cursor color
+            highlightcolor = "gray70"  # Focus border color
+            highlightbackground = "black"  # Unfocused border color
+            entity_background = "black"
+            arch_background = "black"
+            highlight_colors = config.HIGHLIGHT_COLORS_DARK_MODE
+            bracket_highlighting_color_normal_list = config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST_DARK_MODE
+        else:
+            foreground = "black"
+            background = "white"
+            insertbackground = "black"  # Cursor color
+            highlightcolor = "black"  # Focus border color
+            highlightbackground = "light gray"  # Unfocused border color
+            entity_background = "#F5E6D3"
+            arch_background = "#FFF9CC"
+            highlight_colors = config.HIGHLIGHT_COLORS
+            bracket_highlighting_color_normal_list = config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST
+        self.configure(
+            foreground=foreground,
+            background=background,
+            insertbackground=insertbackground,  # Cursor color
+            highlightcolor=highlightcolor,  # Focus border color
+            highlightbackground=highlightbackground,  # Unfocused border color
+        )
+        self.tag_configure("generated_entity_bg", background=entity_background)
+        self.tag_configure("generated_arch_bg", background=arch_background)
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_configure(
                 highlight_tag_name,
-                foreground=config.HIGHLIGHT_COLORS[highlight_tag_name],
-                font=(
-                    *font,
-                    "normal",
-                ),
+                foreground=highlight_colors[highlight_tag_name],
             )
-        for index, name in enumerate(CustomText.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST):
+        for index, name in enumerate(config.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST):
             self.tag_configure(
-                name, foreground=CustomText.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST[index // 2], font=(*font, "normal")
+                name,
+                foreground=bracket_highlighting_color_normal_list[index // 2],
             )
-        for name in CustomText.BRACKET_HIGHLIGHTING_NAME_BOLD_LIST:
-            self.tag_configure(name, foreground="red", font=(*font, "bold"))
+
+    def resize_hdl_text_tags(self, font_size):
+        """Prepare syntax highlighting format tags for custom_text based on the mode."""
+        for tag_name in (
+            list(constants.VHDL_HIGHLIGHT_PATTERN_DICT.keys()) + config.BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST
+        ):
+            self.tag_configure(tag_name, font=(project_manager.style_admin_ref.font_name, font_size, "normal"))
+        for tag_name in config.BRACKET_HIGHLIGHTING_NAME_BOLD_LIST:
+            self.tag_configure(tag_name, font=(project_manager.style_admin_ref.font_name, font_size, "bold"))
 
     def _proxy(self, command, *args) -> None:
         cmd = (self._orig, command) + args

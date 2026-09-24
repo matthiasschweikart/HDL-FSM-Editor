@@ -14,6 +14,7 @@ class GridDraw:
 
     def __init__(self, canvas) -> None:
         self.canvas = canvas
+        self.color = "gray85"
         self.grid_is_visible = True
 
     def remove_grid(self) -> None:
@@ -44,7 +45,7 @@ class GridDraw:
         y = visible_window[1] - visible_window[1] % grid_size - 3 * grid_size
         y_max = visible_window[3] + visible_window[3] % grid_size + 3 * grid_size
         while y < y_max:
-            self.canvas.create_line(x_min, y, x_max, y, dash=(1, 1), fill="gray85", tags="grid_line")
+            self.canvas.create_line(x_min, y, x_max, y, dash=(1, 1), fill=self.color, tags="grid_line")
             y += grid_size
 
     def _draw_vertical_grid(self, grid_size, visible_window) -> None:
@@ -53,7 +54,7 @@ class GridDraw:
         y_min = visible_window[1] - visible_window[1] % grid_size
         y_max = visible_window[3] + visible_window[3] % grid_size
         while x < x_max:
-            self.canvas.create_line(x, y_min, x, y_max, dash=(1, 1), fill="gray85", tags="grid_line")
+            self.canvas.create_line(x, y_min, x, y_max, dash=(1, 1), fill=self.color, tags="grid_line")
             x += grid_size
 
     def show_context_menu(self) -> None:

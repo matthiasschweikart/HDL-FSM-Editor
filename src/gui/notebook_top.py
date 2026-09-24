@@ -20,7 +20,7 @@ class NotebookTop(ttk.Notebook):
     """
 
     def __init__(self, row, column) -> None:
-        super().__init__(padding=5)
+        super().__init__(padding=5, style="My.TNotebook")
         self.grid(column=column, row=row, sticky="nsew")
         project_manager.notebook = self
         project_manager.tab_control_ref = tab_control.TabControl()

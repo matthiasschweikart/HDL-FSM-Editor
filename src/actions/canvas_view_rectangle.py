@@ -11,7 +11,11 @@ from . import canvas_editing
 def start_view_rectangle(event) -> None:
     """Begin drawing a view rectangle from the current event position."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    rectangle_id = project_manager.canvas.create_rectangle(event_x, event_y, event_x, event_y, dash=(3, 5))
+    mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+    color = "black" if mode == "Dark Mode" else "white"
+    rectangle_id = project_manager.canvas.create_rectangle(
+        event_x, event_y, event_x, event_y, dash=(3, 5), outline=color
+    )
     project_manager.canvas.tag_raise(rectangle_id, "all")
     # The binding for 'Motion' must be added with '+', as 'store_mouse_position' is also bound to 'Motion':
     funcid_canvas_draw_view_rectangle = project_manager.canvas.bind(

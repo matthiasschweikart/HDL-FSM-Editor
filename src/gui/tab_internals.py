@@ -15,17 +15,21 @@ class TabInternals:
 
     def __init__(self):
 
-        self.paned_window = ttk.PanedWindow(project_manager.notebook, orient=tk.VERTICAL, takefocus=True)
+        self.paned_window = ttk.PanedWindow(
+            project_manager.notebook, orient=tk.VERTICAL, takefocus=True, style="My.TPanedwindow"
+        )
         self.paned_window_height = 1
 
-        self.internals_package_frame = ttk.Frame(self.paned_window)
+        self.internals_package_frame = ttk.Frame(self.paned_window, style="My.TFrame")
         self.internals_package_frame.columnconfigure(0, weight=1)
         self.internals_package_frame.columnconfigure(1, weight=0)
         self.internals_package_frame.rowconfigure(0, weight=0)
         self.internals_package_frame.rowconfigure(1, weight=1)
-        internals_package_label = ttk.Label(self.internals_package_frame, text="Packages:", padding=5)
+        internals_package_label = ttk.Label(
+            self.internals_package_frame, text="Packages:", padding=5, style="My.TLabel"
+        )
         interface_package_linfo = ttk.Label(
-            self.internals_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
+            self.internals_package_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5, style="My.TLabel"
         )
         self.internals_packages_text = custom_text.CustomText(
             self.internals_package_frame,
@@ -33,11 +37,15 @@ class TabInternals:
             height=3,
             width=10,
             undo=True,
-            font=("Courier", 10),
+            font_size=10,
             wrap=tk.WORD,
         )
         internals_package_scroll = ttk.Scrollbar(
-            self.internals_package_frame, orient=tk.VERTICAL, cursor="arrow", command=self.internals_packages_text.yview
+            self.internals_package_frame,
+            orient=tk.VERTICAL,
+            cursor="arrow",
+            command=self.internals_packages_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.internals_packages_text.config(yscrollcommand=internals_package_scroll.set)
         internals_package_label.grid(row=0, column=0, sticky=tk.W)
@@ -45,16 +53,16 @@ class TabInternals:
         self.internals_packages_text.grid(row=1, column=0, sticky="nsew")
         internals_package_scroll.grid(row=1, column=1, sticky="nsew")
 
-        internals_architecture_frame = ttk.Frame(self.paned_window)
+        internals_architecture_frame = ttk.Frame(self.paned_window, style="My.TFrame")
         internals_architecture_frame.columnconfigure(0, weight=1)
         internals_architecture_frame.columnconfigure(1, weight=0)
         internals_architecture_frame.rowconfigure(0, weight=0)
         internals_architecture_frame.rowconfigure(1, weight=1)
         self.internals_architecture_label = ttk.Label(
-            internals_architecture_frame, text="Architecture Declarations:", padding=5
+            internals_architecture_frame, text="Architecture Declarations:", padding=5, style="My.TLabel"
         )
         interface_architecture_info = ttk.Label(
-            internals_architecture_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
+            internals_architecture_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5, style="My.TLabel"
         )
         self.internals_architecture_text = custom_text.CustomText(
             internals_architecture_frame,
@@ -62,7 +70,7 @@ class TabInternals:
             height=3,
             width=10,
             undo=True,
-            font=("Courier", 10),
+            font_size=10,
             wrap=tk.WORD,
         )
         internals_architecture_scroll = ttk.Scrollbar(
@@ -70,6 +78,7 @@ class TabInternals:
             orient=tk.VERTICAL,
             cursor="arrow",
             command=self.internals_architecture_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.internals_architecture_text.config(yscrollcommand=internals_architecture_scroll.set)
         self.internals_architecture_label.grid(row=0, column=0, sticky=tk.W)
@@ -77,16 +86,19 @@ class TabInternals:
         self.internals_architecture_text.grid(row=1, column=0, sticky="nsew")
         internals_architecture_scroll.grid(row=1, column=1, sticky="nsew")
 
-        internals_process_clocked_frame = ttk.Frame(self.paned_window)
+        internals_process_clocked_frame = ttk.Frame(self.paned_window, style="My.TFrame")
         internals_process_clocked_frame.columnconfigure(0, weight=1)
         internals_process_clocked_frame.columnconfigure(1, weight=0)
         internals_process_clocked_frame.rowconfigure(0, weight=0)
         internals_process_clocked_frame.rowconfigure(1, weight=1)
         self.internals_process_clocked_label = ttk.Label(
-            internals_process_clocked_frame, text="Variable Declarations for clocked process:", padding=5
+            internals_process_clocked_frame,
+            text="Variable Declarations for clocked process:",
+            padding=5,
+            style="My.TLabel",
         )
         interface_process_clocked_info = ttk.Label(
-            internals_process_clocked_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
+            internals_process_clocked_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5, style="My.TLabel"
         )
         self.internals_process_clocked_text = custom_text.CustomText(
             internals_process_clocked_frame,
@@ -94,7 +106,7 @@ class TabInternals:
             height=3,
             width=10,
             undo=True,
-            font=("Courier", 10),
+            font_size=10,
             wrap=tk.WORD,
         )
         internals_process_clocked_scroll = ttk.Scrollbar(
@@ -102,6 +114,7 @@ class TabInternals:
             orient=tk.VERTICAL,
             cursor="arrow",
             command=self.internals_process_clocked_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.internals_process_clocked_text.config(yscrollcommand=internals_process_clocked_scroll.set)
         self.internals_process_clocked_label.grid(row=0, column=0, sticky=tk.W)
@@ -109,16 +122,19 @@ class TabInternals:
         self.internals_process_clocked_text.grid(row=1, column=0, sticky="nsew")
         internals_process_clocked_scroll.grid(row=1, column=1, sticky="nsew")
 
-        internals_process_combinatorial_frame = ttk.Frame(self.paned_window)
+        internals_process_combinatorial_frame = ttk.Frame(self.paned_window, style="My.TFrame")
         internals_process_combinatorial_frame.columnconfigure(0, weight=1)
         internals_process_combinatorial_frame.columnconfigure(1, weight=0)
         internals_process_combinatorial_frame.rowconfigure(0, weight=0)
         internals_process_combinatorial_frame.rowconfigure(1, weight=1)
         self.internals_process_combinatorial_label = ttk.Label(
-            internals_process_combinatorial_frame, text="Variable Declarations for combinatorial process:", padding=5
+            internals_process_combinatorial_frame,
+            text="Variable Declarations for combinatorial process:",
+            padding=5,
+            style="My.TLabel",
         )
         interface_process_combinatorial_info = ttk.Label(
-            internals_process_combinatorial_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5
+            internals_process_combinatorial_frame, text="Undo/Redo: Ctrl-z/Ctrl-Z,Ctrl-y", padding=5, style="My.TLabel"
         )
         self.internals_process_combinatorial_text = custom_text.CustomText(
             internals_process_combinatorial_frame,
@@ -126,7 +142,7 @@ class TabInternals:
             height=3,
             width=10,
             undo=True,
-            font=("Courier", 10),
+            font_size=10,
             wrap=tk.WORD,
         )
         internals_process_combinatorial_scroll = ttk.Scrollbar(
@@ -134,6 +150,7 @@ class TabInternals:
             orient=tk.VERTICAL,
             cursor="arrow",
             command=self.internals_process_combinatorial_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.internals_process_combinatorial_text.config(yscrollcommand=internals_process_combinatorial_scroll.set)
         self.internals_process_combinatorial_label.grid(row=0, column=0, sticky=tk.W)

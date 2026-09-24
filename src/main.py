@@ -17,7 +17,6 @@ from project_manager import project_manager
 def _setup_application_ui() -> main_window.MainWindow:
     """Set up the main application UI components."""
     mainwindow_ref = main_window.MainWindow()
-    mainwindow_ref.set_word_boundaries()
     # Initialize undo/redo system
     project_manager.undo_handling_ref.design_has_changed()
     # Restore title, as some code was already added, but no '*' shall be shown:
@@ -45,7 +44,7 @@ def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None
     if not args.no_version_check:
         check_version_result = mainwindow_ref.check_version()
     if not args.no_message:
-        mainwindow_ref.read_message(check_version_result)
+        mainwindow_ref.put_header_into_log_tab(check_version_result)
 
     # Handle filename
     if args.filename:
@@ -79,8 +78,8 @@ def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None
 def _main() -> None:
     """Main entry point for HDL-FSM-Editor."""
     print(constants.HEADER_STRING)
-    mainwindow_ref = _setup_application_ui()
-    _parse_and_process_arguments(mainwindow_ref)
+    mainwindow_ref = _setup_application_ui()  # window opens iconified
+    _parse_and_process_arguments(mainwindow_ref)  # Exits if batch generation is requested
     project_manager.root.wm_deiconify()
     project_manager.root.mainloop()
 

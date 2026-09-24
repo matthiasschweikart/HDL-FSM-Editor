@@ -18,25 +18,31 @@ class TabHDL:
     def __init__(self) -> None:
         self._line_number_under_pointer_hdl_tab: int = 0
 
-        hdl_frame = ttk.Frame(project_manager.notebook)
+        hdl_frame = ttk.Frame(project_manager.notebook, style="My.TFrame")
         hdl_frame.grid()
         hdl_frame.columnconfigure(0, weight=1)
         hdl_frame.rowconfigure(1, weight=1)
 
-        header_line = ttk.Label(
-            hdl_frame,
-            text="Ctrl-G: Jump to line ...",
-        )
+        header_line = ttk.Label(hdl_frame, text="Ctrl-G: Jump to line ...", style="My.TLabel")
         header_line.grid(row=0, column=0, sticky=tk.W, padx=4, pady=4)
 
         self.hdl_frame_text = custom_text.CustomText(
-            hdl_frame, text_type="generated", undo=False, font=("Courier", 10), wrap=tk.WORD
+            hdl_frame,
+            text_type="generated",
+            undo=False,
+            font_size=10,
+            wrap=tk.WORD,
         )
+        self.hdl_frame_text.configure(highlightthickness=0)  # hide focus border
         self.hdl_frame_text.grid(row=1, column=0, sticky=(tk.N, tk.W, tk.E, tk.S))
         self.hdl_frame_text.config(state=tk.DISABLED)
 
         hdl_frame_text_scroll = ttk.Scrollbar(
-            hdl_frame, orient=tk.VERTICAL, cursor="arrow", command=self.hdl_frame_text.yview
+            hdl_frame,
+            orient=tk.VERTICAL,
+            cursor="arrow",
+            command=self.hdl_frame_text.yview,
+            style="My.Vertical.TScrollbar",
         )
         self.hdl_frame_text.config(yscrollcommand=hdl_frame_text_scroll.set)
         hdl_frame_text_scroll.grid(row=1, column=1, sticky=(tk.N, tk.W, tk.E, tk.S))

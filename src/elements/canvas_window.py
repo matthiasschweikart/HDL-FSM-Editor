@@ -72,7 +72,7 @@ class CanvasWindow:
             takefocus=0,
             undo=True,
             maxundo=-1,
-            font=("Courier", int(project_manager.fontsize)),
+            font_size=int(project_manager.fontsize),
         )
         self.text_ids.append(custom_text_id)
         custom_text_id.insert("1.0", entry_dict["text"])
@@ -253,5 +253,5 @@ class CanvasWindow:
         for label_id in self.label_ids:
             label_id.configure(font=("Arial", int(max(1, project_manager.label_fontsize))))
         for text_id in self.text_ids:
-            text_id.configure(font=("Courier", int(project_manager.fontsize)))
-            text_id.configure_hdl_text_tags(font=("Courier", int(project_manager.fontsize)))
+            text_id.configure(font=(project_manager.style_admin_ref.font_name, int(project_manager.fontsize)))
+            text_id.resize_hdl_text_tags(int(project_manager.fontsize))

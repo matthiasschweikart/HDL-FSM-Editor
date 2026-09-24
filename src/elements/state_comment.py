@@ -45,10 +45,28 @@ class StateComment(CanvasWindow):
             additional_move_func=None,
         )
         StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
-        self.text_ids[0].config(fg="blue")
         # Line starts at comment, ends at state:
         self.line_id = project_manager.canvas.create_line(line_coords, tags=tags[0] + "_line", dash=(2, 2))
         project_manager.canvas.tag_lower(self.line_id)  # Lines are always "under" anything else.
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
+
+    def configure_mode(self, mode):
+        """Apply the specified mode highlight colors"""
+        # StateComment has a CustomText object with a different text color than the regular Text widget.
+        if mode == "Dark Mode":
+            foreground = "#5BCBFE"
+            background = "black"
+            linecolor = "antique white"
+        else:
+            foreground = "blue"
+            background = "white"
+            linecolor = "black"
+        self.text_ids[0].configure(foreground=foreground, background=background)
+        project_manager.canvas.itemconfigure(self.line_id, fill=linecolor)
 
     def delete(self):
         """Remove state-comment window, line, dtag, and ref_dict entry."""

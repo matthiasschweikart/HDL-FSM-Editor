@@ -63,15 +63,26 @@ class ConditionAction(CanvasWindow):
         # Create dictionary for translating the canvas-id of the canvas-window into a reference to this object:
         ConditionAction.ref_dict[self.window_id] = self
         ConditionAction.conditionaction_id += 1
+        mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
+        if mode == "Dark Mode":
+            self.configure_mode("Normal Mode")
+        else:
+            self.configure_mode("Dark Mode")
+
+    def configure_mode(self, mode):
+        """Apply highlight colors based on the mode"""
+        if mode == "Dark Mode":
+            project_manager.canvas.itemconfigure(self.line_id, fill="antique white")
+        else:
+            project_manager.canvas.itemconfigure(self.line_id, fill="black")
 
     def move_line(self, event_x, event_y) -> None:
         """Move the canvas line connecting this condition-action window to the transition."""
-        # Move the line which connects the window to the transition:
+        project_manager.canvas.itemconfig(self.line_id, state=tk.NORMAL)
         line_coords = project_manager.canvas.coords(self.line_id)
         line_coords[0] = event_x
         line_coords[1] = event_y
         project_manager.canvas.coords(self.line_id, line_coords)
-        project_manager.canvas.itemconfig(self.line_id, state=tk.NORMAL)
 
     def hide_line(self) -> None:
         """Hide the canvas line connecting this condition-action window to the transition."""
