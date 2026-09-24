@@ -99,6 +99,7 @@ VHDL_HIGHLIGHT_PATTERN_DICT = {
         "to_signed",
         "std_match",
     ],
+    "line_number": [r"^[0-9]+:"],
     # It is important to have "comment" at the end, as all other highlighting-tags are removed in the comment area.
     "comment": [r"--.*?$", r"/\*.*?\*/"],
 }
@@ -242,6 +243,7 @@ VERILOG_HIGHLIGHT_PATTERN_DICT = {
     ],
     "datatype": ["wire", "reg", "integer", "boolean", "bit", "bit_vector", "real", "logic"],
     "function": ["and", "nand", "or", "nor", "xnor", "xor", "not"],
+    "line_number": [r"^[0-9]+:"],
     # It is important to have "comment" at the end of this list, as all other highlighting-tags are
     # removed when highlighting works at the comment keyword.
     "comment": [r"//.*?$", r"/\*.*?\*/"],

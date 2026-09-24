@@ -10,6 +10,7 @@ HIGHLIGHT_COLORS = {
     "control": "green4",
     "datatype": "brown",
     "function": "violet",
+    "line_number": "red",
     "comment": "blue",
 }
 HIGHLIGHT_COLORS_DARK_MODE = {
@@ -18,6 +19,7 @@ HIGHLIGHT_COLORS_DARK_MODE = {
     "control": "green3",
     "datatype": "burlywood1",
     "function": "violet",
+    "line_number": "red",
     "comment": "#5BCBFE",
 }
 BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST = ["green", "blue", "cyan", "brown"]
