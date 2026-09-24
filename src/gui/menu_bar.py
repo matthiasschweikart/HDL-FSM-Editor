@@ -234,7 +234,7 @@ class MenuBar:
             if mode == "Dark Mode":
                 menu.configure(background="black", foreground="white", activebackground="gray")
             else:
-                menu.configure(background="SystemMenu", foreground="SystemMenuText", activebackground="SystemHighlight")
+                menu.configure(background="gray92", foreground="black", activebackground="royal blue")
 
     def _configure_listboxes(self, mode):
         project_manager.root.option_clear()
