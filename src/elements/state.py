@@ -76,7 +76,7 @@ class States:
             fill_color = STATE_COLOR
             outline_color = "blue"
         actual_fill_color = project_manager.canvas.itemcget(self.state_id, "fill")
-        if actual_fill_color in ("cornflower blue", "blue"):  # The user has not changed the color manually.
+        if actual_fill_color in ("cornflower blue", STATE_COLOR):  # The user has not changed the color manually.
             project_manager.canvas.itemconfigure(self.state_id, fill=fill_color)
         project_manager.canvas.itemconfigure(self.state_id, outline=outline_color)
 
