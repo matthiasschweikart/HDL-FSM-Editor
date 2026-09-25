@@ -43,7 +43,7 @@ def extract_transition_specifications_from_the_graph(state_tag_list_sorted) -> l
         # The separated paths of trace_array are merged together by adding "else" commands,
         # so if the first trace depends on an "if", then the inserted "else" path of the first trace
         # contains the second trace and so on:
-        transition_specifications.extend(_merge_trace_array(trace_array))
+        transition_specifications.extend(_merge_trace_array(state_tag, trace_array))
     # The list "transition_specifications" now contains all information to generate the HDL.
     # But in this list all actions are moved "down" and duplicated in a way that only
     # the transition which at last reaches the target state contains all the actions.
@@ -96,7 +96,7 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
                 "therefore the generated HDL may be corrupted.",
             ],
         )
-    for _, transition_tag in enumerate(outgoing_transition_tags):
+    for transition_tag in outgoing_transition_tags:
         # Collect information about the transition:
         transition_target, transition_condition, transition_action, condition_action_reference = (
             _get_transition_target_condition_action(transition_tag)
@@ -135,7 +135,7 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
         trace_new = []
         for entry in trace:
             trace_new.append(entry)
-        if transition_condition != "" and not transition_condition_is_a_comment:
+        if not transition_condition_is_a_comment and transition_condition != "":
             trace_new.append(
                 {
                     "state_name": state_name,  # The state where the transition starts.
@@ -160,7 +160,7 @@ def _extract_conditions_for_all_outgoing_transitions_of_the_state(
             )
         else:  # Target is a state.
             transition_target_tmp = transition_target if transition_target != state_name else ""
-            # Create at jumps to itself only an entry, if actions are available.
+            # Create an entry at loopback transitions only if actions are available:
             if transition_target != state_name or transition_action_new != []:
                 trace_new.append(
                     {
@@ -495,8 +495,8 @@ def _remove_target_from_branches(transition_specifications, state_name, if_depth
     return index_of_if_in_transition_specifications
 
 
-def _merge_trace_array(trace_array) -> list:
-    _check_for_wrong_priorities(trace_array)
+def _merge_trace_array(state_tag, trace_array) -> list:
+    _check_for_wrong_priorities(state_tag, trace_array)
     traces_of_a_state_reversed = list(reversed(trace_array))  # Start with the trace, which has lowest priority.
     for trace_index, trace in enumerate(traces_of_a_state_reversed):
         if (
@@ -610,9 +610,21 @@ def _merge_trace_array(trace_array) -> list:
     return transition_specifications
 
 
-def _check_for_wrong_priorities(trace_array) -> None:
+def _check_for_wrong_priorities(state_tag, trace_array) -> None:
     condition_array = []
-    for trace in trace_array:
+    for index, trace in enumerate(trace_array):
+        if not trace and index != len(trace_array) - 1:
+            # trace is an empty list (no condition and no action) and not the last trace in the array:
+            canvas_id_of_state_name = project_manager.canvas.find_withtag(state_tag + "_name")
+            state_name = project_manager.canvas.itemcget(canvas_id_of_state_name, "text")
+            raise GenerationError(
+                "Error in HDL-FSM-Editor",
+                [
+                    f"A transition starting at state {state_name}",
+                    "with no condition hides a transition with lower priority.",
+                    "This is not allowed. HDL will not be generated.",
+                ],
+            )
         # Each trace starts like this:
         # [{'state_name': 'filled', 'command': 'if'    , 'condition': "read_fifo_i='1'"           , ...
         #  {'state_name': 'filled', 'command': 'if'    , 'condition': 'read_address=write_address', ...
@@ -629,7 +641,8 @@ def _check_for_wrong_priorities(trace_array) -> None:
     for index, condition_sequence in enumerate(condition_array):
         if index < len(condition_array) - 1 and (
             condition_sequence == condition_array[index + 1][0 : len(condition_sequence)]
-        ):  # Check if the next trace starts with the same conditions.
+        ):
+            # The next trace starts with the same conditions.
             condition_sequence_string = ""
             for single_condition in condition_sequence:
                 condition_sequence_string += single_condition + ","
@@ -641,7 +654,7 @@ def _check_for_wrong_priorities(trace_array) -> None:
                         f"A transition starting at state {trace_array[index][0]['state_name']}",
                         f"with the condition sequence {condition_sequence_string}",
                         "hides a transition with lower priority.",
-                        "This is not allowed and will corrupt the HDL.",
+                        "This is not allowed. HDL will not be generated.",
                     ],
                 )
             raise GenerationError(
@@ -649,6 +662,6 @@ def _check_for_wrong_priorities(trace_array) -> None:
                 [
                     f"A transition starting at state {trace_array[index][0]['state_name']}",
                     "with no condition hides a transition with lower priority.",
-                    "This is not allowed and will corrupt the HDL.",
+                    "This is not allowed. HDL will not be generated.",
                 ],
             )
