@@ -34,6 +34,7 @@ class NotebookTop(ttk.Notebook):
     def _handle_notebook_tab_changed_event(self) -> None:
         self._update_hdl_tab_if_necessary()
         self._if_hdl_tab_set_focus()
+        project_manager.tab_control_ref.module_name_entry.select_clear()
 
     def _update_hdl_tab_if_necessary(self) -> None:
         if self.index(self.select()) == 4:  # HDL-tab is active
