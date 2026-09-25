@@ -174,7 +174,8 @@ class MainWindow:
         self._put_startup_header_into_log_tab(complete_header)
 
     def view_all_after_window_is_built(self) -> None:
-        """Fit all canvas content in view and unbind Visibility (one-shot)."""
+        """Fit all canvas content in view and unbind Visibility (one-shot).
+        Needed when the application is launched by a command line with file argument."""
         canvas_editing.view_all()
         project_manager.canvas.unbind("<Visibility>")
 
