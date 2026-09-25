@@ -15,22 +15,24 @@ def view_all() -> None:
     project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if complete_rectangle is not None:
-        view_rectangle(complete_rectangle)
+        view_rectangle(complete_rectangle, handle_grid=False)
         _decrement_font_size_if_window_is_too_wide()
     project_manager.grid_drawer.draw_grid()
 
 
-def view_rectangle(rectangle_to_view) -> None:
+def view_rectangle(rectangle_to_view, handle_grid: bool = True) -> None:
     """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
     if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
         return
-    project_manager.grid_drawer.remove_grid()
+    if handle_grid:
+        project_manager.grid_drawer.remove_grid()
     project_manager.canvas.update_idletasks()
     factor = _calculate_zoom_factor(rectangle_to_view)
     center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
     _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
     canvas_zoom(center_of_rectangle_to_view, factor)
-    project_manager.grid_drawer.draw_grid()
+    if handle_grid:
+        project_manager.grid_drawer.draw_grid()
 
 
 def _calculate_zoom_factor(rectangle_to_view):
