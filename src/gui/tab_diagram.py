@@ -28,6 +28,8 @@ class TabDiagram:
         # Create the elements of the drawing area:
         h = ttk.Scrollbar(diagram_frame, orient=tk.HORIZONTAL, cursor="arrow", style="My.Horizontal.TScrollbar")
         v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL, cursor="arrow", style="My.Vertical.TScrollbar")
+        h.configure(command=self._scroll_xview)
+        v.configure(command=self._scroll_yview)
         canvas = tk.Canvas(
             diagram_frame,
             borderwidth=2,
@@ -38,8 +40,7 @@ class TabDiagram:
             relief=tk.SUNKEN,
         )
         project_manager.canvas = canvas
-        h["command"] = self._scroll_xview
-        v["command"] = self._scroll_yview
+
         button_frame = ttk.Frame(
             diagram_frame,
             borderwidth=1,
@@ -184,6 +185,21 @@ class TabDiagram:
         project_manager.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def _scroll_end(self, _event) -> None:
+        project_manager.grid_drawer.draw_grid()
+
+    def update_scrollregion(self):
+        """Update the scroll region of the canvas based on its content."""
+        project_manager.grid_drawer.remove_grid()
+        project_manager.root.update_idletasks()  # update geometry information of all widgets
+        bbox = project_manager.canvas.bbox("all")
+        if bbox:
+            scrollregion_scaled = (
+                bbox[0] - (bbox[2] - bbox[0]) * 0.5,
+                bbox[1] - (bbox[3] - bbox[1]) * 0.5,
+                bbox[2] + (bbox[2] - bbox[0]) * 0.5,
+                bbox[3] + (bbox[3] - bbox[1]) * 0.5,
+            )
+            project_manager.canvas.configure(scrollregion=scrollregion_scaled)
         project_manager.grid_drawer.draw_grid()
 
     @classmethod

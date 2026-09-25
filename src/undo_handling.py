@@ -29,6 +29,7 @@ class UndoHandling:
         if project_manager.current_file != "" and not project_manager.root.title().startswith("unnamed"):
             # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
             file_handling.save_in_file(project_manager.current_file + ".tmp")
+        project_manager.tab_diagram_ref.update_scrollregion()
 
     def _add_changes_to_design_stack(self) -> None:
         self._remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
