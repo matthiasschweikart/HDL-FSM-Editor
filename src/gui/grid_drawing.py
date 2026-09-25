@@ -15,7 +15,9 @@ class GridDraw:
     def __init__(self, canvas) -> None:
         self.canvas = canvas
         self.color = "gray85"
+        self.grid_is_enabled = True
         self.grid_is_visible = True
+        self.draw_grid()
 
     def remove_grid(self) -> None:
         """Remove all grid lines from the canvas."""
@@ -24,19 +26,20 @@ class GridDraw:
 
     def draw_grid(self) -> None:
         """Draw grid lines in the visible window; lower grid below content."""
-        self.remove_grid()  # prevent grid to exist multiple times
-        self.grid_is_visible = True
-        visible_window = [
-            self.canvas.canvasx(0),
-            self.canvas.canvasy(0),
-            self.canvas.canvasx(self.canvas.winfo_width()),
-            self.canvas.canvasy(self.canvas.winfo_height()),
-        ]
-        grid_size = project_manager.state_radius
-        if grid_size > 8:
-            self._draw_horizontal_grid(grid_size, visible_window)
-            self._draw_vertical_grid(grid_size, visible_window)
-        self.canvas.tag_lower("grid_line")
+        if self.grid_is_enabled:
+            self.remove_grid()  # prevent grid to exist multiple times
+            self.grid_is_visible = True
+            visible_window = [
+                self.canvas.canvasx(0),
+                self.canvas.canvasy(0),
+                self.canvas.canvasx(self.canvas.winfo_width()),
+                self.canvas.canvasy(self.canvas.winfo_height()),
+            ]
+            grid_size = project_manager.state_radius
+            if grid_size > 8:
+                self._draw_horizontal_grid(grid_size, visible_window)
+                self._draw_vertical_grid(grid_size, visible_window)
+            self.canvas.tag_lower("grid_line")
 
     def _draw_horizontal_grid(self, grid_size, visible_window) -> None:
         # An extra margin of 3*grid_size is used because otherwise there are sometimes too few grid-lines:
@@ -61,8 +64,16 @@ class GridDraw:
         """Show context menu at zoom_coords for background color and grid visibility."""
         menu = tk.Menu(project_manager.canvas, tearoff=0)
         menu.add_command(label="Change background color", command=project_manager.tab_control_ref.choose_bg_color)
-        if self.grid_is_visible is True:
-            menu.add_command(label="Hide grid", command=self.remove_grid)
+        if self.grid_is_enabled is True:
+            menu.add_command(label="Hide grid", command=self._toggle_grid)
         else:
-            menu.add_command(label="Show grid", command=self.draw_grid)
+            menu.add_command(label="Show grid", command=self._toggle_grid)
         menu.tk_popup(project_manager.root.winfo_pointerx(), project_manager.root.winfo_pointery())
+
+    def _toggle_grid(self) -> None:
+        if self.grid_is_enabled:
+            self.grid_is_enabled = False
+            self.remove_grid()
+        else:
+            self.grid_is_enabled = True
+            self.draw_grid()
