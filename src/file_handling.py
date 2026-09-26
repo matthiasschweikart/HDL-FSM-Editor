@@ -154,8 +154,10 @@ def save_in_file(save_filename) -> None:  # Called at saving and at every design
         zoom_factor = project_manager.write_data_creator_ref.zoom_graphic_to_standard_size(project_manager.state_radius)
     design_dictionary = file_handling_save.save_design_to_dict()
     if not save_filename.endswith(".tmp"):
-        project_manager.write_data_creator_ref.zoom_graphic_back_to_actual_size(zoom_factor)
-        design_dictionary = project_manager.write_data_creator_ref.round_and_sort_data(design_dictionary)
+        design_dictionary = project_manager.write_data_creator_ref.zoom_graphic_back_to_actual_size(
+            zoom_factor, design_dictionary
+        )
+        project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     old_cursor = project_manager.root.cget(
         "cursor"
     )  # may be different from "arrow" at design changes (writing to .tmp-file)
@@ -205,6 +207,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
             f"File \n{read_filename}\nhas wrong format.",
         )
         return
+    project_manager.root.config(cursor="arrow")
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
@@ -231,7 +234,6 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     if not is_script_mode:
         project_manager.root.after_idle(canvas_editing.view_all)
     project_manager.root.after_idle(_init_undo_stack)
-    project_manager.root.config(cursor="arrow")
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
         if is_script_mode:
             print("Error: File " + read_filename + " has wrong format.")
