@@ -193,25 +193,21 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
         design_dictionary = _do_load_file(read_filename, replaced_read_filename)
     except FileNotFoundError:
         project_manager.root.config(cursor="arrow")
-        _show_load_error(
-            is_script_mode,
-            "Error: File " + read_filename + " could not be found.",
-            f"File {read_filename} could not be found.",
-        )
+        _show_load_error(replaced_read_filename, is_script_mode, "could not be found.")
         return
     except ValueError:  # includes JSONDecodeError
         project_manager.root.config(cursor="arrow")
-        _show_load_error(
-            is_script_mode,
-            "Error: File " + read_filename + " has wrong format.",
-            f"File \n{read_filename}\nhas wrong format.",
-        )
+        _show_load_error(replaced_read_filename, is_script_mode, "has wrong format.")
         return
-    project_manager.root.config(cursor="arrow")
-    project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
-    file_handling_load.load_design_from_dict(design_dictionary)
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
         os.remove(f"{read_filename}.tmp")
+    project_manager.root.config(cursor="arrow")
+    if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
+        _show_load_error(replaced_read_filename, is_script_mode, "has tag conflicts.")
+
+    project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
+    file_handling_load.load_design_from_dict(design_dictionary)
+
     project_manager.undo_button.config(state="disabled")
     project_manager.root.update()
     dir_name, file_name = os.path.split(read_filename)
@@ -234,11 +230,6 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     if not is_script_mode:
         project_manager.root.after_idle(canvas_editing.view_all)
     project_manager.root.after_idle(_init_undo_stack)
-    if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
-        if is_script_mode:
-            print("Error: File " + read_filename + " has wrong format.")
-        else:
-            messagebox.showerror("Error", f"File \n{read_filename}\nhas wrong format.")
 
 
 def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
@@ -268,8 +259,10 @@ def _init_undo_stack():
     project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
 
 
-def _show_load_error(is_script_mode: bool, print_msg: str, msgbox_msg: str) -> None:
+def _show_load_error(read_filename: str, is_script_mode: bool, msg: str) -> None:
     if is_script_mode:
-        print(print_msg)
+        message = f"Error: File {read_filename} " + msg
+        print(message)
     else:
-        messagebox.showerror("Error in HDL-FSM-Editor", msgbox_msg)
+        message = f"File\n{read_filename}\n" + msg
+        messagebox.showerror("Error in HDL-FSM-Editor", message)
