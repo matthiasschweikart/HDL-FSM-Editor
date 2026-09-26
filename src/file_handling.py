@@ -188,7 +188,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     replaced_read_filename = _resolve_read_filename(read_filename, is_script_mode)
     project_manager.root.config(cursor="watch")
     try:
-        _do_load_file(read_filename, replaced_read_filename, is_script_mode)
+        design_dictionary = _do_load_file(read_filename, replaced_read_filename)
     except FileNotFoundError:
         project_manager.root.config(cursor="arrow")
         _show_load_error(
@@ -196,6 +196,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
             "Error: File " + read_filename + " could not be found.",
             f"File {read_filename} could not be found.",
         )
+        return
     except ValueError:  # includes JSONDecodeError
         project_manager.root.config(cursor="arrow")
         _show_load_error(
@@ -203,26 +204,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
             "Error: File " + read_filename + " has wrong format.",
             f"File \n{read_filename}\nhas wrong format.",
         )
-
-
-def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
-    if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
-        answer = messagebox.askyesno(
-            "HDL-FSM-Editor",
-            f"Found BackUp-File\n{read_filename}.tmp\n"
-            "This file remains after a HDL-FSM-Editor crash and contains all latest changes.\n"
-            "Shall this file be read?",
-        )
-        if answer:
-            return f"{read_filename}.tmp"
-    return read_filename
-
-
-def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mode: bool) -> None:
-    with open(replaced_read_filename, encoding="utf-8") as fileobject:
-        data = fileobject.read()
-    project_manager.current_file = read_filename
-    design_dictionary = json.loads(data)
+        return
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
@@ -257,6 +239,26 @@ def _do_load_file(read_filename: str, replaced_read_filename: str, is_script_mod
             messagebox.showerror("Error", f"File \n{read_filename}\nhas wrong format.")
 
 
+def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
+    if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
+        answer = messagebox.askyesno(
+            "HDL-FSM-Editor",
+            f"Found BackUp-File\n{read_filename}.tmp\n"
+            "This file remains after a HDL-FSM-Editor crash and contains all latest changes.\n"
+            "Shall this file be read?",
+        )
+        if answer:
+            return f"{read_filename}.tmp"
+    return read_filename
+
+
+def _do_load_file(read_filename: str, replaced_read_filename: str) -> dict:
+    with open(replaced_read_filename, encoding="utf-8") as fileobject:
+        data = fileobject.read()
+    project_manager.current_file = read_filename
+    return json.loads(data)
+
+
 def _init_undo_stack():
     project_manager.undo_handling_ref.clear_stack()
     project_manager.undo_handling_ref.design_has_changed()  # Initialize undo stack with current design
@@ -268,4 +270,4 @@ def _show_load_error(is_script_mode: bool, print_msg: str, msgbox_msg: str) -> N
     if is_script_mode:
         print(print_msg)
     else:
-        messagebox.showerror("Error", msgbox_msg)
+        messagebox.showerror("Error in HDL-FSM-Editor", msgbox_msg)
