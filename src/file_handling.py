@@ -202,34 +202,16 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
         os.remove(f"{read_filename}.tmp")
     project_manager.root.config(cursor="arrow")
-    if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
-        _show_load_error(replaced_read_filename, is_script_mode, "has tag conflicts.")
-
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
-
-    project_manager.undo_button.config(state="disabled")
-    project_manager.root.update()
-    dir_name, file_name = os.path.split(read_filename)
-    project_manager.root.title(f"{file_name} ({dir_name})")
+    if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
+        _show_load_error(replaced_read_filename, is_script_mode, "has tag conflicts.")
     if not is_script_mode:
-        generate_path = expand_generate_path(
-            design_dictionary["generate_path"],
-            read_filename,
-        )
-        update_ref = update_hdl_tab.UpdateHdlTab(
-            design_dictionary["language"],
-            design_dictionary["number_of_files"],
-            read_filename,
-            generate_path,
-            design_dictionary["modulename"],
-        )
-        project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
-        project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
+        _set_title_of_window(read_filename)
+        _copy_hdl_into_hdl_tab(design_dictionary, read_filename)
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
-    if not is_script_mode:
-        project_manager.root.after_idle(canvas_editing.view_all)
-    project_manager.root.after_idle(_init_undo_stack)
+        canvas_editing.view_all()
+        _init_undo_stack()
 
 
 def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
@@ -255,6 +237,7 @@ def _do_load_file(read_filename: str, replaced_read_filename: str) -> dict:
 def _init_undo_stack():
     project_manager.undo_handling_ref.clear_stack()
     project_manager.undo_handling_ref.design_has_changed()  # Initialize undo stack with current design
+    project_manager.undo_button.config(state="disabled")
     title = project_manager.root.title()
     project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
 
@@ -266,3 +249,24 @@ def _show_load_error(read_filename: str, is_script_mode: bool, msg: str) -> None
     else:
         message = f"File\n{read_filename}\n" + msg
         messagebox.showerror("Error in HDL-FSM-Editor", message)
+
+
+def _copy_hdl_into_hdl_tab(design_dictionary: dict, read_filename: str) -> None:
+    generate_path = expand_generate_path(
+        design_dictionary["generate_path"],
+        read_filename,
+    )
+    update_ref = update_hdl_tab.UpdateHdlTab(
+        design_dictionary["language"],
+        design_dictionary["number_of_files"],
+        read_filename,
+        generate_path,
+        design_dictionary["modulename"],
+    )
+    project_manager.date_of_hdl_file_shown_in_hdl_tab = update_ref.get_date_of_hdl_file()
+    project_manager.date_of_hdl_file2_shown_in_hdl_tab = update_ref.get_date_of_hdl_file2()
+
+
+def _set_title_of_window(read_filename: str) -> None:
+    dir_name, file_name = os.path.split(read_filename)
+    project_manager.root.title(f"{file_name} ({dir_name})")
