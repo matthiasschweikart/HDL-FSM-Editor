@@ -21,7 +21,7 @@ def _setup_application_ui() -> main_window.MainWindow:
     project_manager.undo_handling_ref.design_has_changed()
     # Restore title, as some code was already added, but no '*' shall be shown:
     title = project_manager.root.title()
-    project_manager.root.after_idle(lambda: project_manager.root.title(title[:-1]))  # Restore the original title
+    project_manager.root.title(title[:-1])  # Restore the original title
     return mainwindow_ref
 
 
