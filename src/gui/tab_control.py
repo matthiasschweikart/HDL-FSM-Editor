@@ -211,7 +211,6 @@ class TabControl:
         self._additional_sources_trace_id = None
         self._working_directory_trace_id = None
         self._diagram_background_color_trace_id = None
-        self.activate_traces()
 
         project_manager.notebook.add(control_frame, sticky="nsew", text=GuiTab.CONTROL.value)
 

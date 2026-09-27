@@ -68,7 +68,7 @@ class MenuBar:
         prefs_menu_button.configure(menu=self.prefs_menu)
         self.prefs_menu.add_command(
             label="Dark Mode",
-            command=self.switch_mode,
+            command=self.switch_between_normal_and_dark_mode,
             font=("Arial", 10),
         )
 
@@ -192,7 +192,7 @@ class MenuBar:
         except Exception as e:  # pylint: disable=broad-except
             print("HDL-FSM-Editor-Warning: Could not write to file " + str(Path.home()) + "/.hdl-fsm-editor.rc.", e)
 
-    def switch_mode(self) -> None:
+    def switch_between_normal_and_dark_mode(self) -> None:
         """Switch between "Dark Mode" and "Normal Mode"."""
         mode = self.prefs_menu.entrycget(0, "label")
         project_manager.style_admin_ref.activate_mode(mode)
@@ -221,7 +221,7 @@ class MenuBar:
         self._configure_diagram_tab_background(mode)
         # The new background color must be stored for sure in the design file, as at any read from file
         # the background color is determined by the value found in design file,
-        if not project_manager.root.title().startswith("unnamed*"):
+        if not project_manager.root.title().startswith("unnamed"):
             file_handling.save()
         if mode == "Dark Mode":
             self.prefs_menu.entryconfig(0, label="Normal Mode")

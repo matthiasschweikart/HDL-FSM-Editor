@@ -66,9 +66,9 @@ class MainWindow:
             state_comment.StateComment.ref_dict,
         )
         self.configure_message = ""
-        working_directory = self._configure_hfe()
-        project_manager.tab_control_ref.working_directory_value.set(working_directory)
+        self._configure_hfe()
         self._set_word_boundaries()
+        project_manager.tab_control_ref.activate_traces()
         # Set the application icon
         try:
             icon_path = self._get_resource_path("hfe_icon.ico")
@@ -95,25 +95,26 @@ class MainWindow:
         project_manager.tab_internals_ref.adjust_sash_positions()
         project_manager.notebook.show_tab(active_tab)
 
-    def _configure_hfe(self):
+    def _configure_hfe(self) -> None:
         try:
             with open(Path.home() / ".hdl-fsm-editor.rc", encoding="utf-8") as fileobject:
                 data = fileobject.read()
             config_dict = json.loads(data)
             self.configure_message += "Configuration file " + str(Path.home()) + "/.hdl-fsm-editor.rc was read."
             work_dir = config_dict["working_directory"]
+            project_manager.tab_control_ref.working_directory_value.set(work_dir)
             project_manager.menu_bar_ref.prefs_menu.entryconfig(0, label=config_dict["graphical_mode"])
             # Now the menu reflects the graphical mode specified in the configuration file which is
-            # wrong as it should reflect not the actual mode but the alternative mode.
-            # But the method switch_mode() reads this wrong menu entry and interpretes it correctly as a
-            # command to activate this mode. As at the end the method switch_mode() as always changes the
+            # wrong as it should reflect not the actual mode but the alternative mode. But the
+            # method switch_between_normal_and_dark_mode() reads this wrong menu entry and interpretes
+            # it correctly as a command to activate this mode. As at the end the
+            # method switch_between_normal_and_dark_mode() as always changes the
             # menu entry to the alternative mode, everything is correct at the end:
-            project_manager.menu_bar_ref.switch_mode()
+            project_manager.menu_bar_ref.switch_between_normal_and_dark_mode()
         except Exception:  # pylint: disable=broad-except
             self.configure_message += "Configuration file " + str(Path.home()) + "/.hdl-fsm-editor.rc was not found."
             work_dir = ""
         print(self.configure_message)
-        return work_dir
 
     def _set_word_boundaries(self) -> None:
         """Configure Tcl word boundaries so double-click selects identifiers (e.g. signal names)."""
