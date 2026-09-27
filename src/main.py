@@ -17,7 +17,7 @@ from project_manager import project_manager
 def _setup_application_ui() -> main_window.MainWindow:
     """Set up the main application UI components."""
     mainwindow_ref = main_window.MainWindow()
-    # Initialize undo/redo system
+    # Initialize undo/redo system by storing an empty design:
     project_manager.undo_handling_ref.design_has_changed()
     # Restore title, as some code was already added, but no '*' shall be shown:
     title = project_manager.root.title()
