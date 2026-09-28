@@ -202,7 +202,7 @@ class FindReplace:
                         else:  # kind=="ports"
                             text_field["ref"].update_custom_text_class_ports_list()
                     elif text_field["tab"] == GuiTab.INTERNALS:
-                        text_field["ref"].update_custom_text_class_signals_list()
+                        text_field["ref"].update_custom_text_signals_list()
                         text_field["ref"].update_custom_text_functions_list()
                     elif text_field["tab"] == GuiTab.DIAGRAM:
                         text_field["ref"].format_after_idle(None)

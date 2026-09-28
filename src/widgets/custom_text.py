@@ -264,10 +264,10 @@ class CustomText(CodeEditor):
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
         if self.text_type in ("declarations"):
-            self.update_custom_text_class_signals_list()
+            self.update_custom_text_signals_list()
             self.update_custom_text_functions_list()
         elif self.text_type in ("variable", "action"):
-            self.update_custom_text_class_signals_list()
+            self.update_custom_text_signals_list()
         elif self.text_type == "ports":
             self.update_custom_text_class_ports_list()
         elif self.text_type == "generics":
@@ -448,7 +448,7 @@ class CustomText(CodeEditor):
         self.edit_redo()
         self.format_after_idle(None)
 
-    def update_custom_text_class_signals_list(self) -> None:
+    def update_custom_text_signals_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         all_signal_declarations = self.get("1.0", tk.END).lower()
@@ -486,7 +486,7 @@ class CustomText(CodeEditor):
 
     def update_custom_text_class_generics_list(self) -> None:
         """Updates the generics_list of this CustomText object, if it is the interface_generics_text"""
-        all_generic_declarations = project_manager.tab_interface_ref.interface_generics_text.get("1.0", tk.END).lower()
+        all_generic_declarations = self.get("1.0", tk.END).lower()
         self.generics_list = hdl_generation_architecture_state_actions.get_all_generic_names(all_generic_declarations)
 
     def highlight_item(self, _, __, number_of_line) -> None:
