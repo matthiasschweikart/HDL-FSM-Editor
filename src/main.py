@@ -18,7 +18,7 @@ def _setup_application_ui() -> main_window.MainWindow:
     """Set up the main application UI components."""
     mainwindow_ref = main_window.MainWindow()
     # Initialize undo/redo system by storing an empty design:
-    project_manager.undo_handling_ref.design_has_changed()
+    project_manager.undo_handling_ref.design_has_changed(store_in_tmp_file=False)
     # Set title (which is tk* at this moment):
     project_manager.root.title("unnamed")
     return mainwindow_ref
