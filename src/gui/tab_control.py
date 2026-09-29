@@ -7,6 +7,7 @@ from tkinter import ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
 import constants
+import file_handling
 from constants import GuiTab
 from dialogs.color_changer import ColorChanger
 from project_manager import project_manager
@@ -364,41 +365,33 @@ class TabControl:
 
     def activate_traces(self) -> None:
         """Activate the traces for the given StringVars to mark the design as changed when they are modified."""
-        self._module_name_trace_id = self.module_name.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
-        )
-        self._language_trace_id = self.language.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
-        )
+        self._module_name_trace_id = self.module_name.trace_add("write", lambda *args: self._control_tab_has_changed())
+        self._language_trace_id = self.language.trace_add("write", lambda *args: self._control_tab_has_changed())
         self._generate_path_trace_id = self.generate_path_value.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._include_timestamp_trace_id = self.include_timestamp_in_output.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._select_file_number_trace_id = self.select_file_number_text.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._reset_signal_name_trace_id = self.reset_signal_name.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._clock_signal_name_trace_id = self.clock_signal_name.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
-        self._compile_cmd_trace_id = self.compile_cmd.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
-        )
-        self._edit_cmd_trace_id = self.edit_cmd.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
-        )
+        self._compile_cmd_trace_id = self.compile_cmd.trace_add("write", lambda *args: self._control_tab_has_changed())
+        self._edit_cmd_trace_id = self.edit_cmd.trace_add("write", lambda *args: self._control_tab_has_changed())
         self._additional_sources_trace_id = self.additional_sources_value.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._working_directory_trace_id = self.working_directory_value.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
         self._diagram_background_color_trace_id = self.diagram_background_color.trace_add(
-            "write", lambda *args: project_manager.undo_handling_ref.design_has_changed()
+            "write", lambda *args: self._control_tab_has_changed()
         )
 
     def deactivate_traces(self) -> None:
@@ -415,3 +408,11 @@ class TabControl:
         self.additional_sources_value.trace_remove("write", self._additional_sources_trace_id)
         self.working_directory_value.trace_remove("write", self._working_directory_trace_id)
         self.diagram_background_color.trace_remove("write", self._diagram_background_color_trace_id)
+
+    def _control_tab_has_changed(self) -> None:
+        if project_manager.current_file != "" and not project_manager.root.title().startswith("unnamed"):
+            file_handling.save_in_file(project_manager.current_file + ".tmp")
+        title = project_manager.root.title()
+        if not title.endswith("*"):
+            title += "*"
+            project_manager.root.title(title)
