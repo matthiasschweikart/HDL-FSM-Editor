@@ -27,6 +27,7 @@ from elements import (
 )
 from project_manager import project_manager
 from utils.var_expansion import expand_generate_path
+from widgets import custom_text
 
 
 def new_design() -> bool:
@@ -41,7 +42,7 @@ def new_design() -> bool:
             # Check if save was successful (current_file is not empty)
             if project_manager.current_file == "":
                 return False
-    clear_design()
+    _clear_design()
     project_manager.root.title("unnamed")
     project_manager.grid_drawer.draw_grid()
     project_manager.write_data_creator_ref.store_as_compare_object(None)
@@ -84,20 +85,25 @@ def save() -> None:
         )  # Wait for the handling of all possible events.
 
 
-def clear_design():
+def _clear_design():
     """Clear the current design from canvas and all variables; reset to initial state."""
     project_manager.current_file = ""
     project_manager.module_name.set("")
     project_manager.reset_signal_name.set("")
     project_manager.clock_signal_name.set("")
     project_manager.include_timestamp_in_output.set(True)
-    project_manager.tab_interface_ref.interface_packages_text.delete("1.0", tk.END)
-    project_manager.tab_interface_ref.interface_generics_text.delete("1.0", tk.END)
-    project_manager.tab_interface_ref.interface_ports_text.delete("1.0", tk.END)
-    project_manager.tab_internals_ref.internals_packages_text.delete("1.0", tk.END)
-    project_manager.tab_internals_ref.internals_architecture_text.delete("1.0", tk.END)
-    project_manager.tab_internals_ref.internals_process_clocked_text.delete("1.0", tk.END)
-    project_manager.tab_internals_ref.internals_process_combinatorial_text.delete("1.0", tk.END)
+    text_widgets_to_reset = [
+        project_manager.tab_interface_ref.interface_packages_text,
+        project_manager.tab_interface_ref.interface_generics_text,
+        project_manager.tab_interface_ref.interface_ports_text,
+        project_manager.tab_internals_ref.internals_packages_text,
+        project_manager.tab_internals_ref.internals_architecture_text,
+        project_manager.tab_internals_ref.internals_process_clocked_text,
+        project_manager.tab_internals_ref.internals_process_combinatorial_text,
+    ]
+    for text_widget in text_widgets_to_reset:
+        text_widget.delete("1.0", tk.END)
+        text_widget.edit_reset()  # clears the Undo/Redo stack
     project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.NORMAL)
     project_manager.tab_hdl_ref.hdl_frame_text.delete("1.0", tk.END)
     project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
@@ -105,17 +111,22 @@ def clear_design():
 
 
 def clear_diagram():
-    """Clear the current design from canvas and all variables; reset to initial state."""
+    """Clear the current diagram from canvas."""
+    _clear_read_and_written_variables_dict()
     project_manager.canvas.delete("all")
+    ref_dicts_to_clear = [
+        condition_action.ConditionAction.ref_dict,
+        global_actions_clocked.GlobalActionsClocked.ref_dict,
+        global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict,
+        state_action.StateAction.ref_dict,
+        state_actions_default.StateActionsDefault.ref_dict,
+        state_comment.StateComment.ref_dict,
+    ]
+    for ref_dict in ref_dicts_to_clear:
+        ref_dict.clear()
     condition_action.ConditionAction.conditionaction_id = 0
-    condition_action.ConditionAction.ref_dict.clear()
     connector.ConnectorInstance.connector_number = 0
-    global_actions_clocked.GlobalActionsClocked.ref_dict.clear()
-    global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.clear()
     state_action.StateAction.state_action_id = 0
-    state_action.StateAction.ref_dict.clear()
-    state_actions_default.StateActionsDefault.ref_dict.clear()
-    state_comment.StateComment.ref_dict.clear()
     state.States.state_number = 0
     transition.TransitionLine.transition_number = 0
     project_manager.reset_entry_button.config(state=tk.NORMAL)
@@ -270,3 +281,10 @@ def _copy_hdl_into_hdl_tab(design_dictionary: dict, read_filename: str) -> None:
 def _set_title_of_window(read_filename: str) -> None:
     dir_name, file_name = os.path.split(read_filename)
     project_manager.root.title(f"{file_name} ({dir_name})")
+
+
+def _clear_read_and_written_variables_dict():
+    for canvas_window_ref in project_manager.canvas_windows_ref_dict.values():
+        for text_id in canvas_window_ref.text_ids:
+            del custom_text.CustomText.read_variables_of_all_windows[text_id]
+            del custom_text.CustomText.written_variables_of_all_windows[text_id]

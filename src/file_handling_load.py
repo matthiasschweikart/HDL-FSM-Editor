@@ -31,8 +31,6 @@ def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
 
 def load_diagram_data(design_dictionary: dict[str, Any]) -> None:
     """Load only the diagram from the given design dictionary."""
-    custom_text.CustomText.read_variables_of_all_windows.clear()
-    custom_text.CustomText.written_variables_of_all_windows.clear()
     _load_canvas_data(design_dictionary)
     _load_canvas_elements(design_dictionary)
     _load_canvas_ids(design_dictionary)  # must be done after changing the IDs by _load_canvas_elements().
@@ -117,16 +115,16 @@ def _load_canvas_ids(design_dictionary: dict[str, Any]) -> None:
 
 def _load_canvas_elements(design_dict: dict[str, Any]) -> None:
     """Load all canvas elements including states, transitions, text, and windows."""
-    hide_priority_rectangle_list: list[str] = []
     transition_dict: dict[str, Any] = {}
     state_comment_line_dict: dict[str, Any] = {}
     state_act_line_dict: dict[str, Any] = {}
     cond_act_line_dict: dict[str, Any] = {}
-    hide_priority_rectangle_list.extend(_load_canvas_states(design_dict))
-    hide_priority_rectangle_list.extend(_load_canvas_polygons(design_dict))
-    _load_canvas_text_elements(design_dict, transition_dict)
+    hide_priority_rectangle_list: list[str] = []
+    hide_priority_rectangle_list.extend(_load_states(design_dict))
+    hide_priority_rectangle_list.extend(_load_reset_entry(design_dict))
+    hide_priority_rectangle_list.extend(_load_connectors(design_dict))
+    _load_canvas_text_elements_and_transition_dict(design_dict, transition_dict)
     _distribute_lines(design_dict, state_comment_line_dict, state_act_line_dict, cond_act_line_dict, transition_dict)
-    hide_priority_rectangle_list.extend(_load_canvas_rectangles(design_dict))
     _load_transitions_from_dict(transition_dict)
     _load_state_action_blocks(design_dict, state_act_line_dict)
     _load_state_comment_blocks(design_dict, state_comment_line_dict)
@@ -156,7 +154,7 @@ def _load_log_config(design_dictionary: dict[str, Any]) -> None:
         project_manager.regex_file_line_number_quote = design_dictionary["regex_file_line_number_quote"]
 
 
-def _load_canvas_states(design_dictionary: dict[str, Any]) -> list[str]:
+def _load_states(design_dictionary: dict[str, Any]) -> list[str]:
     """Load state elements; return list of single-outgoing transition ids to hide."""
     hide_list = []
     for definition in design_dictionary["state"]:
@@ -170,7 +168,7 @@ def _load_canvas_states(design_dictionary: dict[str, Any]) -> list[str]:
     return hide_list
 
 
-def _load_canvas_polygons(design_dictionary: dict[str, Any]) -> list[str]:
+def _load_reset_entry(design_dictionary: dict[str, Any]) -> list[str]:
     """Load polygon (reset) elements; return list of single-outgoing transition ids to hide."""
     hide_list = []
     for definition in design_dictionary["polygon"]:
@@ -183,7 +181,9 @@ def _load_canvas_polygons(design_dictionary: dict[str, Any]) -> list[str]:
     return hide_list
 
 
-def _load_canvas_text_elements(design_dictionary: dict[str, Any], transition_dict: dict[str, Any]) -> None:
+def _load_canvas_text_elements_and_transition_dict(
+    design_dictionary: dict[str, Any], transition_dict: dict[str, Any]
+) -> None:
     """Load text elements (state names, reset text, priority numbers) into canvas and transition_dict."""
     for definition in design_dictionary["text"]:
         tags = definition[1]
@@ -233,7 +233,7 @@ def _distribute_lines(
                 break
 
 
-def _load_canvas_rectangles(design_dictionary: dict[str, Any]) -> list[str]:
+def _load_connectors(design_dictionary: dict[str, Any]) -> list[str]:
     """Load rectangle elements (connector, priority-box); return single-outgoing transition ids to hide."""
     hide_list = []
     for definition in design_dictionary["rectangle"]:
