@@ -19,9 +19,8 @@ def _setup_application_ui() -> main_window.MainWindow:
     mainwindow_ref = main_window.MainWindow()
     # Initialize undo/redo system by storing an empty design:
     project_manager.undo_handling_ref.design_has_changed()
-    # Restore title, as some code was already added, but no '*' shall be shown:
-    title = project_manager.root.title()
-    project_manager.root.title(title[:-1])  # Restore the original title
+    # Set title (which is tk* at this moment):
+    project_manager.root.title("unnamed")
     return mainwindow_ref
 
 

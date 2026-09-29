@@ -114,16 +114,7 @@ def clear_diagram():
     """Clear the current diagram from canvas."""
     _clear_read_and_written_variables_dict()
     project_manager.canvas.delete("all")
-    ref_dicts_to_clear = [
-        condition_action.ConditionAction.ref_dict,
-        global_actions_clocked.GlobalActionsClocked.ref_dict,
-        global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict,
-        state_action.StateAction.ref_dict,
-        state_actions_default.StateActionsDefault.ref_dict,
-        state_comment.StateComment.ref_dict,
-    ]
-    for ref_dict in ref_dicts_to_clear:
-        ref_dict.clear()
+    _clear_ref_dicts()
     condition_action.ConditionAction.conditionaction_id = 0
     connector.ConnectorInstance.connector_number = 0
     state_action.StateAction.state_action_id = 0
@@ -247,7 +238,8 @@ def _do_load_file(read_filename: str, replaced_read_filename: str) -> dict:
 
 def _init_undo_stack():
     project_manager.undo_handling_ref.clear_stack()
-    project_manager.undo_handling_ref.design_has_changed()  # Initialize undo stack with current design
+    # Initialize undo stack with current design:
+    project_manager.undo_handling_ref.design_has_changed(store_in_tmp_file=False)
     project_manager.undo_button.config(state="disabled")
     title = project_manager.root.title()
     project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
@@ -288,3 +280,16 @@ def _clear_read_and_written_variables_dict():
         for text_id in canvas_window_ref.text_ids:
             del custom_text.CustomText.read_variables_of_all_windows[text_id]
             del custom_text.CustomText.written_variables_of_all_windows[text_id]
+
+
+def _clear_ref_dicts():
+    ref_dicts_to_clear = [
+        condition_action.ConditionAction.ref_dict,
+        global_actions_clocked.GlobalActionsClocked.ref_dict,
+        global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict,
+        state_action.StateAction.ref_dict,
+        state_actions_default.StateActionsDefault.ref_dict,
+        state_comment.StateComment.ref_dict,
+    ]
+    for ref_dict in ref_dicts_to_clear:
+        ref_dict.clear()

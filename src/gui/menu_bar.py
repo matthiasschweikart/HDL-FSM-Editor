@@ -221,7 +221,7 @@ class MenuBar:
         self._configure_diagram_tab_background(mode)
         # The new background color must be stored for sure in the design file, as at any read from file
         # the background color is determined by the value found in design file,
-        if not project_manager.root.title().startswith("unnamed"):
+        if project_manager.root.title() != "tk*" and not project_manager.root.title().startswith("unnamed"):
             file_handling.save()
         if mode == "Dark Mode":
             self.prefs_menu.entryconfig(0, label="Normal Mode")

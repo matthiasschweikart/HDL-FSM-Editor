@@ -22,11 +22,17 @@ class UndoHandling:
         self.stack = []
         self.stack_write_pointer = 0
 
-    def design_has_changed(self) -> None:
+    def design_has_changed(self, store_in_tmp_file: bool = True) -> None:
         """Push current design to undo stack, update title, and save to .tmp if file is set."""
+        # import inspect
+        # print("design_has_changed is called from", inspect.stack()[1][3])
         self._add_changes_to_design_stack()
         self.update_window_title()
-        if project_manager.current_file != "" and not project_manager.root.title().startswith("unnamed"):
+        if (
+            store_in_tmp_file
+            and project_manager.current_file != ""
+            and not project_manager.root.title().startswith("unnamed")
+        ):
             # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
             file_handling.save_in_file(project_manager.current_file + ".tmp")
         project_manager.tab_diagram_ref.update_scrollregion()
@@ -112,8 +118,6 @@ class UndoHandling:
     def update_window_title(self) -> None:
         """Set window title to 'unnamed' or append '*' if the design is already named."""
         title = project_manager.root.title()
-        if title == "tk":
-            project_manager.root.title("unnamed")
-        elif not title.endswith("*"):
+        if not title.endswith("*"):
             title += "*"
             project_manager.root.title(title)
