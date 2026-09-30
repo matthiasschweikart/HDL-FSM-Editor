@@ -145,6 +145,7 @@ class CustomText(CodeEditor):
         try:
             result = self.tk.call(cmd)
             if command in ("insert", "delete", "replace"):
+                # insert is used by find&replace, delete is used by delete-key.
                 self.event_generate("<<TextModified>>")
             return result
         except Exception:  # pylint: disable=broad-except
@@ -273,9 +274,8 @@ class CustomText(CodeEditor):
         elif self.text_type == "generics":
             self.update_custom_text_class_generics_list()
         if (
-            self.text_type in ("condition", "action")  # Only in this blocks variables are read or written.
-            and self in CustomText.read_variables_of_all_windows
-            and self in CustomText.written_variables_of_all_windows
+            self.text_type
+            in ("condition", "action", "declarations", "variable")  # Only in this blocks variables are read or written.
         ):
             custom_text_linting.CustomTextLinting(
                 text,
@@ -373,7 +373,15 @@ class CustomText(CodeEditor):
                     start_index = end_index
 
     def _get_all_custom_text_widgets(self):
-        all_custom_text_widgets = []
+        all_custom_text_widgets = [
+            project_manager.tab_interface_ref.interface_packages_text,
+            project_manager.tab_interface_ref.interface_generics_text,
+            project_manager.tab_interface_ref.interface_ports_text,
+            project_manager.tab_internals_ref.internals_packages_text,
+            project_manager.tab_internals_ref.internals_architecture_text,
+            project_manager.tab_internals_ref.internals_process_clocked_text,
+            project_manager.tab_internals_ref.internals_process_combinatorial_text,
+        ]
         for element_ref in project_manager.canvas_windows_ref_dict.values():
             all_custom_text_widgets.extend(element_ref.text_ids)
         return all_custom_text_widgets
