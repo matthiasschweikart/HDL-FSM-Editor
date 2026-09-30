@@ -74,7 +74,7 @@ class CustomText(CodeEditor):
         self.writable_ports_list = []
         self.generics_list = []
         self.port_types_list = []  # Used by interface_ports_text, needed for removing port types at linting.
-        self.function_names_list = []
+        self.function_names_list = []  # Is read by linting.HighLightDict
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
         self.tag_configure("message_red", foreground="red")
@@ -265,14 +265,14 @@ class CustomText(CodeEditor):
         text = self.get("1.0", tk.END)
         self._update_size_of_text_box(text)
         if self.text_type in ("declarations"):
-            self.update_custom_text_signals_list()
-            self.update_custom_text_functions_list()
+            self.update_custom_text_signals_list()  # updates self.signals_list and self.constants_list
+            self.update_custom_text_functions_list()  # updates self.function_names_list
         elif self.text_type in ("variable", "action"):
-            self.update_custom_text_signals_list()
+            self.update_custom_text_signals_list()  # updates self.signals_list and self.constants_list
         elif self.text_type == "ports":
-            self.update_custom_text_class_ports_list()
+            self.update_custom_text_class_ports_list()  # Updates self.port_types/readable_ports/writable_ports_list
         elif self.text_type == "generics":
-            self.update_custom_text_class_generics_list()
+            self.update_custom_text_class_generics_list()  # updates self.generics_list
         if (
             self.text_type
             in ("condition", "action", "declarations", "variable")  # Only in this blocks variables are read or written.
@@ -334,16 +334,19 @@ class CustomText(CodeEditor):
             self.config(height=nr_of_lines)
 
     def _dehighlight_in_all_texts(self) -> None:
-        all_custom_text_widgets = self._get_all_custom_text_widgets()
-        # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
-        # editable text widget. This check is needed, when in "generated HDL"/"Compile Messages" (disabled text widgets)
-        # a line is clicked, in order to jump to the source code. In this case the highlight tag must not be
-        # removed, because the user wants to see the highlighted line in the source code.
+        # Removes first all highlighting introduced by links, by word-selecting, by bracket-background.
+        # Afterwards a new bracket-match highlighting may be applied based on the new cursor position.
         if self.cget("state") == "normal":
-            for text_widget in all_custom_text_widgets:
+            # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
+            # "normal" (editable) text widget. This check is needed, when in "generated HDL"/"Compile Messages",
+            # which are disabled text widgets, a line is clicked, in order to jump to the source code.
+            # In this case the highlight tag must not be removed, because the user wants to see
+            # the highlighted line in the source code.
+            for text_widget in self._get_all_custom_text_widgets():
                 text_widget.tag_remove("highlight", "1.0", tk.END)
             CustomText.selection_is_active = False
-            self.format_after_idle(None)
+            # "after_idle" is used to schedule the bracket highlighting after "tag_remove" has been processed.
+            self.after_idle(lambda: self.bracket_highlighter.highlight_brackets(project_manager.language.get()))
             project_manager.canvas.focus_set()  # canvas shall react to delete-key.
 
     def _highlight_in_all_texts(self) -> None:
@@ -472,6 +475,7 @@ class CustomText(CodeEditor):
 
     def update_custom_text_functions_list(self) -> None:
         """Updates the function_names_list of this CustomText object."""
+        self.function_names_list = []
         text = self.get("1.0", tk.END).lower()
         match_objects = re.finditer(r"function\s+(\w+)", text, re.IGNORECASE)
         for match_object in match_objects:
