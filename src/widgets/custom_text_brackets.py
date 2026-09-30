@@ -62,6 +62,7 @@ class BracketHighlighter:
 
     def _unhighlight_all_bracket_pairs(self) -> None:
         for tag_name in self.normal_tag_names:
+            self.text_widget.tag_remove("highlight", "1.0", tk.END)
             self.text_widget.tag_remove(tag_name, "1.0", tk.END)  # Remove each bracket color tag.
 
     def _create_bracket_dict(self, bracket_search_string) -> dict:
