@@ -191,8 +191,12 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     """Load project from the given file; resolve path and show errors for script vs GUI."""
     replaced_read_filename = _resolve_read_filename(read_filename, is_script_mode)
     project_manager.root.config(cursor="watch")
+    if not os.path.isfile(replaced_read_filename) or os.path.getsize(replaced_read_filename) == 0:
+        project_manager.root.config(cursor="arrow")
+        _show_load_error(replaced_read_filename, is_script_mode, "is empty.")
+        return
     try:
-        design_dictionary = _do_load_file(read_filename, replaced_read_filename)
+        design_dictionary = _do_load_file(replaced_read_filename)
     except FileNotFoundError:
         project_manager.root.config(cursor="arrow")
         _show_load_error(replaced_read_filename, is_script_mode, "could not be found.")
@@ -201,6 +205,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
         project_manager.root.config(cursor="arrow")
         _show_load_error(replaced_read_filename, is_script_mode, "has wrong format.")
         return
+    project_manager.current_file = read_filename
     if os.path.isfile(f"{read_filename}.tmp") and not is_script_mode:
         os.remove(f"{read_filename}.tmp")
     project_manager.root.config(cursor="arrow")
@@ -229,10 +234,9 @@ def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
     return read_filename
 
 
-def _do_load_file(read_filename: str, replaced_read_filename: str) -> dict:
+def _do_load_file(replaced_read_filename: str) -> dict:
     with open(replaced_read_filename, encoding="utf-8") as fileobject:
         data = fileobject.read()
-    project_manager.current_file = read_filename
     return json.loads(data)
 
 
