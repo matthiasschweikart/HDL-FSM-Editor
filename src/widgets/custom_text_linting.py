@@ -46,7 +46,7 @@ class CustomTextLinting:
 
     def __init__(self, text, text_type, my_read_variables, my_written_variables) -> None:
         self.text_type = text_type
-        self.function_names_list = []
+        self._function_names_list = []
         self.my_read_variables = my_read_variables
         self.my_written_variables = my_written_variables
         # Remove comments and returns and add blanks around special characters:
@@ -79,7 +79,7 @@ class CustomTextLinting:
             # When the ";" is missing, then the right hand side with "<=" could not be found and erased.
             # So remove "<=" and ":=" from these lists:
             self._remove_items_from_list(self.my_read_variables, ["<=", ":="])
-            self._remove_items_from_list(self.my_read_variables, self.function_names_list)
+            self._remove_items_from_list(self.my_read_variables, self._function_names_list)
             self._remove_items_from_list(self.my_read_variables, [";", ","])
             # ';' appears at VHDL-"null" assignments.
             self._remove_items_from_list(self.my_written_variables, [";", "<=", ":="])
@@ -105,8 +105,8 @@ class CustomTextLinting:
         match_objects = re.finditer(r"function\s+(\w+)", text, re.IGNORECASE)
         for match_object in match_objects:
             function_name = match_object.group(1)
-            if function_name not in self.function_names_list:
-                self.function_names_list.append(function_name)
+            if function_name not in self._function_names_list:
+                self._function_names_list.append(function_name)
 
     def _remove_vhdl_attributes(self, text):
         # remove signal-name and attribute; example: "addr ' range"
