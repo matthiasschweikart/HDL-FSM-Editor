@@ -211,6 +211,8 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     project_manager.root.config(cursor="arrow")
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
+    custom_text.CustomText.update_highlight_tags_in_all_texts()
+    custom_text.CustomText.highlight_brackets_in_all_texts()
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
         _show_load_error(replaced_read_filename, is_script_mode, "has tag conflicts.")
     if not is_script_mode:

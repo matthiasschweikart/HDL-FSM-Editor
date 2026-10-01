@@ -368,11 +368,11 @@ def get_all_generic_names(all_generic_declarations) -> list:
     for declaration in generic_declaration_list:
         if declaration != "" and not declaration.isspace():
             if project_manager.language.get() == "VHDL":
-                generic_name = re.sub(" : .*", "", declaration, flags=re.I | re.DOTALL)
-                generic_name = re.sub(r"(^|\s+)constant ", "", generic_name, flags=re.I | re.DOTALL)
+                generic_name = re.sub(" : .*", "", declaration, flags=re.DOTALL)
+                generic_name = re.sub(r"(^|\s+)constant ", "", generic_name, flags=re.I)
                 generic_name = re.sub("\\s", "", generic_name)
             else:  # Verilog
-                generic_name = re.sub("=.*", "", declaration, flags=re.I | re.DOTALL)
+                generic_name = re.sub("=.*", "", declaration, flags=re.DOTALL)
                 generic_name = re.sub("\\s", "", generic_name)
             generic_name_list.append(generic_name)
     return generic_name_list
@@ -396,6 +396,7 @@ def _get_all_readable_port_names(declaration, check) -> str:
         declaration = re.sub(" input ", " ", declaration, flags=re.I)
         declaration = re.sub(" reg ", " ", declaration, flags=re.I)
         declaration = re.sub(" logic ", " ", declaration, flags=re.I)
+        declaration = re.sub(" wire ", " ", declaration, flags=re.I)
         port_names = re.sub(" \\[.*?\\] ", " ", declaration)
     else:
         return ""

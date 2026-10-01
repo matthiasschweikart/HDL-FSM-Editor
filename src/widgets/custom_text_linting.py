@@ -21,8 +21,8 @@ VHDL_KEYWORD_PATTERNS = [
         r"\)",
         r"\+",
         r"\*",
-        r"true",
-        r"false",
+        r" true ",
+        r" false ",
         r"-",
         r"/",
         r"%",
@@ -56,16 +56,19 @@ class CustomTextLinting:
         self._update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows(text)
 
     def _update_entry_of_this_window_in_list_of_read_and_written_variables_of_all_windows(self, text) -> None:
-        self.my_read_variables.clear()
-        self.my_written_variables.clear()
         self._fill_function_names_list(text)
         if project_manager.language.get() == "VHDL":
             text = self._remove_loop_indices(text)
         if project_manager.language.get() == "VHDL":
             text = self._add_incomplete_vhdl_variables_to_read_or_written_variables_of_all_windows(text)
         text = self._add_read_constants_from_case_when_to_read_variables_of_all_windows(text)  # Keywords are used here.
-        text = self._remove_keywords(text)
-        text = self._remove_vhdl_attributes(text)
+        if project_manager.language.get() == "VHDL":
+            text = self._remove_keywords(text)
+            text = self._remove_vhdl_attributes(text)
+        else:
+            text = self._remove_verilog_signal_values(text)
+            # last, because numbers are removed which must be still found by _remove_verilog_signal_values:
+            text = self._remove_keywords(text)
         if project_manager.language.get() == "VHDL":
             text = re.sub(r"\..*?\s", " ", text)  # remove all record-element-names from their signal/variable names
         if self.text_type == "condition":
@@ -113,6 +116,11 @@ class CustomTextLinting:
         # The character "'" is surrounded by blanks because of convert_hdl_lines_into_a_searchable_string().
         search_for_attributes = r"\w+\s+'\s+\w+"
         return re.sub(search_for_attributes, " ", text)
+
+    def _remove_verilog_signal_values(self, text):
+        # remove signal values; example: "1'b0"
+        search_for_signal_values = r"[0-9]+\s*'\s*[b]\s*[0-9]+"
+        return re.sub(search_for_signal_values, " ", text)
 
     def _remove_loop_indices(self, text):
         # Search for "for ... in" and remove it and also the loop index.
@@ -229,8 +237,10 @@ class CustomTextLinting:
             " endcase\\s*?;",
             "\\(",
             "\\)",
-            "{",
-            "}",
+            "\\[",
+            "\\]",
+            "\\{",
+            "\\}",
             "\\+",
             "-",
             "/",
@@ -369,7 +379,7 @@ class CustomTextLinting:
         if project_manager.language.get() == "VHDL":
             match_objects = re.finditer(r"\swhen\s+([^\s\"\']+?)\s+=>", text, re.IGNORECASE)
             for match_object in match_objects:
-                if match_object.group(1) != "others":
+                if match_object.group(1).lower() != "others":
                     self.my_read_variables += [match_object.group(1)]
                 text = text[: match_object.start()] + " " * len(match_object.group(0)) + text[match_object.end() :]
         return text
@@ -396,7 +406,7 @@ class CustomTextLinting:
         return text
 
     def _add_read_variables_from_assignments_to_read_variables_of_all_windows(self, text) -> str:
-        match_objects = re.finditer(r"=.*?;", text, re.IGNORECASE)  # Collect all right hand sides.
+        match_objects = re.finditer(r"=.*?;", text)  # Collect all right hand sides.
         for match_object in match_objects:
             # remove not only the match but also complete ":=" or "<=":
             hit = match_object.group(0)[+1:-1]  # Without '=' and without ';'

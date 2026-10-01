@@ -40,7 +40,7 @@ class TabInterface:
             wrap=tk.WORD,
         )
         self.interface_packages_text.insert("1.0", "library ieee;\nuse ieee.std_logic_1164.all;")
-        self.interface_packages_text.update_highlight_tags()
+        self.interface_packages_text.add_highlight_tags_to_characters()
         interface_package_scroll = ttk.Scrollbar(
             self.interface_package_frame,
             orient=tk.VERTICAL,

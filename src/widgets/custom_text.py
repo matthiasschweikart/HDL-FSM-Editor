@@ -258,39 +258,44 @@ class CustomText(CodeEditor):
     def format(self, event) -> None:
         """Update text box size and highlighting."""
         # event is the last of several key events when multiple keys are pressed in succession.
-        # event is "element-insertion" when an element is inserted manually or by loading a file.
+        # event is "element-insertion" when an element is inserted manually or inserted by loading a file.
         # event is None when CodeEditor (handles Ctrl-v, Ctrl-x, Ctrl-Delete, Ctrl-Backspace) modified the text.
         # event is None when an external editor modified the text.
         # event is None when Ctrl-z, Ctrl-Z were pressed and undo()/redo() from this file are called.
-        text = self.get("1.0", tk.END)
-        self._update_size_of_text_box(text)
+        CustomText.read_variables_of_all_windows[self].clear()
+        CustomText.written_variables_of_all_windows[self].clear()
         if self.text_type in ("declarations"):
-            self.update_custom_text_signals_list()  # updates self.signals_list and self.constants_list
-            self.update_custom_text_functions_list()  # updates self.function_names_list
-        elif self.text_type in ("variable", "action"):
-            self.update_custom_text_signals_list()  # updates self.signals_list and self.constants_list
+            self.create_signals_and_constants_list()
+            self.create_function_names_list()
+            self.put_generics_used_as_range_limit_into_read_variables()
+        elif self.text_type in ("variable"):
+            self.put_generics_used_as_range_limit_into_read_variables()
+            self.create_signals_and_constants_list()
+        elif self.text_type in ("action"):
+            self.create_signals_and_constants_list()
+            self.put_generics_used_as_range_limit_into_read_variables()
         elif self.text_type == "ports":
-            self.update_custom_text_class_ports_list()  # Updates self.port_types/readable_ports/writable_ports_list
+            self.create_ports_and_port_types_list()
+            self.put_generics_used_as_range_limit_into_read_variables()
         elif self.text_type == "generics":
-            self.update_custom_text_class_generics_list()  # updates self.generics_list
-        if (
-            self.text_type
-            in ("condition", "action", "declarations", "variable")  # Only in this blocks variables are read or written.
-        ):
+            self.create_generics_list()
+        text = self.get("1.0", tk.END)
+        if self.text_type in ("condition", "action"):  # Only in this blocks variables are read or written.
             custom_text_linting.CustomTextLinting(
                 text,
                 self.text_type,
                 CustomText.read_variables_of_all_windows[self],
                 CustomText.written_variables_of_all_windows[self],
             )
+        self._update_size_of_text_box(text)
         if event == "element-insertion":
-            # An element is inserted manually or by loading a file.
+            # The event has this value if the element is inserted manually or if it is inserted by loading a file.
             # If it is manually inserted, update_highlight_tags_in_all_texts() must not be called as the element is
-            # still empty (but calling it would not slow down the program).
+            # still empty (but calling it would not slow down the GUI).
             # But when a file is loaded, update_highlight_tags_in_all_texts() should not be called each time a
             # element is inserted, as this would slow down the loading of the file.
             # In this case update_highlight_tags_in_all_texts() and highlight_brackets() are not called here but
-            # called from file_handling_load.py after the whole file is loaded.
+            # called from file_handling.py after the whole file is loaded.
             return
         self.update_highlight_tags_in_all_texts()
         if event is not None and event.keysym == "BackSpace":
@@ -389,7 +394,7 @@ class CustomText(CodeEditor):
             all_custom_text_widgets.extend(element_ref.text_ids)
         return all_custom_text_widgets
 
-    def update_highlight_tags(self) -> None:
+    def add_highlight_tags_to_characters(self) -> None:
         """
         Updates only in this text. Called when text is changed by:
         - format()
@@ -421,7 +426,10 @@ class CustomText(CodeEditor):
             # Prevent a hit, when the keyword is part of another word:
             pattern = r"([^a-zA-Z0-9_]|^)(" + highlight_search_pattern + r")([^a-zA-Z0-9_]|$)"
             group_index = 2
-        match_objects = re.finditer(pattern, copy_of_text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
+        try:
+            match_objects = re.finditer(pattern, copy_of_text, flags=re.MULTILINE | re.DOTALL)
+        except re.error:
+            match_objects = []
         for match_object in match_objects:
             self.tag_add(
                 highlight_tag_name,
@@ -459,31 +467,33 @@ class CustomText(CodeEditor):
         self.edit_redo()
         self.format_after_idle(None)
 
-    def update_custom_text_signals_list(self) -> None:
+    def create_signals_and_constants_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
-        all_signal_declarations = self.get("1.0", tk.END).lower()
+        all_signal_declarations = self.get("1.0", tk.END)
         all_signal_declarations = hdl_generation_library.remove_comments_and_returns(all_signal_declarations)
         all_signal_declarations = hdl_generation_library.remove_functions(all_signal_declarations)
         all_signal_declarations = hdl_generation_library.remove_type_declarations(all_signal_declarations)
         all_signal_declarations = hdl_generation_library.surround_character_by_blanks(":", all_signal_declarations)
         # For VHDL processes in "global actions combinatorial":
-        all_signal_declarations = re.sub(r"process\s*\(.*?\)", "", all_signal_declarations)
+        all_signal_declarations = re.sub(
+            r"process\s*\(.*?\)", "", all_signal_declarations, flags=re.IGNORECASE | re.DOTALL
+        )
 
         self.signals_list = hdl_generation_library.get_all_declared_signal_and_variable_names(all_signal_declarations)
         self.constants_list = hdl_generation_library.get_all_declared_constant_names(all_signal_declarations)
 
-    def update_custom_text_functions_list(self) -> None:
+    def create_function_names_list(self) -> None:
         """Updates the function_names_list of this CustomText object."""
         self.function_names_list = []
-        text = self.get("1.0", tk.END).lower()
+        text = self.get("1.0", tk.END)
         match_objects = re.finditer(r"function\s+(\w+)", text, re.IGNORECASE)
         for match_object in match_objects:
-            function_name = match_object.group(1)
+            function_name = match_object.group(1).lower()
             if function_name not in self.function_names_list:
                 self.function_names_list.append(function_name)
 
-    def update_custom_text_class_ports_list(
+    def create_ports_and_port_types_list(
         self,
     ) -> None:  # Needed at self==project_manager.tab_interface_ref.interface_ports_text
         """Updates the port_types_list of this CustomText object, if it is the interface_ports_text"""
@@ -496,10 +506,51 @@ class CustomText(CodeEditor):
         )
         self.port_types_list = hdl_generation_architecture_state_actions.get_all_port_types(all_port_declarations)
 
-    def update_custom_text_class_generics_list(self) -> None:
+    def create_generics_list(self) -> None:
         """Updates the generics_list of this CustomText object, if it is the interface_generics_text"""
-        all_generic_declarations = self.get("1.0", tk.END).lower()
+        all_generic_declarations = self.get("1.0", tk.END)
         self.generics_list = hdl_generation_architecture_state_actions.get_all_generic_names(all_generic_declarations)
+
+    def put_generics_used_as_range_limit_into_read_variables(self) -> None:
+        """Identifies non-integers used as range limits and adds them to the read variables list.
+        The non-integers are generics or constants (constants will be removed later)"""
+        limit_list = []
+        all_declarations = self.get("1.0", tk.END)
+        all_declarations = hdl_generation_library.remove_comments_and_returns(all_declarations)
+        all_declarations = hdl_generation_library.remove_functions(all_declarations)
+        all_declarations = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(all_declarations)
+        declaration_list = all_declarations.split(";")
+        if project_manager.language.get() == "VHDL":
+            # search for "(<term> downto <term>)" or "(<term> to <term>)":
+            search_string = r"\(\s*([^\(\)]*?)\s+downto\s+([^\(\)]*?)\s*\)|\(\s*([^\(\)]*?)\s+to\s+([^\(\)]*?)\s*\)"
+        else:
+            search_string = r"\[\s*([^\[\]]*?)\s+:\s+([^\[\]]*?)\s*\]"
+        for declaration in declaration_list:
+            if " : " in declaration:
+                match_objects = re.finditer(search_string, declaration, flags=re.IGNORECASE)
+                range_values = []
+                for match_object in match_objects:
+                    if match_object.group(1) and not match_object.group(1).isdigit():
+                        range_values.append(match_object.group(1))
+                    if match_object.group(2) and not match_object.group(2).isdigit():
+                        range_values.append(match_object.group(2))
+                    if project_manager.language.get() == "VHDL":
+                        if match_object.group(3) and not match_object.group(3).isdigit():
+                            range_values.append(match_object.group(3))
+                        if match_object.group(4) and not match_object.group(4).isdigit():
+                            range_values.append(match_object.group(4))
+                for range_value in range_values:
+                    if " " in range_value:  # range_value contains a term with operators.
+                        range_value = re.sub(r"\+|\-|\/|\%|\*", " ", range_value)  # remove operators
+                        range_value_list = range_value.split()
+                        for value in range_value_list:
+                            if not value.isdigit():
+                                limit_list.append(value)
+                    else:
+                        limit_list.append(range_value)
+        generics_used_as_range_limit_in_declaration_list = list(set(limit_list))
+        if generics_used_as_range_limit_in_declaration_list:
+            CustomText.read_variables_of_all_windows[self] += generics_used_as_range_limit_in_declaration_list
 
     def highlight_item(self, _, __, number_of_line) -> None:
         """Highlights a line. Used when a line is clicked in the "Generated HDL" or "Compile Messages" text box."""
@@ -526,9 +577,9 @@ class CustomText(CodeEditor):
         # Prepare highlight_dict_ref by checking read_variables_of_all_windows and written_variables_of_all_windows:
         project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in CustomText.read_variables_of_all_windows:
-            text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
+            text_ref.add_highlight_tags_to_characters()  # Uses the prepared highlight_dict_ref.
         for text_ref in cls.declaration_text_widgets():
-            text_ref.update_highlight_tags()  # Uses the prepared highlight_dict_ref.
+            text_ref.add_highlight_tags_to_characters()  # Uses the prepared highlight_dict_ref.
 
     @classmethod
     def highlight_brackets_in_all_texts(cls) -> None:
@@ -543,7 +594,7 @@ class CustomText(CodeEditor):
         """Reapply syntax highlighting in all declaration widgets (e.g. after language change)."""
         project_manager.highlight_dict_ref.recreate_keyword_list_of_unused_signals()
         for text_ref in cls.declaration_text_widgets():
-            text_ref.update_highlight_tags()
+            text_ref.add_highlight_tags_to_characters()
 
     @classmethod
     def declaration_text_widgets(cls) -> list:

@@ -30,8 +30,9 @@ class HighLightDict:
         self.highlight_pattern_dict["not_written"].clear()
         variables_to_write = self._get_all_read_variables()
         variables_to_read = self._get_all_written_variables()
-        variables_to_write = self._store_not_read_input_ports(variables_to_write)
-        variables_to_read, variables_to_write = self._store_not_written_output_ports(
+        variables_to_write = self._handle_not_read_input_ports(variables_to_write)
+        variables_to_read, variables_to_write = self._handle_not_read_generics(variables_to_write, variables_to_read)
+        variables_to_read, variables_to_write = self._handle_not_written_output_ports(
             variables_to_read, variables_to_write
         )
         variables_to_read, variables_to_write = self._store_not_written_not_read_signals(
@@ -39,58 +40,110 @@ class HighLightDict:
         )
         variables_to_read, variables_to_write = self._handle_constant_names(variables_to_read, variables_to_write)
         variables_to_write = self._remove_port_types(variables_to_write)
-        variables_to_read, variables_to_write = self._remove_generics(variables_to_read, variables_to_write)
         variables_to_write = self._remove_function_calls(variables_to_write)
         self.highlight_pattern_dict["not_written"] += variables_to_write
         self.highlight_pattern_dict["not_read"] += variables_to_read
 
     def _get_all_read_variables(self):
         variables_to_write = []
-        for _, read_variables_of_window in custom_text.CustomText.read_variables_of_all_windows.items():
-            variables_to_write += read_variables_of_window
+        for read_variables_of_window in custom_text.CustomText.read_variables_of_all_windows.values():
+            variables_to_write += (
+                read_variables_of_window
+                if project_manager.language.get() != "VHDL"
+                else [var.lower() for var in read_variables_of_window]
+            )
         variables_to_write = list(set(variables_to_write))  # remove duplicates
         return variables_to_write
 
     def _get_all_written_variables(self):
         variables_to_read = []
-        for _, written_variables_of_window in custom_text.CustomText.written_variables_of_all_windows.items():
-            variables_to_read += written_variables_of_window
+        for written_variables_of_window in custom_text.CustomText.written_variables_of_all_windows.values():
+            variables_to_read += (
+                written_variables_of_window
+                if project_manager.language.get() != "VHDL"
+                else [var.lower() for var in written_variables_of_window]
+            )
         variables_to_read = list(set(variables_to_read))  # remove duplicates
         return variables_to_read
 
-    def _store_not_read_input_ports(self, variables_to_write):
+    def _handle_not_read_input_ports(self, variables_to_write):
         for input_port in project_manager.tab_interface_ref.interface_ports_text.readable_ports_list:
-            if input_port in variables_to_write:
+            input_port_lower = input_port if project_manager.language.get() != "VHDL" else input_port.lower()
+            if input_port_lower in variables_to_write:
                 # Input is read but must not be written:
-                variables_to_write.remove(input_port)
+                variables_to_write.remove(input_port_lower)
             else:
-                if input_port != project_manager.clock_signal_name.get():
+                # Input port is never read:
+                clock_signal_name_lower = (
+                    project_manager.clock_signal_name.get()
+                    if project_manager.language.get() != "VHDL"
+                    else project_manager.clock_signal_name.get().lower()
+                )
+                if input_port_lower != clock_signal_name_lower:
                     self.highlight_pattern_dict["not_read"].append(input_port)
         return variables_to_write
 
-    def _store_not_written_output_ports(self, variables_to_read, variables_to_write):
-        for output in project_manager.tab_interface_ref.interface_ports_text.writable_ports_list:
+    def _handle_not_read_generics(self, variables_to_write, variables_to_read):
+        generics_list_lower = (
+            project_manager.tab_interface_ref.interface_generics_text.generics_list
+            if project_manager.language.get() != "VHDL"
+            else [
+                generic.lower() for generic in project_manager.tab_interface_ref.interface_generics_text.generics_list
+            ]
+        )
+        for generic in generics_list_lower:
+            if generic in variables_to_write or generic in variables_to_read:
+                if generic in variables_to_write:
+                    variables_to_write.remove(generic)
+                if generic in variables_to_read:
+                    variables_to_read.remove(generic)
+            else:
+                self.highlight_pattern_dict["not_read"].append(generic)
+        return variables_to_read, variables_to_write
+
+    def _handle_not_written_output_ports(self, variables_to_read, variables_to_write):
+        writable_ports_list_lower = (
+            project_manager.tab_interface_ref.interface_ports_text.writable_ports_list
+            if project_manager.language.get() != "VHDL"
+            else [port.lower() for port in project_manager.tab_interface_ref.interface_ports_text.writable_ports_list]
+        )
+        for output in writable_ports_list_lower:
             if output in variables_to_read:
-                # Outputs is written but must not be read:
+                # Output port is written but must not be read:
                 variables_to_read.remove(output)
             else:
+                # Output port is never written:
                 self.highlight_pattern_dict["not_written"].append(output)
-            if project_manager.language.get() != "VHDL" and output in variables_to_write:  # A Verilog output is read.
+            if project_manager.language.get() != "VHDL" and output in variables_to_write:
+                # A Verilog output is read as if it would be an input.
                 # Writing of outputs is checked by the variables_to_read list:
                 variables_to_write.remove(output)
         return variables_to_read, variables_to_write
 
     def _store_not_written_not_read_signals(self, variables_to_read, variables_to_write):
         # Check if each signal or variable is written and is read:
-        process_variable_list = []
-        for _, ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.items():
-            process_variable_list += ref.text_ids[0].signals_list
-        for signal in (
-            project_manager.tab_internals_ref.internals_architecture_text.signals_list
-            + project_manager.tab_internals_ref.internals_process_combinatorial_text.signals_list
-            + project_manager.tab_internals_ref.internals_process_clocked_text.signals_list
-            + process_variable_list
-        ):
+        signals_list_lower = (
+            (
+                project_manager.tab_internals_ref.internals_architecture_text.signals_list
+                + project_manager.tab_internals_ref.internals_process_combinatorial_text.signals_list
+                + project_manager.tab_internals_ref.internals_process_clocked_text.signals_list
+            )
+            if project_manager.language.get() != "VHDL"
+            else [
+                signal.lower()
+                for signal in project_manager.tab_internals_ref.internals_architecture_text.signals_list
+                + project_manager.tab_internals_ref.internals_process_combinatorial_text.signals_list
+                + project_manager.tab_internals_ref.internals_process_clocked_text.signals_list
+            ]
+        )
+        process_variable_list_lower = []
+        for ref in global_actions_combinatorial.GlobalActionsCombinatorial.ref_dict.values():
+            process_variable_list_lower += (
+                ref.text_ids[0].signals_list
+                if project_manager.language.get() != "VHDL"
+                else [signal.lower() for signal in ref.text_ids[0].signals_list]
+            )
+        for signal in signals_list_lower + process_variable_list_lower:
             if signal in variables_to_read and signal in variables_to_write:
                 variables_to_read.remove(signal)
                 variables_to_write.remove(signal)
@@ -101,13 +154,18 @@ class HighLightDict:
         return variables_to_read, variables_to_write
 
     def _handle_constant_names(self, variables_to_read, variables_to_write):
-        constants_from_packages = self._get_constant_names_from_packages()
-        for constant in (
-            constants_from_packages
-            + project_manager.tab_internals_ref.internals_architecture_text.constants_list
+        constants_from_declarations = (
+            project_manager.tab_internals_ref.internals_architecture_text.constants_list
             + project_manager.tab_internals_ref.internals_process_combinatorial_text.constants_list
             + project_manager.tab_internals_ref.internals_process_clocked_text.constants_list
-        ):
+        )
+        constants_from_declarations_lower = (
+            constants_from_declarations
+            if project_manager.language.get() != "VHDL"
+            else [constant.lower() for constant in constants_from_declarations]
+        )
+        constants_from_packages = self._get_constant_names_from_packages()
+        for constant in constants_from_packages + constants_from_declarations_lower:
             if constant in variables_to_read:
                 variables_to_read.remove(constant)
             if constant not in variables_to_write:  # Then the constant is not read.
@@ -142,21 +200,23 @@ class HighLightDict:
         return constants_from_packages
 
     def _remove_port_types(self, variables_to_write):
-        for port_type in project_manager.tab_interface_ref.interface_ports_text.port_types_list:
+        for port_type in (
+            project_manager.tab_interface_ref.interface_ports_text.port_types_list
+            if project_manager.language.get() != "VHDL"
+            else [var.lower() for var in project_manager.tab_interface_ref.interface_ports_text.port_types_list]
+        ):
             if port_type in variables_to_write:
                 variables_to_write.remove(port_type)
         return variables_to_write
 
-    def _remove_generics(self, variables_to_read, variables_to_write):
-        for generic in project_manager.tab_interface_ref.interface_generics_text.generics_list:
-            if generic in variables_to_read:
-                variables_to_read.remove(generic)
-            if generic in variables_to_write:
-                variables_to_write.remove(generic)
-        return variables_to_read, variables_to_write
-
     def _remove_function_calls(self, variables_to_write) -> list[str]:
-        for function_name in project_manager.tab_internals_ref.internals_architecture_text.function_names_list:
+        for function_name in (
+            project_manager.tab_internals_ref.internals_architecture_text.function_names_list
+            if project_manager.language.get() != "VHDL"
+            else [
+                var.lower() for var in project_manager.tab_internals_ref.internals_architecture_text.function_names_list
+            ]
+        ):
             if function_name in variables_to_write:
                 variables_to_write.remove(function_name)
         return variables_to_write

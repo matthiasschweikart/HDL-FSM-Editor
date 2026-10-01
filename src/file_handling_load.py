@@ -17,7 +17,6 @@ from elements import (
     transition,
 )
 from project_manager import project_manager
-from widgets import custom_text
 
 
 def load_design_from_dict(design_dictionary: dict[str, Any]) -> None:
@@ -34,8 +33,6 @@ def load_diagram_data(design_dictionary: dict[str, Any]) -> None:
     _load_canvas_data(design_dictionary)
     _load_canvas_elements(design_dictionary)
     _load_canvas_ids(design_dictionary)  # must be done after changing the IDs by _load_canvas_elements().
-    custom_text.CustomText.update_highlight_tags_in_all_texts()
-    custom_text.CustomText.highlight_brackets_in_all_texts()
 
 
 def _load_control_data(design_dictionary: dict[str, Any]) -> None:
@@ -68,8 +65,9 @@ def _load_interface_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.tab_interface_ref.interface_packages_text.insert("1.0", design_dictionary["interface_package"])
     project_manager.tab_interface_ref.interface_generics_text.insert("1.0", design_dictionary["interface_generics"])
     project_manager.tab_interface_ref.interface_ports_text.insert("1.0", design_dictionary["interface_ports"])
-    project_manager.tab_interface_ref.interface_generics_text.update_custom_text_class_generics_list()
-    project_manager.tab_interface_ref.interface_ports_text.update_custom_text_class_ports_list()
+    project_manager.tab_interface_ref.interface_generics_text.create_generics_list()
+    project_manager.tab_interface_ref.interface_ports_text.create_ports_and_port_types_list()
+    project_manager.tab_interface_ref.interface_ports_text.put_generics_used_as_range_limit_into_read_variables()
 
 
 def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
@@ -84,10 +82,13 @@ def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.tab_internals_ref.internals_process_combinatorial_text.insert(
         "1.0", design_dictionary["internals_process_combinatorial"]
     )
-    project_manager.tab_internals_ref.internals_architecture_text.update_custom_text_signals_list()
-    project_manager.tab_internals_ref.internals_architecture_text.update_custom_text_functions_list()
-    project_manager.tab_internals_ref.internals_process_clocked_text.update_custom_text_signals_list()
-    project_manager.tab_internals_ref.internals_process_combinatorial_text.update_custom_text_signals_list()
+    project_manager.tab_internals_ref.internals_architecture_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_architecture_text.create_function_names_list()
+    project_manager.tab_internals_ref.internals_architecture_text.put_generics_used_as_range_limit_into_read_variables()
+    project_manager.tab_internals_ref.internals_process_clocked_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_process_clocked_text.put_generics_used_as_range_limit_into_read_variables()
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.put_generics_used_as_range_limit_into_read_variables()
 
 
 def _load_canvas_data(design_dictionary: dict[str, Any]) -> None:

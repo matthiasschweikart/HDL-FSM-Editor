@@ -153,20 +153,18 @@ def remove_comments_and_returns(hdl_text) -> str:
 
 def remove_functions(hdl_text):
     """Remove VHDL/Verilog function declarations from text for signal/constant parsing."""
-    text = re.sub(
-        r"(^|\s+)function\s+.*end(\s+function\s*;|function)", "", hdl_text
-    )  # Regular expression for VHDL and Verilog function declaration
+    # Regular expression for VHDL and Verilog function declaration:
+    text = re.sub(r"(^|\s+)function\s+.*end(\s+function\s*;|function)", "", hdl_text, flags=re.IGNORECASE)
     return text
 
 
 def remove_type_declarations(hdl_text):
     """Remove VHDL type declarations from text for signal/constant parsing."""
+    # Regular expression for VHDL and Verilog type declaration:
     text = re.sub(
-        r"(^|\s+)type\s+\w+\s+is\s+record\s+.*?\send\s+record\s*;", "", hdl_text
-    )  # Regular expression for VHDL and Verilog type declaration
-    text = re.sub(
-        r"(^|\s+)type\s+\w+\s+is\s+.*?;", "", text
-    )  # Regular expression for VHDL and Verilog type declaration
+        r"(^|\s+)type\s+\w+\s+is\s+record\s+.*?\send\s+record\s*;", "", hdl_text, flags=re.IGNORECASE | re.DOTALL
+    )
+    text = re.sub(r"(^|\s+)type\s+\w+\s+is\s+.*?;", "", text, flags=re.IGNORECASE | re.DOTALL)
     return text
 
 
@@ -255,14 +253,14 @@ def get_all_declared_constant_names(all_signal_declarations) -> list:
 
 def _get_all_signal_names(declaration):
     signal_names = ""
-    if " signal " in declaration and project_manager.language.get() == "VHDL":
+    if " signal " in declaration.lower() and project_manager.language.get() == "VHDL":
         if ":" in declaration:
             signal_names = re.sub(":.*", "", declaration)
-            signal_names = re.sub(" signal ", "", signal_names)
-    elif " variable " in declaration and project_manager.language.get() == "VHDL":
+            signal_names = re.sub(" signal ", "", signal_names, flags=re.IGNORECASE)
+    elif " variable " in declaration.lower() and project_manager.language.get() == "VHDL":
         if ":" in declaration:
             signal_names = re.sub(":.*", "", declaration)
-            signal_names = re.sub(" variable ", "", signal_names)
+            signal_names = re.sub(" variable ", "", signal_names, flags=re.IGNORECASE)
     elif project_manager.language.get() != "VHDL":
         declaration = re.sub(" integer ", " ", declaration, flags=re.I)
         declaration = re.sub(" logic ", " ", declaration, flags=re.I)
@@ -274,9 +272,9 @@ def _get_all_signal_names(declaration):
 
 def _get_all_constant_names(declaration):
     constant_names = ""
-    if " constant " in declaration and project_manager.language.get() == "VHDL" and ":" in declaration:
+    if " constant " in declaration.lower() and project_manager.language.get() == "VHDL" and ":" in declaration:
         constant_names = re.sub(":.*", "", declaration)
-        constant_names = re.sub(" constant ", "", constant_names)
+        constant_names = re.sub(" constant ", "", constant_names, flags=re.IGNORECASE)
     if " localparam " in declaration and project_manager.language.get() != "VHDL":
         declaration = re.sub(" localparam ", " ", declaration, flags=re.I)
         constant_names = re.sub(" \\[.*?\\] ", " ", declaration)
