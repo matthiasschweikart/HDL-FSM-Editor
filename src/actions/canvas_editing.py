@@ -109,7 +109,8 @@ def _decrement_font_size_if_window_is_too_wide() -> None:
     project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if (
-        (
+        complete_rectangle  # is None if the diagram is empty
+        and (
             complete_rectangle[0] < visible_rectangle[0]
             or complete_rectangle[1] < visible_rectangle[1]
             or complete_rectangle[2] > visible_rectangle[2]
