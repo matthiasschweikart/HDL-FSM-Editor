@@ -336,6 +336,7 @@ class TabControl:
         try:
             project_manager.canvas.configure(bg=self.diagram_background_color.get())
             self.diagram_background_color_error.configure(text="")
+            self._control_tab_has_changed()
         except tk.TclError:
             project_manager.canvas.configure(bg="white")
             self.diagram_background_color_error.configure(
@@ -391,7 +392,7 @@ class TabControl:
             "write", lambda *args: self._control_tab_has_changed()
         )
         self._diagram_background_color_trace_id = self.diagram_background_color.trace_add(
-            "write", lambda *args: self._control_tab_has_changed()
+            "write", lambda *args: self._change_color_of_diagram_background()
         )
 
     def deactivate_traces(self) -> None:
