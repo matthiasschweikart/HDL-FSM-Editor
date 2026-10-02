@@ -149,7 +149,7 @@ class TabDiagram:
         canvas.bind("<Button-4>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-5>", TabDiagram.scroll_wheel)
         canvas.bind("<Button-3>", lambda event: self.run_start_view_rectangle(event, canvas))
-        canvas.bind("<Configure>", self._check_for_window_resize)
+        canvas.bind("<Configure>", self._adapt_length_of_grid_lines)
         canvas.bind("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
         canvas.bind("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
 
@@ -187,21 +187,6 @@ class TabDiagram:
     def _scroll_end(self, _event) -> None:
         project_manager.grid_drawer.draw_grid()
 
-    def update_scrollregion(self):
-        """Update the scroll region of the canvas based on its content."""
-        project_manager.grid_drawer.remove_grid()
-        project_manager.root.update_idletasks()  # update geometry information of all widgets
-        bbox = project_manager.canvas.bbox("all")
-        if bbox:
-            scrollregion_scaled = (
-                bbox[0] - (bbox[2] - bbox[0]) * 0.5,
-                bbox[1] - (bbox[3] - bbox[1]) * 0.5,
-                bbox[2] + (bbox[2] - bbox[0]) * 0.5,
-                bbox[3] + (bbox[3] - bbox[1]) * 0.5,
-            )
-            project_manager.canvas.configure(scrollregion=scrollregion_scaled)
-        project_manager.grid_drawer.draw_grid()
-
     @classmethod
     def scroll_wheel(cls, event) -> None:
         """Handle mouse wheel: scroll the canvas."""
@@ -220,7 +205,8 @@ class TabDiagram:
         project_manager.canvas.scan_dragto(int(event.x + dx), int(event.y + dy), gain=1)
         project_manager.grid_drawer.draw_grid()
 
-    def _check_for_window_resize(self, _) -> None:
+    def _adapt_length_of_grid_lines(self, _) -> None:
+        # Will be called, when resizing the window causes a change of the canvas size.
         project_manager.grid_drawer.remove_grid()
         project_manager.grid_drawer.draw_grid()
 

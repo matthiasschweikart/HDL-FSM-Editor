@@ -35,7 +35,24 @@ class UndoHandling:
         ):
             # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
             file_handling.save_in_file(project_manager.current_file + ".tmp")
-        project_manager.tab_diagram_ref.update_scrollregion()
+        self.resize_scrollregion()
+
+    def resize_scrollregion(self):
+        """Update the scroll region of the canvas based on its content."""
+        project_manager.grid_drawer.remove_grid()
+        project_manager.canvas.after_idle(self._continue_resize_scrollregion)
+
+    def _continue_resize_scrollregion(self):
+        bbox = project_manager.canvas.bbox("all")
+        if bbox:
+            scrollregion_scaled = (
+                bbox[0] - (bbox[2] - bbox[0]) * 0.5,
+                bbox[1] - (bbox[3] - bbox[1]) * 0.5,
+                bbox[2] + (bbox[2] - bbox[0]) * 0.5,
+                bbox[3] + (bbox[3] - bbox[1]) * 0.5,
+            )
+            project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+        project_manager.grid_drawer.draw_grid()
 
     def _add_changes_to_design_stack(self) -> None:
         self._remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()

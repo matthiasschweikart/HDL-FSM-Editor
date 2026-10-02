@@ -12,66 +12,92 @@ from . import canvas_font_sizes
 def view_all() -> None:
     """Fit all canvas content in view and optionally adjust font size."""
     project_manager.grid_drawer.remove_grid()
-    project_manager.canvas.update_idletasks()  # to get correct results from bbox
+    project_manager.canvas.after_idle(_continue_view_all)
+
+
+def _continue_view_all():
     complete_rectangle = project_manager.canvas.bbox("all")
     if complete_rectangle is not None:
-        # view_rectangle shall not add the grid, because _decrement_font_size_if_window_is_too_wide must
-        # be called without the grid already drawn:
-        view_rectangle(complete_rectangle, add_grid=False)
-        _decrement_font_size_if_window_is_too_wide()
-    project_manager.grid_drawer.draw_grid()
-
-
-def view_rectangle(rectangle_to_view, add_grid: bool = True) -> None:
-    """Zoom and pan so the given rectangle is visible; optionally adjust font size."""
-    if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
-        return
-    project_manager.grid_drawer.remove_grid()
-    project_manager.canvas.update_idletasks()
-    factor = _calculate_zoom_factor(rectangle_to_view)
-    center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
-    _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
-    canvas_zoom(center_of_rectangle_to_view, factor)
-    if add_grid:
+        view_rectangle(complete_rectangle, check_fit=True)
+    else:
         project_manager.grid_drawer.draw_grid()
 
 
-def _calculate_zoom_factor(rectangle_to_view):
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
-        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+def view_rectangle(rectangle_to_view, check_fit: bool = False) -> None:
+    """Zoom and pan so the given rectangle is visible; optionally fix zooming if anything extends beyond the view."""
+    if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
+        return
+    project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.after_idle(_continue_view_rectangle, rectangle_to_view, check_fit)
+
+
+def _continue_view_rectangle(rectangle_to_view, check_fit):
+    factor = _calculate_zoom_factor(rectangle_to_view)
+    center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
+    _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
+    canvas_zoom(center_of_rectangle_to_view, factor, check_fit)
+
+
+def zoom_plus() -> None:
+    """Zoom in by 10% around the visible center."""
+    project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.after_idle(_continue_zoom_plus_minus, 1.1)
+
+
+def zoom_minus() -> None:
+    """Zoom out by 10% around the visible center."""
+    project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.after_idle(_continue_zoom_plus_minus, 1 / 1.1)
+
+
+def _continue_zoom_plus_minus(factor):
+    visible_canvas_area = [
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     ]
-    rectangle_to_view_width = rectangle_to_view[2] - rectangle_to_view[0]
-    rectangle_to_view_height = rectangle_to_view[3] - rectangle_to_view[1]
-    visible_width = visible_rectangle[2] - visible_rectangle[0]
-    visible_height = visible_rectangle[3] - visible_rectangle[1]
-    scale_x = visible_width / rectangle_to_view_width
-    scale_y = visible_height / rectangle_to_view_height
-    factor = min(scale_x, scale_y)
-    return factor
+    visible_center = _determine_center_of_rectangle(visible_canvas_area)
+    canvas_zoom(visible_center, factor)
 
 
-def _determine_center_of_rectangle(rectangle_coords) -> list:
-    return [(rectangle_coords[0] + rectangle_coords[2]) / 2, (rectangle_coords[1] + rectangle_coords[3]) / 2]
+def zoom_wheel(event, event_x, event_y) -> None:
+    """Zoom in/out at cursor position of the given window item."""
+    project_manager.grid_drawer.remove_grid()
+    project_manager.canvas.after_idle(_continue_zoom_wheel, event, event_x, event_y)
 
 
-def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view) -> None:
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
-        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+def _continue_zoom_wheel(event, event_x, event_y):
+    # event.delta: attribute of the mouse wheel under Windows and MacOs.
+    # One "felt step" at the mouse wheel gives this value:
+    # Windows: delta=+/-120 ; MacOS: delta=+/-1 ; Linux: delta=0
+    # num: attribute of the the mouse wheel under Linux  ("scroll-up=5" and "scroll-down=4").
+    factor = 1
+    if event.num == 5 or event.delta < 0:  # scroll down
+        factor = 1 / 1.1
+    elif event.num == 4 or event.delta >= 0:  # scroll up
+        factor = 1.1
+    # Adapt the zoom factor here, so that the new center of the zoomed window can be predicted correctly here.
+    # Otherwise canvas_zoom() would adapt the zoom factor, which would change the position of the zoom center.
+    factor = _modify_zoom_factor_to_achieve_integer_fontsize(factor)
+    if factor == 0:
+        return
+    visible_canvas_area = [
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     ]
-    visible_center = _determine_center_of_rectangle(visible_rectangle)
-    project_manager.canvas.scan_mark(int(center_of_rectangle_to_view[0]), int(center_of_rectangle_to_view[1]))
-    project_manager.canvas.scan_dragto(int(visible_center[0]), int(visible_center[1]), gain=1)
+    visible_center = _determine_center_of_rectangle(visible_canvas_area)
+    zoom_center = [  # Place new center between event and visible center, so that it will become the new visible center.
+        event_x + (visible_center[0] - event_x) / factor,
+        event_y + (visible_center[1] - event_y) / factor,
+    ]
+    canvas_zoom(zoom_center, factor)
 
 
-def canvas_zoom(zoom_center, zoom_factor) -> None:
+def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
-    # Modify factor, so that fontsize is always an integer:
     zoom_factor = _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor)
     if zoom_factor == 0 or project_manager.fontsize * zoom_factor > 300:  # do not accept fontsize above 300
         return
@@ -84,6 +110,44 @@ def canvas_zoom(zoom_center, zoom_factor) -> None:
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
     canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
+    if check_fit:
+        project_manager.canvas.after_idle(_decrement_font_size_if_window_is_too_wide)
+        # project_manager.canvas.after(4000, _decrement_font_size_if_window_is_too_wide)
+    else:
+        project_manager.grid_drawer.draw_grid()
+
+
+def _calculate_zoom_factor(rectangle_to_view):
+    visible_canvas_area = [
+        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    rectangle_to_view_width = rectangle_to_view[2] - rectangle_to_view[0]
+    rectangle_to_view_height = rectangle_to_view[3] - rectangle_to_view[1]
+    visible_width = visible_canvas_area[2] - visible_canvas_area[0]
+    visible_height = visible_canvas_area[3] - visible_canvas_area[1]
+    scale_x = visible_width / rectangle_to_view_width
+    scale_y = visible_height / rectangle_to_view_height
+    factor = min(scale_x, scale_y)
+    return factor
+
+
+def _determine_center_of_rectangle(rectangle_coords) -> list:
+    return [(rectangle_coords[0] + rectangle_coords[2]) / 2, (rectangle_coords[1] + rectangle_coords[3]) / 2]
+
+
+def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view) -> None:
+    visible_canvas_area = [
+        project_manager.canvas.canvasx(0),  # 0 = event.x of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasy(0),  # 0 = event.y of a mouse-movment at the top-left corner of the canvas
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    ]
+    visible_center = _determine_center_of_rectangle(visible_canvas_area)
+    project_manager.canvas.scan_mark(int(center_of_rectangle_to_view[0]), int(center_of_rectangle_to_view[1]))
+    project_manager.canvas.scan_dragto(int(visible_center[0]), int(visible_center[1]), gain=1)
 
 
 def _adapt_scroll_region(factor) -> None:
@@ -100,29 +164,34 @@ def _modify_zoom_factor_to_achieve_integer_fontsize(zoom_factor):
 
 
 def _decrement_font_size_if_window_is_too_wide() -> None:
-    visible_rectangle = [
+    visible_canvas_area = [
         project_manager.canvas.canvasx(0),
         project_manager.canvas.canvasy(0),
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     ]
-    project_manager.canvas.update_idletasks()  # to get correct results from bbox
     complete_rectangle = project_manager.canvas.bbox("all")
     if (
         complete_rectangle  # is None if the diagram is empty
-        and (
-            complete_rectangle[0] < visible_rectangle[0]
-            or complete_rectangle[1] < visible_rectangle[1]
-            or complete_rectangle[2] > visible_rectangle[2]
-            or complete_rectangle[3] > visible_rectangle[3]
-        )
+        and _complete_rectangle_extends_visible_area(complete_rectangle, visible_canvas_area)
         and project_manager.fontsize != 1  # When fontsize==1 then zoom_factor calculates to 0, which makes no sense.
     ):
         complete_center = _determine_center_of_rectangle(complete_rectangle)
         _shift_canvas_to_make_point_visible_in_the_middle(complete_center)
         zoom_factor = (project_manager.fontsize - 1) / project_manager.fontsize
-        canvas_zoom(complete_center, zoom_factor)
-        _decrement_font_size_if_window_is_too_wide()
+        canvas_zoom(complete_center, zoom_factor, check_fit=True)
+    else:
+        project_manager.grid_drawer.draw_grid()
+
+
+def _complete_rectangle_extends_visible_area(complete_rectangle, visible_canvas_area) -> bool:
+    """Return True if the complete rectangle extends beyond the visible rectangle."""
+    return (
+        complete_rectangle[0] < visible_canvas_area[0]
+        or complete_rectangle[1] < visible_canvas_area[1]
+        or complete_rectangle[2] > visible_canvas_area[2]
+        or complete_rectangle[3] > visible_canvas_area[3]
+    )
 
 
 def translate_window_event_coordinates_in_rounded_canvas_coordinates(event) -> list:
@@ -139,69 +208,3 @@ def translate_window_event_coordinates_in_exact_canvas_coordinates(event) -> lis
         project_manager.canvas.canvasy(event.y),
     )
     return [canvas_grid_x_coordinate, canvas_grid_y_coordinate]
-
-
-def zoom_plus() -> None:
-    """Zoom in by 10% around the visible center."""
-    project_manager.canvas.grid_remove()  # Make the canvas invisible.
-    project_manager.grid_drawer.remove_grid()
-    factor = 1.1
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),
-        project_manager.canvas.canvasy(0),
-        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-    ]
-    visible_center = _determine_center_of_rectangle(visible_rectangle)
-    canvas_zoom(visible_center, factor)
-    project_manager.grid_drawer.draw_grid()
-    project_manager.canvas.grid()
-
-
-def zoom_minus() -> None:
-    """Zoom out by 10% around the visible center."""
-    project_manager.canvas.grid_remove()  # Make the canvas invisible.
-    project_manager.grid_drawer.remove_grid()
-    factor = 1 / 1.1
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),
-        project_manager.canvas.canvasy(0),
-        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-    ]
-    visible_center = _determine_center_of_rectangle(visible_rectangle)
-    canvas_zoom(visible_center, factor)
-    project_manager.grid_drawer.draw_grid()
-    project_manager.canvas.grid()
-
-
-def zoom_wheel(event, event_x, event_y) -> None:
-    """Zoom in/out at cursor position of the given window item."""
-    project_manager.grid_drawer.remove_grid()
-    # event.delta: attribute of the mouse wheel under Windows and MacOs.
-    # One "felt step" at the mouse wheel gives this value:
-    # Windows: delta=+/-120 ; MacOS: delta=+/-1 ; Linux: delta=0
-    # num: attribute of the the mouse wheel under Linux  ("scroll-up=5" and "scroll-down=4").
-    factor = 1
-    if event.num == 5 or event.delta < 0:  # scroll down
-        factor = 1 / 1.1
-    elif event.num == 4 or event.delta >= 0:  # scroll up
-        factor = 1.1
-    # Adapt the zoom factor here, so that the new center of the zoomed window can be predicted correctly here.
-    # Otherwise canvas_zoom() would adapt the zoom factor, which would change the position of the zoom center.
-    factor = _modify_zoom_factor_to_achieve_integer_fontsize(factor)
-    if factor == 0:
-        return
-    visible_rectangle = [
-        project_manager.canvas.canvasx(0),
-        project_manager.canvas.canvasy(0),
-        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
-        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
-    ]
-    visible_center = _determine_center_of_rectangle(visible_rectangle)
-    zoom_center = [  # Place new center between event and visible center, so that it will become the new visible center.
-        event_x + (visible_center[0] - event_x) / factor,
-        event_y + (visible_center[1] - event_y) / factor,
-    ]
-    canvas_zoom(zoom_center, factor)
-    project_manager.grid_drawer.draw_grid()

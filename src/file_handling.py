@@ -211,6 +211,7 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     project_manager.root.config(cursor="arrow")
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
+    _init_undo_stack()
     custom_text.CustomText.update_highlight_tags_in_all_texts()
     custom_text.CustomText.highlight_brackets_in_all_texts()
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
@@ -219,8 +220,16 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
         _set_title_of_window(read_filename)
         _copy_hdl_into_hdl_tab(design_dictionary, read_filename)
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
-        canvas_editing.view_all()
-        _init_undo_stack()
+        project_manager.root.after_idle(_continue_after_load)
+
+
+def _continue_after_load():
+    # view_all must be started after idle, because init_undo_stack calls design_has_changed(),
+    # which calls update_scroll_region, which removes the grid-lines and adds them later after idle.
+    # This means without waiting here, view_all would be called at once and would remove the grid-lines,
+    # and then would also wait for idle. So when idle is reached, first the grid-lines are added and
+    # would influence the bbox command of view-all running also after idle.
+    canvas_editing.view_all()
 
 
 def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:
@@ -243,10 +252,11 @@ def _do_load_file(replaced_read_filename: str) -> dict:
 
 
 def _init_undo_stack():
-    project_manager.undo_handling_ref.clear_stack()
     # Initialize undo stack with current design:
-    project_manager.undo_handling_ref.design_has_changed(store_in_tmp_file=False)
     project_manager.undo_button.config(state="disabled")
+    project_manager.undo_handling_ref.clear_stack()
+    project_manager.undo_handling_ref.design_has_changed(store_in_tmp_file=False)
+    # Remove the asterisk from the window title caused by design_has_changed():
     title = project_manager.root.title()
     project_manager.root.title(title[:-1])  # remove * from title, because loading a file is not an unsaved change
 
