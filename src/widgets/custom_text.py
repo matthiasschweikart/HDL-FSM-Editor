@@ -79,7 +79,7 @@ class CustomText(CodeEditor):
         CustomText.written_variables_of_all_windows[self] = []
         self.tag_configure("message_red", foreground="red")
         self.tag_configure("message_green", foreground="green")
-        self.tag_configure("highlight", background="orange")
+        self.tag_configure("highlight", background="green")
         self.tag_configure(
             "bracket_color_wrong", foreground="red", font=(project_manager.style_admin_ref.font_name, font_size, "bold")
         )
