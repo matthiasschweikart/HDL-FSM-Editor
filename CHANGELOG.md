@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [7.0]
+## Added
+- Added "dark mode" support.
+- Added linting support for not used or not defined VHDL-generics or Verilog-parameters.
+## Changed
+- Improved scrollbar adaption during graphical element insertion.
+- HDL line numbers in the "generated HDL"-tab are now displayed red.
+- Refactoring.
+## Deprecated
+## Removed
+## Fixed
+- After deleting reset-entry in the diagram, it could not be added again.
+- Two outgoing transition with no conditions (senseless idea) caused an exception at generation.
+- The view-all command sometimes caused an unwantend animation during redrawing.
+- Zooming without grid activated the grid.
+- Loading a design created immediately a not needed tmp-file.
+- Loading an empty design caused an exception.
+- Deselect an selected text in Interface/Internals-tab by mouse click did not work.
+- Edits in the Control-tab did create a not needed entry at the undo-stack of the diagram.
+- Typing a color name in the "Diagram background color" field in the Control-tab did not update the background.
+## Security
+
 ## [6.6]
 ## Added
 - Corresponding brackets in the HDL are now colored.
