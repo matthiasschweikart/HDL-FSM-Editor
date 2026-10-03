@@ -69,11 +69,12 @@ class CustomText(CodeEditor):
         self.bind("<Control-e>", lambda event: self.edit_in_external_editor())
         self.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
+        self.signal_and_variable_types_list = []
         self.constants_list = []
         self.readable_ports_list = []
         self.writable_ports_list = []
         self.generics_list = []
-        self.port_types_list = []  # Used by interface_ports_text, needed for removing port types at linting.
+        self.port_types_list = []  # Filled by interface_ports_text, needed for removing port types at linting.
         self.function_names_list = []  # Is read by linting.HighLightDict
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
@@ -264,15 +265,16 @@ class CustomText(CodeEditor):
         # event is None when Ctrl-z, Ctrl-Z were pressed and undo()/redo() from this file are called.
         CustomText.read_variables_of_all_windows[self].clear()
         CustomText.written_variables_of_all_windows[self].clear()
+        self.signal_and_variable_types_list = []
         if self.text_type in ("declarations"):
-            self.create_signals_and_constants_list()
+            self.create_signals_and_constants_and_types_list()
             self.create_function_names_list()
             self.put_generics_used_as_range_limit_into_read_variables()
         elif self.text_type in ("variable"):
             self.put_generics_used_as_range_limit_into_read_variables()
-            self.create_signals_and_constants_list()
+            self.create_signals_and_constants_and_types_list()
         elif self.text_type in ("action"):
-            self.create_signals_and_constants_list()
+            self.create_signals_and_constants_and_types_list()
             self.put_generics_used_as_range_limit_into_read_variables()
         elif self.text_type == "ports":
             self.create_ports_and_port_types_list()
@@ -467,14 +469,16 @@ class CustomText(CodeEditor):
         self.edit_redo()
         self.format_after_idle(None)
 
-    def create_signals_and_constants_list(self) -> None:
+    def create_signals_and_constants_and_types_list(self) -> None:
         """Updates the signals_list and constants_list of this CustomText object."""
         # ["package","generics","ports","variable","condition","generated","action","declarations","log","comment"]
         all_signal_declarations = self.get("1.0", tk.END)
         all_signal_declarations = hdl_generation_library.remove_comments_and_returns(all_signal_declarations)
         all_signal_declarations = hdl_generation_library.remove_functions(all_signal_declarations)
         all_signal_declarations = hdl_generation_library.remove_type_declarations(all_signal_declarations)
-        all_signal_declarations = hdl_generation_library.surround_character_by_blanks(":", all_signal_declarations)
+        all_signal_declarations = hdl_generation_library.convert_hdl_lines_into_a_searchable_string(
+            all_signal_declarations
+        )
         # For VHDL processes in "global actions combinatorial":
         all_signal_declarations = re.sub(
             r"process\s*\(.*?\)", "", all_signal_declarations, flags=re.IGNORECASE | re.DOTALL
@@ -482,6 +486,7 @@ class CustomText(CodeEditor):
 
         self.signals_list = hdl_generation_library.get_all_declared_signal_and_variable_names(all_signal_declarations)
         self.constants_list = hdl_generation_library.get_all_declared_constant_names(all_signal_declarations)
+        self.signal_and_variable_types_list.extend(self._create_signal_and_variable_types_list(all_signal_declarations))
 
     def create_function_names_list(self) -> None:
         """Updates the function_names_list of this CustomText object."""
@@ -492,6 +497,21 @@ class CustomText(CodeEditor):
             function_name = match_object.group(1).lower()
             if function_name not in self.function_names_list:
                 self.function_names_list.append(function_name)
+
+    def _create_signal_and_variable_types_list(self, all_signal_declarations):
+        """Creates and returns the signal and variable types list based on all_signal_declarations."""
+        var_types = []
+        if project_manager.language.get() == "VHDL":
+            declarations = all_signal_declarations.split(";")
+            for declaration in declarations:
+                if ":" in declaration:
+                    declaration = re.sub(r":=.*", "", declaration)
+                    declaration = re.sub(r".*?:", "", declaration)
+                    declaration = re.sub(r"\(.*\)", "", declaration)
+                    var_type = re.sub(r";", "", declaration).strip()
+                    if var_type != "" and var_type not in var_types:
+                        var_types.append(var_type)
+        return var_types
 
     def create_ports_and_port_types_list(
         self,

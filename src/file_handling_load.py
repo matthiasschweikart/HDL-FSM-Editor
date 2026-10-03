@@ -82,12 +82,12 @@ def _load_internals_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.tab_internals_ref.internals_process_combinatorial_text.insert(
         "1.0", design_dictionary["internals_process_combinatorial"]
     )
-    project_manager.tab_internals_ref.internals_architecture_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_architecture_text.create_signals_and_constants_and_types_list()
     project_manager.tab_internals_ref.internals_architecture_text.create_function_names_list()
     project_manager.tab_internals_ref.internals_architecture_text.put_generics_used_as_range_limit_into_read_variables()
-    project_manager.tab_internals_ref.internals_process_clocked_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_process_clocked_text.create_signals_and_constants_and_types_list()
     project_manager.tab_internals_ref.internals_process_clocked_text.put_generics_used_as_range_limit_into_read_variables()
-    project_manager.tab_internals_ref.internals_process_combinatorial_text.create_signals_and_constants_list()
+    project_manager.tab_internals_ref.internals_process_combinatorial_text.create_signals_and_constants_and_types_list()
     project_manager.tab_internals_ref.internals_process_combinatorial_text.put_generics_used_as_range_limit_into_read_variables()
 
 

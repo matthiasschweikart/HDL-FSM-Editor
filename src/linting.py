@@ -40,6 +40,7 @@ class HighLightDict:
         )
         variables_to_read, variables_to_write = self._handle_constant_names(variables_to_read, variables_to_write)
         variables_to_write = self._remove_port_types(variables_to_write)
+        variables_to_write = self._remove_signal_and_variables_types(variables_to_write)
         variables_to_write = self._remove_function_calls(variables_to_write)
         self.highlight_pattern_dict["not_written"] += variables_to_write
         self.highlight_pattern_dict["not_read"] += variables_to_read
@@ -207,6 +208,17 @@ class HighLightDict:
         ):
             if port_type in variables_to_write:
                 variables_to_write.remove(port_type)
+        return variables_to_write
+
+    def _remove_signal_and_variables_types(self, variables_to_write) -> list[str]:
+        signal_and_variable_types_list = (
+            project_manager.tab_internals_ref.internals_architecture_text.signal_and_variable_types_list
+            + project_manager.tab_internals_ref.internals_process_clocked_text.signal_and_variable_types_list
+            + project_manager.tab_internals_ref.internals_process_combinatorial_text.signal_and_variable_types_list
+        )
+        for var_type in signal_and_variable_types_list:
+            if var_type in variables_to_write:
+                variables_to_write.remove(var_type)
         return variables_to_write
 
     def _remove_function_calls(self, variables_to_write) -> list[str]:
