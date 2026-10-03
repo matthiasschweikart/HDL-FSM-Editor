@@ -95,7 +95,7 @@ class CustomText(CodeEditor):
             foreground = "linen"
             background = "black"
             insertbackground = "white"  # Cursor color
-            highlightcolor = "gray70"  # Focus border color
+            highlightcolor = "gray95"  # Focus border color
             highlightbackground = "black"  # Unfocused border color
             entity_background = "black"
             arch_background = "black"
@@ -105,7 +105,7 @@ class CustomText(CodeEditor):
             foreground = "black"
             background = "white"
             insertbackground = "black"  # Cursor color
-            highlightcolor = "black"  # Focus border color
+            highlightcolor = "gray60"  # Focus border color
             highlightbackground = "light gray"  # Unfocused border color
             entity_background = "#F5E6D3"
             arch_background = "#FFF9CC"
