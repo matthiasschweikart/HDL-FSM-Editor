@@ -41,23 +41,15 @@ class TabDiagram:
         )
         project_manager.canvas = canvas
 
-        button_frame = ttk.Frame(
-            diagram_frame,
-            borderwidth=1,
-            style="My.TFrame",
-        )
+        button_frame = ttk.Frame(diagram_frame, borderwidth=1, style="My.TFrame")
 
         # Layout of the drawing area:
         canvas.grid(column=0, row=0, sticky="nsew")
-        h.grid(
-            column=0, row=1, sticky="ew"
-        )  # The sticky argument extends the scrollbar, so that a "shift" is possible.
-        v.grid(
-            column=1, row=0, sticky="ns"
-        )  # The sticky argument extends the scrollbar, so that a "shift" is possible.
-        button_frame.grid(column=0, row=2, sticky="swe")
+        h.grid(column=0, row=1, sticky="ew")  # "sticky" extends the scrollbar, so that a "shift" is possible.
+        v.grid(column=1, row=0, sticky="ns")
+        button_frame.grid(column=0, columnspan=2, row=2, sticky="swe")
 
-        # Implement the buttons of the drawing area:
+        # Implement the undo/redo buttons of the drawing area:
         undo_redo_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
         undo_button = ttk.Button(
             undo_redo_frame,
@@ -78,6 +70,7 @@ class TabDiagram:
         undo_button.grid(row=0, column=0)
         redo_button.grid(row=0, column=1)
 
+        # Implement the global-action buttons of the drawing area:
         action_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
         state_action_default_button = ttk.Button(
             action_frame, text="Default State Actions (combinatorial)", style="DefaultStateActions.TButton"
@@ -95,6 +88,7 @@ class TabDiagram:
         global_action_clocked_button.grid(row=0, column=1)
         global_action_combinatorial_button.grid(row=0, column=2)
 
+        # Implement the insertion and view buttons of the drawing area:
         new_transition_button = ttk.Button(button_frame, text="new Transition", style="NewTransition.TButton")
         new_state_button = ttk.Button(button_frame, text="new State", style="NewState.TButton")
         new_connector_button = ttk.Button(button_frame, text="new Connector", style="NewConnector.TButton")
@@ -206,9 +200,13 @@ class TabDiagram:
         project_manager.grid_drawer.draw_grid()
 
     def _adapt_length_of_grid_lines(self, _) -> None:
-        # Will be called, when resizing the window causes a change of the canvas size.
-        project_manager.grid_drawer.remove_grid()
-        project_manager.grid_drawer.draw_grid()
+        # Will be called, because resizing the window causes a change of the canvas size.
+        # Only adapt the grid_lines if they are actually really present on the canvas,
+        # because if they are temporarily not present, they should not be shown:
+        canvas_ids_of_grid_lines = project_manager.canvas.find_withtag("grid_line")
+        if canvas_ids_of_grid_lines:
+            project_manager.grid_drawer.remove_grid()
+            project_manager.grid_drawer.draw_grid()
 
     def _create_font_for_state_names(self) -> None:
         project_manager.state_name_font = font.Font(font="TkDefaultFont")
