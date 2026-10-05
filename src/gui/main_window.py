@@ -44,7 +44,6 @@ class MainWindow:
         self.root.columnconfigure(0, weight=1)  # The (only) column shall expand at window resize
         self.root.rowconfigure(1, weight=1)  # The row where the notebook is placed shall expand at window resize
         self.root.grid()
-        self.root.bind("<Configure>", self._check_for_window_resize)
         project_manager.root = self.root
         project_manager.main_window = self
         # Create background objects:
@@ -56,6 +55,7 @@ class MainWindow:
         project_manager.style_admin_ref = style_admin.StyleAdmin(self.root)
         project_manager.menu_bar_ref = menu_bar.MenuBar(row=0, column=0)
         project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
+        project_manager.notebook.bind("<Configure>", self._check_for_window_resize)
         # Create a combined reference dictionary for all canvas window items:
         project_manager.canvas_windows_ref_dict = ChainMap(
             condition_action.ConditionAction.ref_dict,
@@ -80,7 +80,7 @@ class MainWindow:
             print(f"Warning: Could not set application icon: {e}")
 
     def _check_for_window_resize(self, event) -> None:
-        if event.widget == self.root and self.window_height != event.height:
+        if event.widget == project_manager.notebook and self.window_height != event.height:
             if self.window_height != 0:  # equal 0 at application start, so ignore first event
                 self._move_sashes_after_window_resize()
             self.window_height = event.height
