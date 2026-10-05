@@ -239,8 +239,8 @@ class TabControl:
             project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # enable 2 files mode
             project_manager.select_file_number_text.set(2)
-            self.select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.E)
-            self.select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.E)
+            self.select_file_number_radio_button1.grid()
+            self.select_file_number_radio_button2.grid()
             # Interface: Adapt documentation for generics and ports
             project_manager.tab_interface_ref.paned_window.insert(
                 0, project_manager.tab_interface_ref.interface_package_frame, weight=1
@@ -273,8 +273,8 @@ class TabControl:
             project_manager.highlight_dict_ref.highlight_pattern_dict["not_written"].clear()
             # Control: disable 2 files mode
             project_manager.select_file_number_text.set(1)
-            self.select_file_number_radio_button1.grid_forget()
-            self.select_file_number_radio_button2.grid_forget()
+            self.select_file_number_radio_button1.grid_remove()
+            self.select_file_number_radio_button2.grid_remove()
             # Interface: Remove VHDL-package text field
             project_manager.tab_interface_ref.paned_window.forget(
                 project_manager.tab_interface_ref.interface_package_frame
