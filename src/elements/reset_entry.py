@@ -23,6 +23,8 @@ class ResetEntry:
     difference_y = 0
 
     def __init__(self, reset_entry_polygon_coords, tags) -> None:
+        if "diagram-element" not in tags:  # Old HFE designs do not have this tag.
+            tags.append("diagram-element")
         polygon_id = project_manager.canvas.create_polygon(
             *reset_entry_polygon_coords, fill="red", outline="orange", tags=tags
         )

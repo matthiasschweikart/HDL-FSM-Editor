@@ -26,6 +26,8 @@ class TransitionLine:
         self.phi_last = 0
         rectangle_coords = self._determine_position_of_priority_rectangle(transition_coords)
         self.transition_tag = tags[0]  # "transition<n>"
+        if "diagram-element" not in tags:  # Old HFE designs do not have this tag.
+            tags.append("diagram-element")
         self.transition_id = project_manager.canvas.create_line(transition_coords, arrow="last", smooth=True, tags=tags)
         self.priority_text = project_manager.canvas.create_text(
             rectangle_coords,

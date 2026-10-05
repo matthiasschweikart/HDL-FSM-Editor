@@ -47,6 +47,8 @@ class CanvasWindow:
             self._add_label_and_text_widget_to_frame(entry_dict)
         self._add_bindings_to_labels_and_text_widgets(move_handling_class, canvas_delete_class, zoom_wheel_function)
         self._show_all_text_widgets()
+        if "diagram-element" not in tags:  # Old HFE designs do not have this tag.
+            tags.append("diagram-element")
         if len(self.text_ids) > 1:
             self._hide_empty_text_widgets()
         self.window_id = project_manager.canvas.create_window(

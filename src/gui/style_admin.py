@@ -60,6 +60,7 @@ class StyleAdmin:
                 "map": {"foreground": [("active", "black")], "background": [("active", "gray95")]},
             },
             "My.TFrame": {"configure": {"background": "light gray"}},
+            "My2.TFrame": {"configure": {"background": "light gray"}},
             "My.TLabel": {"configure": {"foreground": "black", "background": "light gray"}},
             "My.TEntry": {
                 "configure": {
@@ -228,6 +229,7 @@ class StyleAdmin:
                 "map": {"foreground": [("active", "white")], "background": [("active", "black")]},
             },
             "My.TFrame": {"configure": {"background": "black"}},
+            "My2.TFrame": {"configure": {"background": "gray20"}},
             "My.TLabel": {"configure": {"foreground": "light gray", "background": "black"}},
             "My.TEntry": {
                 "configure": {

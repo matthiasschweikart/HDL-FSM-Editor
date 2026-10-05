@@ -205,7 +205,7 @@ class TagPlausibility:
         reset_incoming_transitions_list = []
         reset_tags = project_manager.canvas.gettags(canvas_item)
         for reset_tag in reset_tags:
-            if reset_tag == "current":
+            if reset_tag in ["current", "diagram-element"]:
                 pass
             elif reset_tag.startswith("reset_entry"):
                 reset_dict["reset_identifier"] = "reset_entry"
@@ -226,7 +226,7 @@ class TagPlausibility:
         state_comment_line_list = []
         state_tags = project_manager.canvas.gettags(canvas_item)
         for state_tag in state_tags:
-            if state_tag == "current":
+            if state_tag in ["current", "diagram-element"]:
                 pass
             elif state_tag.startswith("state") and not state_tag.endswith("_comment_line_end"):
                 state_dict["state_identifier"] = state_tag
@@ -349,7 +349,7 @@ class TagPlausibility:
         state_action_dict = {}
         state_action_tags = project_manager.canvas.gettags(canvas_item)
         for state_action_tag in state_action_tags:
-            if state_action_tag == "current":
+            if state_action_tag in ["current", "diagram-element"]:
                 pass
             elif state_action_tag.startswith("state_action"):
                 state_action_dict["state_action_identifier"] = (
@@ -390,7 +390,7 @@ class TagPlausibility:
         state_action_line_dict = {}
         state_action_line_tags = project_manager.canvas.gettags(canvas_item)
         for state_action_line_tag in state_action_line_tags:
-            if state_action_line_tag == "current":
+            if state_action_line_tag in ["current", "diagram-element"]:
                 pass
             elif state_action_line_tag.startswith("connection"):
                 state_action_line_dict["state_action_line_identifier"] = (
@@ -431,7 +431,7 @@ class TagPlausibility:
         state_comment_dict = {}
         state_comment_tags = project_manager.canvas.gettags(canvas_item)  # canvas_item is a canvas-window
         for state_comment_tag in state_comment_tags:
-            if state_comment_tag == "current":
+            if state_comment_tag in ["current", "diagram-element"]:
                 pass
             elif state_comment_tag.startswith("state") and state_comment_tag.endswith("_comment"):
                 state_comment_dict["state_comment_identifier"] = state_comment_tag
@@ -467,7 +467,7 @@ class TagPlausibility:
         state_comment_line_dict = {}
         state_comment_line_tags = project_manager.canvas.gettags(canvas_item)
         for state_comment_line_tag in state_comment_line_tags:
-            if state_comment_line_tag == "current":
+            if state_comment_line_tag in ["current", "diagram-element"]:
                 pass
             elif state_comment_line_tag.endswith("_comment_line"):
                 state_comment_line_dict["state_comment_line_identifier"] = (
@@ -501,9 +501,9 @@ class TagPlausibility:
         transition_dict = {}
         line_tags = project_manager.canvas.gettags(canvas_item)
         for transition_tag in line_tags:
-            if transition_tag == "current":
-                pass
-            elif transition_tag.startswith("transition"):
+            if transition_tag in ("current", "diagram-element"):
+                continue
+            if transition_tag.startswith("transition"):
                 transition_dict["transition_identifier"] = transition_tag
             elif transition_tag.startswith("coming_from_"):
                 state_identifier = re.sub(r"coming_from_", "", transition_tag)
@@ -568,7 +568,7 @@ class TagPlausibility:
         connector_incoming_transitions_list = []
         connector_tags = project_manager.canvas.gettags(canvas_item)
         for connector_tag in connector_tags:
-            if connector_tag == "current":
+            if connector_tag in ["current", "diagram-element"]:
                 pass
             elif connector_tag.startswith("connector"):
                 connector_dict["connector_identifier"] = connector_tag
@@ -616,7 +616,7 @@ class TagPlausibility:
         ca_window_dict = {}
         window_tags = project_manager.canvas.gettags(canvas_item)
         for window_tag in window_tags:
-            if window_tag == "current":
+            if window_tag in ["current", "diagram-element"]:
                 pass
             elif window_tag.startswith("condition_action"):  # "condition_action"<integer>
                 ca_window_dict["ca_window_identifier"] = window_tag

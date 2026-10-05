@@ -24,6 +24,8 @@ class States:
     difference_y = 0
 
     def __init__(self, coords, tags, text, fill_color) -> None:
+        if "diagram-element" not in tags:  # Old HFE designs do not have this tag.
+            tags.append("diagram-element")
         self.state_id = project_manager.canvas.create_oval(
             coords,
             fill=fill_color,

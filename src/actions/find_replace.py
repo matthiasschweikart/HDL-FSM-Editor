@@ -205,7 +205,7 @@ class FindReplace:
                         text_field["ref"].create_signals_and_constants_and_types_list()
                         text_field["ref"].create_function_names_list()
                     elif text_field["tab"] == GuiTab.DIAGRAM:
-                        text_field["ref"].format_after_idle(None)
+                        text_field["ref"].format(None)
                 else:
                     break
             else:

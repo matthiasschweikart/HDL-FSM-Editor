@@ -114,6 +114,9 @@ def clear_diagram():
     """Clear the current diagram from canvas."""
     _clear_read_and_written_variables_dict()
     project_manager.canvas.delete("all")
+    project_manager.canvas.xview_moveto(0)
+    project_manager.canvas.yview_moveto(0)
+    project_manager.canvas.configure(scrollregion=())
     _clear_ref_dicts()
     condition_action.ConditionAction.conditionaction_id = 0
     connector.ConnectorInstance.connector_number = 0
@@ -211,7 +214,6 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
     project_manager.root.config(cursor="arrow")
     project_manager.write_data_creator_ref.store_as_compare_object(design_dictionary)
     file_handling_load.load_design_from_dict(design_dictionary)
-    _init_undo_stack()
     custom_text.CustomText.update_highlight_tags_in_all_texts()
     custom_text.CustomText.highlight_brackets_in_all_texts()
     if not tag_plausibility.TagPlausibility().get_tag_status_is_okay():
@@ -220,16 +222,31 @@ def open_file_with_name(read_filename, is_script_mode) -> None:
         _set_title_of_window(read_filename)
         _copy_hdl_into_hdl_tab(design_dictionary, read_filename)
         project_manager.notebook.show_tab(GuiTab.DIAGRAM)
-        project_manager.root.after_idle(_continue_after_load)
+        # Wait until the canvas is completely rendered before continuing with view_all()
+        project_manager.root.after_idle(
+            lambda: _continue_when_canvas_is_stable(last_size=None, last_bbox=None, stable_ticks=0, tries=0)
+        )
 
 
-def _continue_after_load():
-    # view_all must be started after idle, because init_undo_stack calls design_has_changed(),
-    # which calls update_scroll_region, which removes the grid-lines and adds them later after idle.
-    # This means without waiting here, view_all would be called at once and would remove the grid-lines,
-    # and then would also wait for idle. So when idle is reached, first the grid-lines are added and
-    # would influence the bbox command of view-all running also after idle.
+def _continue_when_canvas_is_stable(last_size, last_bbox, stable_ticks: int, tries: int) -> None:
+    width = project_manager.canvas.winfo_width()
+    height = project_manager.canvas.winfo_height()
+    current_size = (width, height)
+    current_bbox = project_manager.canvas.bbox("all")
+
+    geometry_ready = width > 1 and height > 1 and current_bbox is not None
+    unchanged = geometry_ready and current_size == last_size and current_bbox == last_bbox
+
+    stable_ticks = stable_ticks + 1 if unchanged else 0
+    if stable_ticks >= 2 or tries >= 40:
+        _continue_with_view_all()
+        return
+    project_manager.root.after(25, _continue_when_canvas_is_stable, current_size, current_bbox, stable_ticks, tries + 1)
+
+
+def _continue_with_view_all():
     canvas_editing.view_all()
+    _init_undo_stack()
 
 
 def _resolve_read_filename(read_filename: str, is_script_mode: bool) -> str:

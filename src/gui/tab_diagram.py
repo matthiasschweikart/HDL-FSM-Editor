@@ -41,7 +41,7 @@ class TabDiagram:
         )
         project_manager.canvas = canvas
 
-        button_frame = ttk.Frame(diagram_frame, borderwidth=1, style="My.TFrame")
+        button_frame = ttk.Frame(diagram_frame, borderwidth=1, style="My2.TFrame")
 
         # Layout of the drawing area:
         canvas.grid(column=0, row=0, sticky="nsew")
@@ -50,7 +50,7 @@ class TabDiagram:
         button_frame.grid(column=0, columnspan=2, row=2, sticky="swe")
 
         # Implement the undo/redo buttons of the drawing area:
-        undo_redo_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
+        undo_redo_frame = ttk.Frame(button_frame, borderwidth=2, style="My2.TFrame")
         undo_button = ttk.Button(
             undo_redo_frame,
             text="Undo (Ctrl-z)",
@@ -71,7 +71,7 @@ class TabDiagram:
         redo_button.grid(row=0, column=1)
 
         # Implement the global-action buttons of the drawing area:
-        action_frame = ttk.Frame(button_frame, borderwidth=2, style="My.TFrame")
+        action_frame = ttk.Frame(button_frame, borderwidth=2, style="My2.TFrame")
         state_action_default_button = ttk.Button(
             action_frame, text="Default State Actions (combinatorial)", style="DefaultStateActions.TButton"
         )
@@ -126,8 +126,8 @@ class TabDiagram:
         )
         view_area_button.config(command=canvas_modify_bindings.switch_to_view_area)
         view_all_button.config(command=canvas_editing.view_all)
-        plus_button.config(command=canvas_editing.zoom_plus)
-        minus_button.config(command=canvas_editing.zoom_minus)
+        plus_button.config(command=lambda: canvas_editing.zoom_plus_minus(1.1))
+        minus_button.config(command=lambda: canvas_editing.zoom_plus_minus(1 / 1.1))
 
         canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         canvas.bind("<Home>", lambda event: canvas_editing.view_all())
@@ -202,7 +202,7 @@ class TabDiagram:
     def _adapt_length_of_grid_lines(self, _) -> None:
         # Will be called, because resizing the window causes a change of the canvas size.
         # Only adapt the grid_lines if they are actually really present on the canvas,
-        # because if they are temporarily not present, they should not be shown:
+        # because if they are temporarily not present, they should not be drawn:
         canvas_ids_of_grid_lines = project_manager.canvas.find_withtag("grid_line")
         if canvas_ids_of_grid_lines:
             project_manager.grid_drawer.remove_grid()

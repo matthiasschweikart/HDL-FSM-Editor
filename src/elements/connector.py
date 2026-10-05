@@ -19,6 +19,8 @@ class ConnectorInstance:
     ref_dict = {}
 
     def __init__(self, coords, tags):
+        if "diagram-element" not in tags:  # Old HFE designs do not have this tag.
+            tags.append("diagram-element")
         self.connector_id = project_manager.canvas.create_rectangle(coords, fill=constants.CONNECTOR_COLOR, tags=tags)
         project_manager.canvas.tag_bind(
             self.connector_id,
