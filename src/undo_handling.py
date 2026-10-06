@@ -104,6 +104,7 @@ class UndoHandling:
         file_handling_load.load_diagram_data(design)
         self._shift_visible_center_to_window_center(visible_center)
         project_manager.grid_drawer.draw_grid()
+        self.resize_scrollregion()
 
     def _shift_visible_center_to_window_center(self, visible_center) -> None:
         """Pan canvas so the given center string becomes the current window center."""
