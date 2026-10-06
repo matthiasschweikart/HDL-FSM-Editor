@@ -66,7 +66,7 @@ class StateActionsDefault(CanvasWindow):
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
             padding=1,
-            tags=("state_actions_default",),
+            tags=["state_actions_default"],
             action="",
             move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,

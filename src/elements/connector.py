@@ -69,14 +69,14 @@ class ConnectorInstance:
             # Increase until an unused number is found.
             # This number conflict may happen, if the design was created with an old version of HFE.
             ConnectorInstance.connector_number += 1
-        tag = "connector" + str(ConnectorInstance.connector_number)
+        tags = ["connector" + str(ConnectorInstance.connector_number)]
         coords = (
             event_x - project_manager.state_radius / 4,
             event_y - project_manager.state_radius / 4,
             event_x + project_manager.state_radius / 4,
             event_y + project_manager.state_radius / 4,
         )
-        ConnectorInstance(coords, tag)
+        ConnectorInstance(coords, tags)
         project_manager.undo_handling_ref.design_has_changed()
 
     @classmethod

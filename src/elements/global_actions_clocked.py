@@ -74,7 +74,7 @@ class GlobalActionsClocked(CanvasWindow):
             canvas_grid_coordinates_of_the_event[0],
             canvas_grid_coordinates_of_the_event[1],
             padding=1,
-            tags=("global_actions1",),
+            tags=["global_actions1"],
             move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
