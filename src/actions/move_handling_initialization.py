@@ -48,12 +48,14 @@ def move_initialization(event) -> None:
         # determined and stored. This distance is afterwards at each cursor movement added to the event coordinates
         # in order to get the new coordinates of the anchor point.
         # This prevents the object from jumping to the cursor at the first movement.
-        move_handling.move_do(event, move_list, first=True)
+        move_handling.move_to_coordinates(event.x, event.y, move_list, first=True, move_to_grid=False)
 
         # Create a binding for the now following movements of the mouse and for finishing the moving:
         move_do_funcid = project_manager.canvas.bind(
             "<Motion>",
-            lambda motion_event, move_list=move_list: move_handling.move_do(motion_event, move_list, first=False),
+            lambda motion_event: move_handling.move_to_coordinates(
+                motion_event.x, motion_event.y, move_list, first=False, move_to_grid=False
+            ),
             add="+",
         )  # Must be "added", as store_mouse_position is already bound to "Motion".
         coords_before_move = project_manager.canvas.coords(move_list[0][0])

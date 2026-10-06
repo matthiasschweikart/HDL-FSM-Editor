@@ -3,15 +3,8 @@ This module contains a method to decide which graphical object must be moved.
 """
 
 import constants
-from actions import canvas_editing
 from elements import connector, reset_entry, state, transition
 from project_manager import project_manager
-
-
-def move_do(event, move_list, first, move_to_grid=False) -> None:
-    """Move all items in move_list to the event's canvas coordinates."""
-    [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-    move_to_coordinates(event_x, event_y, move_list, first, move_to_grid)
 
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):

@@ -18,7 +18,7 @@ class MoveHandlingCanvasItem:
             return  # Button-1 shall now not move any canvas item
         self.canvas_id = canvas_id
         self.coords_before_move = project_manager.canvas.coords(self.canvas_id)
-        self.move_list = move_handling_initialization.create_move_list([self.canvas_id], event.x, event.y)
+        self.move_list = move_handling_initialization.create_move_list([self.canvas_id], None, None)
 
         # This first move does not move the object.
         # It is needed to set self.difference_x, self.difference_y of the moved window to 0.
