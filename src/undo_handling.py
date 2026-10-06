@@ -8,6 +8,7 @@ import file_handling
 import file_handling_load
 import file_handling_save
 from project_manager import project_manager
+from widgets import custom_text
 
 
 class UndoHandling:
@@ -102,6 +103,8 @@ class UndoHandling:
         file_handling.clear_diagram()
         design, visible_center = self.stack[self.stack_write_pointer]
         file_handling_load.load_diagram_data(design)
+        custom_text.CustomText.update_highlight_tags_in_all_texts()
+        custom_text.CustomText.highlight_brackets_in_all_texts()
         self._shift_visible_center_to_window_center(visible_center)
         project_manager.grid_drawer.draw_grid()
         self.resize_scrollregion()
