@@ -11,7 +11,7 @@ from elements import transition
 from project_manager import project_manager
 
 
-def move_finish(event, move_list, move_do_funcid) -> None:
+def move_finish(event, move_list, move_do_funcid, coords_before_move) -> None:
     """End moving: snap to grid, unbind handlers, update transitions and condition-actions, record undo."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
 
@@ -38,7 +38,10 @@ def move_finish(event, move_list, move_do_funcid) -> None:
         )
         _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transition_id, transition_point)
     move_finish_for_transitions(move_list)
-    project_manager.undo_handling_ref.design_has_changed()
+    for index, coord_after_move in enumerate(project_manager.canvas.coords(move_list[0][0])):
+        if abs(coord_after_move - coords_before_move[index]) > project_manager.state_radius / 2:
+            project_manager.undo_handling_ref.design_has_changed()
+            return
 
 
 def move_finish_for_transitions(move_list):

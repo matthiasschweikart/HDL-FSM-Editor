@@ -56,12 +56,14 @@ def move_initialization(event) -> None:
             lambda motion_event, move_list=move_list: move_handling.move_do(motion_event, move_list, first=False),
             add="+",
         )  # Must be "added", as store_mouse_position is already bound to "Motion".
+        coords_before_move = project_manager.canvas.coords(move_list[0][0])
+        # move_finish must unbind move_do from "Motion", so it needs the function id:
         project_manager.canvas.bind(
             "<ButtonRelease-1>",
-            lambda release_event, move_list=move_list, move_do_funcid=move_do_funcid: move_handling_finish.move_finish(
-                release_event, move_list, move_do_funcid
+            lambda release_event: move_handling_finish.move_finish(
+                release_event, move_list, move_do_funcid, coords_before_move
             ),
-        )  # move_finish must unbind move_do from "Motion", so it needs the function id.
+        )
 
 
 def _no_item_found_to_be_moved(items_to_be_moved):
