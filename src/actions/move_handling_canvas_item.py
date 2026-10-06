@@ -14,9 +14,11 @@ class MoveHandlingCanvasItem:
     transition_insertion_runs = False
 
     def __init__(self, event, canvas_id):
+        print("state-movement started")
         if MoveHandlingCanvasItem.transition_insertion_runs:
             return  # Button-1 shall now not move any canvas item
         self.canvas_id = canvas_id
+        self.coords_before_move = project_manager.canvas.coords(self.canvas_id)
         self.move_list = move_handling_initialization.create_move_list([self.canvas_id], event.x, event.y)
 
         # This first move does not move the object.
@@ -55,4 +57,10 @@ class MoveHandlingCanvasItem:
             move_to_grid=True,
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
-        project_manager.undo_handling_ref.design_has_changed()
+        coords_after_move = project_manager.canvas.coords(self.canvas_id)
+        for index, coord_after_move in enumerate(coords_after_move):
+            if abs(coord_after_move - self.coords_before_move[index]) > project_manager.state_radius / 2:
+                print("coords before move:", self.coords_before_move)
+                print("coords after move:", project_manager.canvas.coords(self.canvas_id))
+                project_manager.undo_handling_ref.design_has_changed()
+                return
