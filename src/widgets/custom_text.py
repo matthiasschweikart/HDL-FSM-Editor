@@ -321,24 +321,15 @@ class CustomText(CodeEditor):
         nr_of_lines = 0
         nr_of_characters_in_line = 0
         max_line_length = 0
-        if self not in [
-            project_manager.tab_interface_ref.interface_generics_text,
-            project_manager.tab_interface_ref.interface_packages_text,
-            project_manager.tab_interface_ref.interface_ports_text,
-            project_manager.tab_internals_ref.internals_architecture_text,
-            project_manager.tab_internals_ref.internals_process_clocked_text,
-            project_manager.tab_internals_ref.internals_process_combinatorial_text,
-            project_manager.tab_internals_ref.internals_packages_text,
-        ]:
-            for c in text:
-                if c != "\n":
-                    nr_of_characters_in_line += 1
-                    max_line_length = max(nr_of_characters_in_line, max_line_length)
-                else:
-                    nr_of_lines += 1
-                    nr_of_characters_in_line = 0
-            self.config(width=max_line_length)
-            self.config(height=nr_of_lines)
+        for c in text:
+            if c != "\n":
+                nr_of_characters_in_line += 1
+                max_line_length = max(nr_of_characters_in_line, max_line_length)
+            else:
+                nr_of_lines += 1
+                nr_of_characters_in_line = 0
+        self.config(width=max_line_length)
+        self.config(height=nr_of_lines)
 
     def _dehighlight_in_all_texts(self) -> None:
         # Removes first all highlighting introduced by links, by word-selecting, by bracket-background.
