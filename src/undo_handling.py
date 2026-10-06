@@ -48,6 +48,9 @@ class UndoHandling:
                 bbox[3] + (bbox[3] - bbox[1]) * 0.5,
             )
             project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+            # redraw grid, because visible canvas area may have increased:
+            project_manager.grid_drawer.remove_grid()
+            project_manager.grid_drawer.draw_grid()
 
     def _add_changes_to_design_stack(self) -> None:
         self._remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
