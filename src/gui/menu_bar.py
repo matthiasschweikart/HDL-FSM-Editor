@@ -28,16 +28,21 @@ class MenuBar:
         file_menu_button = ttk.Menubutton(menue_frame, text="File", style="My.TMenubutton")
         hdl_menu_button = ttk.Menubutton(menue_frame, text="HDL", style="My.TMenubutton")
         prefs_menu_button = ttk.Menubutton(menue_frame, text="Prefs", style="My.TMenubutton")
-        tool_title = ttk.Label(menue_frame, text="HDL-FSM-Editor", font=("Arial", 15), style="My.TLabel")
+        title_frame = ttk.Frame(menue_frame, style="My.TFrame")
         search_frame = ttk.Frame(menue_frame, borderwidth=2, style="My.TFrame")
         info_menu_button = ttk.Menubutton(menue_frame, text="Info", style="My.TMenubutton")
         file_menu_button.grid(row=0, column=0)
         hdl_menu_button.grid(row=0, column=1)
         prefs_menu_button.grid(row=0, column=2, sticky="w")
-        tool_title.grid(row=0, column=3)
+        title_frame.grid(row=0, column=3)
         search_frame.grid(row=0, column=4)
         info_menu_button.grid(row=0, column=5)
         menue_frame.columnconfigure(3, weight=1)  # The column with the title expands.
+
+        tool_title = ttk.Label(title_frame, text="HDL-FSM-Editor", font=("Arial", 15), style="My.TLabel")
+        self.new_version_availabale = ttk.Label(title_frame, text=" (new Version available)", style="My.TLabel")
+        tool_title.grid(row=0, column=0)
+        self.new_version_availabale.grid(row=0, column=1)
 
         self.file_menu = tk.Menu(file_menu_button)  # , activeborderwidth=0, borderwidth=0)
         file_menu_button.configure(menu=self.file_menu)

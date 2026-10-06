@@ -143,10 +143,13 @@ class MainWindow:
                 )
             else:
                 check_version_result = "Your version of HDL-FSM-Editor is up to date."
+                project_manager.menu_bar_ref.new_version_availabale.grid_remove()
         except urllib.error.URLError:
             check_version_result = "HDL-FSM-Editor version could not be checked, as you are offline."
+            project_manager.menu_bar_ref.new_version_availabale.grid_remove()
         except http.client.RemoteDisconnected:
             check_version_result = "Remote end closed connection without response, when checking the version."
+            project_manager.menu_bar_ref.new_version_availabale.grid_remove()
         print(check_version_result)
         return check_version_result
 
