@@ -38,8 +38,12 @@ def move_finish(event, move_list, move_do_funcid, coords_before_move) -> None:
         )
         _update_the_tags_of_the_transition(item_ids_at_moving_end_location, transition_id, transition_point)
     move_finish_for_transitions(move_list)
+    type_of_moved_canvas_item = project_manager.canvas.type(move_list[0][0])
     for index, coord_after_move in enumerate(project_manager.canvas.coords(move_list[0][0])):
-        if abs(coord_after_move - coords_before_move[index]) > project_manager.state_radius / 2:
+        if (
+            type_of_moved_canvas_item == "window"
+            or abs(coord_after_move - coords_before_move[index]) > project_manager.state_radius / 2
+        ):
             project_manager.undo_handling_ref.design_has_changed()
             return
 
