@@ -13,7 +13,7 @@ class MoveHandlingCanvasWindow:
         if move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs:
             return  # Button-1 shall now not move any canvas item
         self.move_active = True
-        self.widget = widget
+        self.widget = widget  # This is a reference to the Frame or to a Label of the canvas_window object.
         self.window_id = window_id
         window_coords = project_manager.canvas.coords(self.window_id)
         self.move_list = move_handling_initialization.create_move_list(
