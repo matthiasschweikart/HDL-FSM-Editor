@@ -177,7 +177,8 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
         # If left mouse button is pressed during view-area with the right mouse-button, the list is empty:
         if tags_of_item_id:
             for tag in tags_of_item_id:
-                if tag.startswith("state") and tag.endswith("_name"):  # A state is moved by moving its state-name.
+                if tag.startswith("state") and tag.endswith("_name"):
+                    # A state is moved by moving its state-name.
                     # This can happen only if the moving is started by MoveHandlingCanvasItem.
                     # Then only the canvas-id of the state-name is in the list items_to_be_moved.
                     # To be able to create a complete move_list, the canvas-id of the state
@@ -186,12 +187,9 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
                     canvas_id_of_state = project_manager.canvas.find_withtag(state_tag)[0]
                     list_of_move_list_entries = [[canvas_id_of_state, ""]]
                     return _create_additional_move_list_entries_for_a_state(state_tag, list_of_move_list_entries)
-                if tag.startswith("state") and not tag.endswith("_comment_line_end"):
-                    # tag = state<nr>
-                    list_of_move_list_entries = [[item_id, ""]]
-                    return _create_additional_move_list_entries_for_a_state(tag, list_of_move_list_entries)
                 if (
                     tag.startswith("state_action")  # state_action<nr>, state_actions_default
+                    or tag.startswith("state_comment")
                     or tag.startswith("condition_action")
                     or tag.startswith("reset_entry")
                     or tag.startswith("global_actions")
@@ -199,6 +197,11 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
                     or tag.startswith("connector")
                 ):
                     return [[item_id, ""]]
+                if tag.startswith("state") and not tag.endswith("_comment_line_end"):
+                    # A state, state_comment, state_action, state_actions_default is moved.
+                    # tag = state<nr>
+                    list_of_move_list_entries = [[item_id, ""]]
+                    return _create_additional_move_list_entries_for_a_state(tag, list_of_move_list_entries)
     return []
 
 
