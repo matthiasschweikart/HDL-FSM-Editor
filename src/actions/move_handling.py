@@ -9,6 +9,10 @@ from project_manager import project_manager
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
     """Apply move to (event_x, event_y) for each item in move_list; respect grid and proximity checks."""
+    event_x, event_y = (
+        project_manager.canvas.canvasx(event_x),
+        project_manager.canvas.canvasy(event_y),
+    )
     if _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y):
         return
     new_event_x, new_event_y = event_x, event_y  # Default values for the case, when no state is moved.
