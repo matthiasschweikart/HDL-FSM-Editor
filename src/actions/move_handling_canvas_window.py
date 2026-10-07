@@ -2,7 +2,7 @@
 A MoveCanvasWindow object is created, when the user moves a Canvas window object.
 """
 
-from actions import move_handling, move_handling_finish, move_handling_initialization
+from actions import move_handling, move_handling_canvas_item, move_handling_finish, move_handling_initialization
 from project_manager import project_manager
 
 
@@ -10,6 +10,8 @@ class MoveHandlingCanvasWindow:
     """Handles dragging of a canvas window when the user moves it."""
 
     def __init__(self, event, widget, window_id):
+        if move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs:
+            return  # Button-1 shall now not move any canvas item
         self.move_active = True
         self.widget = widget
         self.window_id = window_id
