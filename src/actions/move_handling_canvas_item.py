@@ -24,13 +24,7 @@ class MoveHandlingCanvasItem:
         # It is needed to set self.difference_x, self.difference_y of the moved window to 0.
         # Both values are used, when the window is picked up at its border.
         # The values are set to 0 by using window_coords[0] and window_coords[1] as event coords:
-        move_handling.move_to_coordinates(
-            event.x,
-            event.y,
-            self.move_list,
-            first=True,
-            move_to_grid=False,
-        )
+        move_handling.move_to_coordinates(event.x, event.y, self.move_list, first=True, move_to_grid=False)
 
         # Create a binding for the now following movements of the mouse and for finishing the moving:
         self.funcid_motion = project_manager.canvas.tag_bind(self.canvas_id, "<Motion>", self._motion)
