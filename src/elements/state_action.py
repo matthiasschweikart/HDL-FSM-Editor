@@ -83,10 +83,10 @@ class StateAction(CanvasWindow):
             "connection" + str(cls.state_action_id),
             "connected_to_" + project_manager.canvas.gettags(state_id)[0],
         )
-        state_action_tags = (
+        state_action_tags = [
             "state_action" + str(cls.state_action_id),
             "connection" + str(cls.state_action_id) + "_start",
-        )
+        ]
         coords = project_manager.canvas.coords(state_id)
         middle_x = (coords[0] + coords[2]) / 2
         middle_y = (coords[1] + coords[3]) / 2
