@@ -15,20 +15,24 @@ class MoveHandlingCanvasWindow:
         self.move_active = True
         self.widget = widget  # This is a reference to the Frame or to a Label of the canvas_window object.
         self.window_id = window_id
-        window_coords = project_manager.canvas.coords(self.window_id)
-        self.move_list = move_handling_initialization.create_move_list(
-            [self.window_id], window_coords[0], window_coords[1]
+        self.move_list, self.window_coords_before_move = (
+            move_handling_initialization.create_move_list_and_extend_transitions([self.window_id], None, None)
         )
         self.touching_point_x = event.x
         self.touching_point_y = event.y
 
-        # This first move does not move the object.
-        # It is needed to set self.difference_x, self.difference_y of the moved window to 0.
-        # Both values are used, when the window is picked up at its border.
-        # The values are set to 0 by using window_coords[0] and window_coords[1] as event coords:
+        # The first move does not move the object.
+        # It is needed to define difference_x, difference_y of the used move_to method.
+        # The coordinates are converted from canvas to screen coordinates in order to avoid any confusion,
+        # as move_to_coordinates works with screen coordinates.
+        # But using canvas coordinates would not make any difference, as difference_x/y are based on deltas.
+        # The values of difference_x/y should calculate to 0, as the differences are build between the
+        # position determined here and the position calculated in the used move_to method.
+        # But they are not exactly 0, because of the conversion between the coordinate systems.
+        window_coords_screen_before_move = self._canvas_to_screen(self.window_coords_before_move)
         move_handling.move_to_coordinates(
-            window_coords[0],
-            window_coords[1],
+            window_coords_screen_before_move[0],
+            window_coords_screen_before_move[1],
             self.move_list,
             first=True,
             move_to_grid=False,
@@ -47,9 +51,11 @@ class MoveHandlingCanvasWindow:
         if not self.move_active:
             # The release event did already happen:
             return
+        # Determine the change in mouse position compared to the initial touching point.
         delta_x = motion_event.x - self.touching_point_x
         delta_y = motion_event.y - self.touching_point_y
-        window_coords = project_manager.canvas.coords(self.window_id)
+        # Move the window by the delta values, which moves the touching point under the actual mouse pointer again:
+        window_coords = self._canvas_to_screen(project_manager.canvas.coords(self.window_id))
         move_handling.move_to_coordinates(
             window_coords[0] + delta_x,
             window_coords[1] + delta_y,
@@ -72,7 +78,7 @@ class MoveHandlingCanvasWindow:
         if self.funcid_release is not None:
             self.widget.unbind("<ButtonRelease-1>", self.funcid_release)
             self.funcid_release = None
-        window_coords = project_manager.canvas.coords(self.window_id)
+        window_coords = self._canvas_to_screen(project_manager.canvas.coords(self.window_id))
         move_handling.move_to_coordinates(
             window_coords[0],
             window_coords[1],
@@ -82,3 +88,10 @@ class MoveHandlingCanvasWindow:
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
         project_manager.undo_handling_ref.design_has_changed()
+
+    def _canvas_to_screen(self, coords):
+        canvas_lu_x = project_manager.canvas.canvasx(0)
+        canvas_lu_y = project_manager.canvas.canvasy(0)
+        x_screen = coords[0] - canvas_lu_x
+        y_screen = coords[1] - canvas_lu_y
+        return x_screen, y_screen

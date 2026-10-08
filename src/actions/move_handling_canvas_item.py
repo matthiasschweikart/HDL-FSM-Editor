@@ -17,13 +17,13 @@ class MoveHandlingCanvasItem:
         if MoveHandlingCanvasItem.transition_insertion_runs:
             return  # Button-1 shall now not move any canvas item
         self.canvas_id = canvas_id
-        self.coords_before_move = project_manager.canvas.coords(self.canvas_id)
-        self.move_list = move_handling_initialization.create_move_list([self.canvas_id], None, None)
+        self.move_list, self.coords_before_move = move_handling_initialization.create_move_list_and_extend_transitions(
+            [self.canvas_id], None, None
+        )
 
         # This first move does not move the object.
-        # It is needed to set self.difference_x, self.difference_y of the moved window to 0.
-        # Both values are used, when the window is picked up at its border.
-        # The values are set to 0 by using window_coords[0] and window_coords[1] as event coords:
+        # It is needed to define difference_x, difference_y of the used move_to method.
+        # The values are set to 0 when the state is picked up in the middle:
         move_handling.move_to_coordinates(event.x, event.y, self.move_list, first=True, move_to_grid=False)
 
         # Create a binding for the now following movements of the mouse and for finishing the moving:

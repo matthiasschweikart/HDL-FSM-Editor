@@ -18,7 +18,7 @@ def move_initialization(event) -> None:
     items_to_be_moved = _create_a_list_of_items_to_be_moved_by_this_event(event_x, event_y)
     if _no_item_found_to_be_moved(items_to_be_moved):
         return
-    move_list = create_move_list(items_to_be_moved, event_x, event_y)
+    move_list, coords_before_move = create_move_list_and_extend_transitions(items_to_be_moved, event_x, event_y)
     # The move_list has an entry for each item, which must be moved.
     # The first entry belongs always to the object, the user wants to move.
     # All following entries are objects, which are "connected" to the object of the first entry and must also be moved.
@@ -58,7 +58,6 @@ def move_initialization(event) -> None:
             ),
             add="+",
         )  # Must be "added", as store_mouse_position is already bound to "Motion".
-        coords_before_move = project_manager.canvas.coords(move_list[0][0])
         # move_finish must unbind move_do from "Motion", so it needs the function id:
         project_manager.canvas.bind(
             "<ButtonRelease-1>",
@@ -154,15 +153,18 @@ def _mouse_click_happened_in_grid_line(items_to_be_moved) -> bool:
     return all("grid_line" in project_manager.canvas.gettags(item_id) for item_id in items_to_be_moved)
 
 
-def create_move_list(items_to_be_moved, event_x, event_y) -> list:
+def create_move_list_and_extend_transitions(items_to_be_moved, event_x, event_y) -> list:
     """Build list of [[item_id, point_index], ...] to move.
     Includes connected diagram objects or a single line point."""
-    move_list = _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved)
+    move_list, coords_before_move = _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved)
     if move_list:
         _add_lines_connected_to_the_diagram_object_to_the_list(move_list)
-        return move_list
+        return move_list, coords_before_move
     # A Canvas line point from a transition is moved:
-    return _create_move_list_for_transition_point(items_to_be_moved, event_x, event_y)
+    move_list, coords_before_move = _create_move_list_for_transition_point_and_extend_transition(
+        items_to_be_moved, event_x, event_y
+    )
+    return move_list, coords_before_move
 
 
 def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> list | None:
@@ -182,7 +184,7 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
                 or tag.startswith("global_actions_combinatorial")
                 or tag.startswith("connector")
             ):
-                return [[canvas_id, ""]]
+                return [[canvas_id, ""]], project_manager.canvas.coords(canvas_id)
             if tag.startswith("state") and tag.endswith("_name"):
                 # A state is moved by moving its state-name.
                 # This can happen only if the moving is started by MoveHandlingCanvasItem.
@@ -192,16 +194,22 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
                 state_tag = tag[:-5]  # remove "_name"
                 canvas_id_of_state = project_manager.canvas.find_withtag(state_tag)[0]
                 list_of_move_list_entries = [[canvas_id_of_state, ""]]
-                return _create_additional_move_list_entries_for_a_state(state_tag, list_of_move_list_entries)
+                list_of_move_list_entries = _add_additional_move_list_entries_for_a_state(
+                    state_tag, list_of_move_list_entries
+                )
+                return list_of_move_list_entries, project_manager.canvas.coords(canvas_id)
             if tag.startswith("state") and not tag.endswith("_comment_line_end"):
                 # A state is moved.
                 # tag is equal to: state<nr>
                 list_of_move_list_entries = [[canvas_id, ""]]
-                return _create_additional_move_list_entries_for_a_state(tag, list_of_move_list_entries)
-    return []
+                list_of_move_list_entries = _add_additional_move_list_entries_for_a_state(
+                    tag, list_of_move_list_entries
+                )
+                return list_of_move_list_entries, project_manager.canvas.coords(canvas_id)
+    return [], []
 
 
-def _create_additional_move_list_entries_for_a_state(state_tag, list_of_move_list_entries) -> list:
+def _add_additional_move_list_entries_for_a_state(state_tag, list_of_move_list_entries) -> list:
     tag_list = project_manager.canvas.find_withtag(state_tag + "_comment")
     if tag_list:
         list_of_move_list_entries.append([tag_list[0], ""])  # canvas-id of state comment
@@ -287,16 +295,17 @@ def _add_lines_connected_to_the_diagram_object_to_the_list(move_list) -> None:
                 move_list.append([id_of_connected_line, "start"])
 
 
-def _create_move_list_for_transition_point(items_to_be_moved, event_x, event_y) -> list:
+def _create_move_list_for_transition_point_and_extend_transition(items_to_be_moved, event_x, event_y) -> list:
     line_id = _find_the_item_id_of_the_line(items_to_be_moved)
     if line_id is None:
-        return []  # move_list is emtpy in this case.
+        return [], []  # move_list is emtpy in this case.
     # A line can represent a "transition" or a "connection" (connections are ignored here):
     transition_tags = _search_for_the_tags_of_a_transition(line_id)
     if not transition_tags:
-        return []
+        return [], []
     move_list = []
-    moving_point = get_point_to_move(line_id, event_x, event_y)
+    coords_before_move = project_manager.canvas.coords(line_id)
+    moving_point = _get_point_to_move_and_insert_point_if_needed(line_id, event_x, event_y)
     for tag in transition_tags:
         if tag.startswith("transition"):
             id_of_transition = project_manager.canvas.find_withtag(tag)[0]
@@ -304,7 +313,7 @@ def _create_move_list_for_transition_point(items_to_be_moved, event_x, event_y) 
             move_list.append([id_of_transition, moving_point])
             transition.TransitionLine.extend_transition_to_state_middle_points(tag)
             _remove_tags_and_hide_priority(line_id, tag, transition_tags, moving_point)
-    return move_list
+    return move_list, coords_before_move
 
 
 def _find_the_item_id_of_the_line(items_to_be_moved) -> None:
@@ -349,7 +358,7 @@ def _remove_tags_and_hide_priority(line_id, transition_tag, transition_tags, mov
             project_manager.canvas.dtag(line_id, tag)  # delete the "going_to_" tag from the line
 
 
-def get_point_to_move(item_id, event_x, event_y) -> str:
+def _get_point_to_move_and_insert_point_if_needed(item_id, event_x, event_y) -> str:
     """Return index of the transition point nearest to (event_x, event_y); insert extra point if needed."""
     # Determine which point of the transition is nearest to the event and insert an additional if necessary:
     transition_coords = project_manager.canvas.coords(item_id)
