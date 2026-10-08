@@ -3,7 +3,7 @@ Module handling connectors on the canvas.
 """
 
 import constants
-from actions import canvas_editing
+from actions import canvas_editing, move_handling_canvas_item
 from elements import transition
 from project_manager import project_manager
 
@@ -31,6 +31,11 @@ class ConnectorInstance:
             self.connector_id,
             "<Leave>",
             lambda event: project_manager.canvas.itemconfig(self.connector_id, width=1),
+        )
+        project_manager.canvas.tag_bind(
+            self.connector_id,
+            "<Button-1>",
+            lambda event: move_handling_canvas_item.MoveHandlingCanvasItem(event, self.connector_id),
         )
         ConnectorInstance.ref_dict[self.connector_id] = self
         ConnectorInstance.connector_number += 1

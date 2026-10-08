@@ -90,16 +90,17 @@ def _create_a_list_of_items_to_be_moved_by_this_event(event_x, event_y) -> list:
     list_of_overlapping_items = []
     overlapping_items = project_manager.canvas.find_overlapping(event_x, event_y, event_x, event_y)
     for overlapping_item in overlapping_items:
-        if project_manager.canvas.type(overlapping_item) == "oval":
-            # The cursor is inside a state, in this case moving shall use MoveHandlingCanvasItem.
+        if project_manager.canvas.type(overlapping_item) in ("oval", "rectangle"):
+            # The cursor is inside a state or a connector, in this case moving shall use MoveHandlingCanvasItem.
+            # It may also be inside a priority rectangle, which cannot be moved.
             return []
         overlap_tag = project_manager.canvas.gettags(overlapping_item)[0]
         if overlap_tag.startswith("transition") and overlap_tag.endswith("priority"):
             # The cursor is inside a priority-rectangle, no moving in this case
             return []
-        if overlap_tag.startswith("transition") and overlap_tag.endswith("rectangle"):
-            # The cursor is inside a priority-rectangle, no moving in this case
-            return []
+        # if overlap_tag.startswith("transition") and overlap_tag.endswith("rectangle"):
+        #     # The cursor is inside a priority-rectangle, no moving in this case
+        #     return []
     overlapping_items = project_manager.canvas.find_overlapping(
         event_x - project_manager.state_radius / 4,
         event_y - project_manager.state_radius / 4,
@@ -177,7 +178,7 @@ def _create_move_list_entry_if_a_diagram_object_is_moved(items_to_be_moved) -> l
         for tag in tags_of_canvas_id:
             if (
                 tag.startswith("state_action")  # state_action<nr>, state_actions_default
-                or tag.startswith("state_comment")
+                or tag.endswith("_comment")  # state<nr>_comment
                 or tag.startswith("condition_action")
                 or tag.startswith("reset_entry")
                 or tag.startswith("global_actions")
