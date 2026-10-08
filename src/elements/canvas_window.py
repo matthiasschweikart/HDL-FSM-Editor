@@ -36,11 +36,8 @@ class CanvasWindow:
         self.additional_move_func = additional_move_func
         self.old_text = ["" for _ in range(len(entry_dicts))]
         self.funcid_canvas_enter = None
-        self.funcid_frame_enter = None
-        self.funcids_label_enter = []
         self.funcids_text_enter = []
         self.frame_id = self._create_frame_for_label_and_text_widgets(padding)
-        self._add_bindings_to_frame(move_handling_class, canvas_delete_class)
         self.label_ids = []
         self.text_ids = []
         for entry_dict in entry_dicts:
@@ -84,15 +81,11 @@ class CanvasWindow:
         self.funcid_frame_enter = self.frame_id.bind("<Enter>", lambda event: self._start_editing(canvas_delete_class))
         self.frame_id.bind(
             "<Button-1>",
-            # lambda event: move_handling_canvas_window.MoveHandlingCanvasWindow(event, self.frame_id, self.window_id),
             lambda event: move_handling_class(event, self.frame_id, self.window_id),
         )
 
     def _add_bindings_to_labels_and_text_widgets(self, move_handling_class, canvas_delete_class, zoom_wheel_function):
         for label_id in self.label_ids:
-            self.funcids_label_enter.append(
-                label_id.bind("<Enter>", lambda event: self._start_editing(canvas_delete_class))
-            )
             label_id.bind(
                 "<Button-1>", lambda event, label_id=label_id: move_handling_class(event, label_id, self.window_id)
             )
@@ -152,13 +145,6 @@ class CanvasWindow:
         self._show_window_as_deselected()
 
     def _unbind_all_enter_bindings(self) -> None:
-        if self.funcid_frame_enter is not None:
-            self.frame_id.unbind("<Enter>", self.funcid_frame_enter)
-            self.funcid_frame_enter = None
-        for i, func_id in enumerate(self.funcids_label_enter):
-            if func_id is not None:
-                self.label_ids[i].unbind("<Enter>", func_id)
-                self.funcids_label_enter[i] = None
         for i, func_id in enumerate(self.funcids_text_enter):
             if func_id is not None:
                 self.text_ids[i].unbind("<Enter>", func_id)
@@ -176,11 +162,6 @@ class CanvasWindow:
 
     def _restore_original_bindings(self, canvas_delete_class) -> None:
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete_class())
-        self.funcid_frame_enter = self.frame_id.bind("<Enter>", lambda event: self._start_editing(canvas_delete_class))
-        for i, label_id in enumerate(self.label_ids):
-            self.funcids_label_enter[i] = label_id.bind(
-                "<Enter>", lambda event: self._start_editing(canvas_delete_class)
-            )
         for i, text_id in enumerate(self.text_ids):
             self.funcids_text_enter[i] = text_id.bind("<Enter>", lambda event: self._start_editing(canvas_delete_class))
 
