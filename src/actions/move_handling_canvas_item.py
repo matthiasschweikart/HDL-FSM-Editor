@@ -1,5 +1,5 @@
 """
-This module handles the movement of states at the Canvas.
+This module handles the movement of states, connectors at the Canvas.
 """
 
 from actions import move_handling, move_handling_finish, move_handling_initialization
@@ -12,13 +12,19 @@ class MoveHandlingCanvasItem:
     """
 
     transition_insertion_runs = False
+    move_handling_canvas_item_is_active = False
 
     def __init__(self, event, canvas_id):
-        if MoveHandlingCanvasItem.transition_insertion_runs:
+        if (
+            MoveHandlingCanvasItem.move_handling_canvas_item_is_active
+            or MoveHandlingCanvasItem.transition_insertion_runs
+        ):
             return  # Button-1 shall now not move any canvas item
+
+        MoveHandlingCanvasItem.move_handling_canvas_item_is_active = True
         self.canvas_id = canvas_id
         self.move_list, self.coords_before_move = move_handling_initialization.create_move_list_and_extend_transitions(
-            [self.canvas_id], None, None
+            self.canvas_id
         )
 
         # This first move does not move the object.
@@ -50,6 +56,7 @@ class MoveHandlingCanvasItem:
             move_to_grid=True,
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
+        MoveHandlingCanvasItem.move_handling_canvas_item_is_active = False
         coords_after_move = project_manager.canvas.coords(self.canvas_id)
         for index, coord_after_move in enumerate(coords_after_move):
             if abs(coord_after_move - self.coords_before_move[index]) > project_manager.state_radius / 2:
