@@ -28,9 +28,6 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
             new_event_x, new_event_y = connector.ConnectorInstance.move_to(
                 event_x, event_y, item_id, first, move_to_grid
             )
-        elif item_type == "window":
-            ref = project_manager.canvas_windows_ref_dict[item_id]
-            ref.move_to(event_x, event_y, first)
     # If move_to_grid is true, the new_event_x and new_event_y have already been adjusted to the grid,
     # which must be known when a line is moved:
     for entry in move_list:
@@ -42,6 +39,9 @@ def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
             if tags[0].endswith("comment_line"):  # Other line-tags are: "transition", "connection", "ca_connection"
                 item_point_to_move += "_comment_line"
             transition.TransitionLine.move_to(new_event_x, new_event_y, item_id, item_point_to_move, first, move_list)
+        elif item_type == "window":  # A window must be moved to new_event_x/y if it is moved together with a state.
+            ref = project_manager.canvas_windows_ref_dict[item_id]
+            ref.move_to(new_event_x, new_event_y, first)
 
 
 def _object_is_moved_too_close_to_state_or_connector(move_list, event_x, event_y) -> bool:
