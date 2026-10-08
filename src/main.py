@@ -90,7 +90,7 @@ if __name__ == "__main__":
 # This is a list of all these tags:
 #
 # Tag of all diagram objects (states, transitions, connections, reset entries, etc.) used in the canvas:
-# "diagram-element"               : Tag used to identify all diagram objects without the grid-lines.
+# "diagram-element"               : Tag used to identify all diagram objects except transitions and grid-lines.
 #
 # Tag of the grid:
 # "grid_line"                     : Tag used to identify all grid lines in the canvas.
