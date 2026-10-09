@@ -3,6 +3,8 @@ The method move_initialization is bound to to "Button-1" (left mouse button).
 It is only used for moving a transition.
 """
 
+import tkinter as tk
+
 from actions import (
     canvas_editing,
     move_handling,
