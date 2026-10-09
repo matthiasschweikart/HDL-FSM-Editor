@@ -75,14 +75,6 @@ class ConditionAction(CanvasWindow):
         else:
             project_manager.canvas.itemconfigure(self.line_id, fill="black")
 
-    def move_line(self, event_x, event_y) -> None:
-        """Move the canvas line connecting this condition-action window to the transition."""
-        project_manager.canvas.itemconfig(self.line_id, state=tk.NORMAL)
-        line_coords = project_manager.canvas.coords(self.line_id)
-        line_coords[0] = event_x
-        line_coords[1] = event_y
-        project_manager.canvas.coords(self.line_id, line_coords)
-
     def hide_line(self) -> None:
         """Hide the canvas line connecting this condition-action window to the transition."""
         project_manager.canvas.itemconfig(self.line_id, state=tk.HIDDEN)

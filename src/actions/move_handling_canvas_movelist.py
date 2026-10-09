@@ -18,14 +18,7 @@ from elements import transition
 from project_manager import project_manager
 
 
-def create_move_list_and_extend_transitions(canvas_id) -> list:
-    """Build list of [[item_id, point_index], ...] to move. Includes connected diagram objects."""
-    move_list, coords_before_move = _create_move_list(canvas_id)
-    _add_connected_lines_and_add_transitions_extended(move_list)
-    return move_list, coords_before_move
-
-
-def _create_move_list(canvas_id) -> list | None:
+def create_move_list(canvas_id) -> list | None:
     # The move_list_entry must contain item_ids (and not tags), as only the item_id can
     # later be used as a key for a dictionary.
     # The empty second entry is needed, as later on it will be accessed in
@@ -45,82 +38,63 @@ def _create_move_list(canvas_id) -> list | None:
             or tag.startswith("connector")
         ):
             return [[canvas_id, ""]], project_manager.canvas.coords(canvas_id)
-        if tag.startswith("state") and tag.endswith("_name"):
-            # A state is moved by moving its state-name.
-            # This can happen only if the moving is started by MoveHandlingCanvasItem.
-            # Then only the canvas-id of the state-name is in the list items_to_be_moved.
-            # To be able to create a complete move_list, the canvas-id of the state
-            # must be added to the move_list:
-            state_tag = tag[:-5]  # remove "_name"
-            canvas_id_of_state = project_manager.canvas.find_withtag(state_tag)[0]
-            list_of_move_list_entries = [[canvas_id_of_state, ""]]
-            list_of_move_list_entries = _add_additional_move_list_entries_for_a_state(
-                state_tag, list_of_move_list_entries
-            )
-            return list_of_move_list_entries, project_manager.canvas.coords(canvas_id)
-        if tag.startswith("state") and not tag.endswith("_comment_line_end"):
-            # A state is moved.
-            # tag is equal to: state<nr>
-            list_of_move_list_entries = [[canvas_id, ""]]
-            list_of_move_list_entries = _add_additional_move_list_entries_for_a_state(tag, list_of_move_list_entries)
-            return list_of_move_list_entries, project_manager.canvas.coords(canvas_id)
+        if tag.startswith("state"):
+            state_tag = None
+            if tag.endswith("_name"):
+                # A state is moved by moving its state-name.
+                state_tag = tag[:-5]  # remove "_name"
+                canvas_id_of_state = project_manager.canvas.find_withtag(state_tag)[0]
+            elif not tag.endswith("_comment_line_end"):
+                # A state is moved by moving its circle.
+                state_tag = tag
+                canvas_id_of_state = canvas_id
+            if state_tag is not None:
+                move_list = [[canvas_id_of_state, ""]]
+                move_list = _add_connected_elements(state_tag, move_list)
+                return move_list, project_manager.canvas.coords(canvas_id)
 
 
-def _add_additional_move_list_entries_for_a_state(state_tag, list_of_move_list_entries) -> list:
+def _add_connected_elements(state_tag, move_list) -> list:
+    # A comment window is always moved together with its state:
     tag_list = project_manager.canvas.find_withtag(state_tag + "_comment")
     if tag_list:
-        list_of_move_list_entries.append([tag_list[0], ""])  # canvas-id of state comment
+        move_list.append([tag_list[0], ""])  # canvas-id of state comment
+    # A state action window is always moved together with its state and
+    # a loopback-transition (and its condition&action window) is always moved together with its state:
     tag_list = project_manager.canvas.gettags(state_tag)
     for tag_list_entry in tag_list:
-        if tag_list_entry.startswith("connection") and tag_list_entry.endswith("_end"):
-            connection_tag = tag_list_entry[:-4]  # connection<n>
+        if tag_list_entry.startswith("connection") and tag_list_entry.endswith("_end"):  # line to state action
+            connection_tag = tag_list_entry[:-4]
             canvas_id_of_state_action = project_manager.canvas.find_withtag(connection_tag + "_start")
-            list_of_move_list_entries.append([canvas_id_of_state_action[0], ""])  # canvas-id action
+            move_list.append([canvas_id_of_state_action[0], ""])  # canvas-id state action
         elif tag_list_entry.startswith("transition") and tag_list_entry.endswith("_start"):
             transition_tag = tag_list_entry[:-6]  # transition<n>_start
             if transition_tag + "_end" in tag_list:  # Then this is a loopback transition.
                 transition_tags = project_manager.canvas.gettags(transition_tag)
                 for tag in transition_tags:
                     if tag.startswith("ca_connection"):  # Then the transition has a condition&action box.
-                        ca_connection_tag = tag[:-4]
-                        list_of_move_list_entries.append(
+                        ca_connection_tag = tag[:-4]  # tag = "ca_connection<p>_end"
+                        move_list.append(  # Add the canvas-id of the condition&action window.
                             [project_manager.canvas.find_withtag(ca_connection_tag + "_anchor")[0], ""]
                         )
-                        list_of_move_list_entries.append(
+                        move_list.append(  # Add the canvas-id of the line between condition&action and transition.
+                            [project_manager.canvas.find_withtag(ca_connection_tag)[0], "start"]
+                        )
+                        move_list.append(  # Add the canvas_id of the line between condition&action and transition..
                             [project_manager.canvas.find_withtag(ca_connection_tag)[0], "end"]
                         )
-    return list_of_move_list_entries
+    return move_list
 
 
-def _add_connected_lines_and_add_transitions_extended(move_list) -> None:
-    tag_list_of_object_to_move = project_manager.canvas.gettags(move_list[0][0])
-    # tag_list_of_object_to_move may have different entries (additional to "current"):
-    # When moving a state:
-    # ('state1',
-    # 'connection0_end',                              -> line to state_action must be moved
-    # 'transition0_start','transition2_end',          -> transition start- or/and end-point must be moved
-    # 'state1_comment_line_end')                      -> comment line must be moved
-    # When moving a state action:
-    # ('state_action0', 'connection0_start')          -> end-point of the action line must be moved
-    # When moving a state comment:
-    # ('state1_comment', 'state1_comment_line_start') -> start-point of the comment line must be moved
+def add_connected_lines_and_add_transitions_extended(move_list) -> None:
+    tag_list_of_object_to_move = project_manager.canvas.gettags(move_list[0][0])  # State/Connector/Reset-Entry/Window
     tag_of_connected_line = None
     # Check which Canvas lines are "connected" and must be moved together with the diagram object:
     for tag in tag_list_of_object_to_move:
         to_be_moved_point_of_connected_line = None
         loop_back_transition = False
         add_line_start_point = False
-        if tag.startswith("connection") and tag.endswith("_end"):
-            # A state together with a state_action is moved, so move both points of the action line as well:
-            to_be_moved_point_of_connected_line = "end"
-            add_line_start_point = True
-            tag_of_connected_line = tag[:-4]  # connection<n>_end
-        elif tag.endswith("_comment_line_end"):
-            # A state together with a state_comment is moved, so move both points of the comment line as well:
-            to_be_moved_point_of_connected_line = "end"
-            add_line_start_point = True
-            tag_of_connected_line = tag[:-4]  # state<n>_comment_line_end
-        elif tag.startswith("transition") and tag.endswith("_start"):
+        if tag.startswith("transition") and tag.endswith("_start"):
             # A state or connector is moved, so the start-point of a connected transition line must be moved as well:
             tag_of_connected_line = tag[:-6]  # transition<n>
             to_be_moved_point_of_connected_line = "start"
@@ -131,6 +105,16 @@ def _add_connected_lines_and_add_transitions_extended(move_list) -> None:
             tag_of_connected_line = tag[:-4]  # transition<n>
             to_be_moved_point_of_connected_line = "end"
             transition.TransitionLine.extend_transition_to_state_middle_points(tag_of_connected_line)
+        elif tag.startswith("connection") and tag.endswith("_end"):
+            # A state is moved and has a state_action, so move both points of the action line as well:
+            to_be_moved_point_of_connected_line = "end"
+            add_line_start_point = True
+            tag_of_connected_line = tag[:-4]  # connection<n>_end
+        elif tag.endswith("_comment_line_end"):
+            # A state is moved and has a state_comment, so move both points of the comment line as well:
+            to_be_moved_point_of_connected_line = "end"
+            add_line_start_point = True
+            tag_of_connected_line = tag[:-4]  # state<n>_comment_line_end
         elif tag.startswith("connection") and tag.endswith("_start"):
             # A state action window is moved and moves the start point of the action line as well:
             tag_of_connected_line = tag[:-6]  # = connection<n>; line from a state action to a state

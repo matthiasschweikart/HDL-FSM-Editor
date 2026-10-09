@@ -184,9 +184,10 @@ class TransitionLine:
 
     def _adjust_anchor_of_connection_line(self, connection_tag):
         new_transition_coords = project_manager.canvas.coords(self.transition_tag)
+        coords_of_condition_and_action_window = project_manager.canvas.coords(connection_tag + "_anchor")
         project_manager.canvas.coords(
             connection_tag,
-            *new_transition_coords[-2:],  # not relevant, are determined new when line is shown
+            *coords_of_condition_and_action_window,
             *new_transition_coords[0:2],
         )
 

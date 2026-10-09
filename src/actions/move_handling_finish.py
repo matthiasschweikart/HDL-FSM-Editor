@@ -24,12 +24,13 @@ def move_finish(event, move_list, move_do_funcid, coords_before_move) -> None:
         return
 
     # Moving can be finished:
-    move_handling.move_to_coordinates(event.x, event.y, move_list, first=False, move_to_grid=True)
     project_manager.canvas.unbind("<ButtonRelease-1>")
     project_manager.canvas.unbind("<Motion>", move_do_funcid)
     project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
     move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs = False
-
+    # Snap to grid:
+    move_handling.move_to_coordinates(event.x, event.y, move_list, first=False, move_to_grid=True)
+    # Finish transition moving:
     if transition_start_or_end_point_is_moved:
         transition_id = move_list[0][0]
         transition_point = move_list[0][1]
@@ -52,9 +53,7 @@ def move_finish_for_transitions(move_list):
     """Shorten transitions to state borders, move condition-action endpoints, hide connection lines, lower grid."""
     _shorten_all_moved_transitions_to_the_state_borders(move_list)
     _move_all_ca_connection_end_points_to_the_new_transition_start_points(move_list)
-    _hide_the_connection_line_of_moved_condition_action_window(
-        move_list
-    )  # needed when a condition_action_window is moved alone.
+    _hide_the_connection_line_of_moved_condition_action_window(move_list)  # Gets visible when the window is moved alone
     project_manager.canvas.tag_lower("grid_line")
 
 

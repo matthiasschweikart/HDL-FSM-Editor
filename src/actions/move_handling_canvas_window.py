@@ -15,9 +15,8 @@ class MoveHandlingCanvasWindow:
         self.move_active = True
         self.widget = widget  # This is a reference to the Frame or to a Label of the canvas_window object.
         self.window_id = window_id
-        self.move_list, self.window_coords_before_move = (
-            move_handling_canvas_movelist.create_move_list_and_extend_transitions(self.window_id)
-        )
+        self.move_list, self.window_coords_before_move = move_handling_canvas_movelist.create_move_list(self.window_id)
+        move_handling_canvas_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
         self.touching_point_x = event.x
         self.touching_point_y = event.y
 

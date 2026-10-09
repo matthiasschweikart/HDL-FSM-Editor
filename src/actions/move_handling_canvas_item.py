@@ -8,7 +8,8 @@ from project_manager import project_manager
 
 class MoveHandlingCanvasItem:
     """
-    When a state is moved at the Canvas, a MoveHandlingCanvasItem object is created and handles the movement.
+    When a state or connector or reset_entry is moved at the Canvas,
+    a MoveHandlingCanvasItem object is created and handles the movement.
     """
 
     transition_insertion_runs = False
@@ -23,9 +24,8 @@ class MoveHandlingCanvasItem:
 
         MoveHandlingCanvasItem.move_handling_canvas_item_is_active = True
         self.canvas_id = canvas_id
-        self.move_list, self.coords_before_move = move_handling_canvas_movelist.create_move_list_and_extend_transitions(
-            self.canvas_id
-        )
+        self.move_list, self.coords_before_move = move_handling_canvas_movelist.create_move_list(self.canvas_id)
+        move_handling_canvas_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
 
         # This first move does not move the object.
         # It is needed to define difference_x, difference_y of the used move_to method.
