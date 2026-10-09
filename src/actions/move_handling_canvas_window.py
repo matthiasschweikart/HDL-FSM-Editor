@@ -2,7 +2,7 @@
 A MoveCanvasWindow object is created, when the user moves a Canvas window object.
 """
 
-from actions import move_handling, move_handling_canvas_item, move_handling_finish, move_handling_initialization
+from actions import move_handling, move_handling_canvas_item, move_handling_canvas_movelist, move_handling_finish
 from project_manager import project_manager
 
 
@@ -16,7 +16,7 @@ class MoveHandlingCanvasWindow:
         self.widget = widget  # This is a reference to the Frame or to a Label of the canvas_window object.
         self.window_id = window_id
         self.move_list, self.window_coords_before_move = (
-            move_handling_initialization.create_move_list_and_extend_transitions(self.window_id)
+            move_handling_canvas_movelist.create_move_list_and_extend_transitions(self.window_id)
         )
         self.touching_point_x = event.x
         self.touching_point_y = event.y

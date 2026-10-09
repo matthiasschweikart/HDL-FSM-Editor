@@ -50,7 +50,6 @@ class GlobalActionsClocked(CanvasWindow):
             canvas_delete_class,
             zoom_wheel_function,
             entry_dicts,
-            additional_move_func=None,
         )
 
         # Create dictionary for translating the canvas-id of the canvas-window into a reference to this object:

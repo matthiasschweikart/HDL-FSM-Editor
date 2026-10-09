@@ -48,7 +48,6 @@ class ConditionAction(CanvasWindow):
             canvas_delete_class,
             zoom_wheel_function,
             entry_dicts,
-            additional_move_func=self.move_line,
         )
         self.line_id = project_manager.canvas.create_line(
             menu_x,

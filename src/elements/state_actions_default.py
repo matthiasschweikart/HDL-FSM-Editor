@@ -44,7 +44,6 @@ class StateActionsDefault(CanvasWindow):
             canvas_delete_class,
             zoom_wheel_function,
             entry_dicts,
-            additional_move_func=None,
         )
         StateActionsDefault.ref_dict[self.window_id] = self
 

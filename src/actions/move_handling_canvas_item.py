@@ -2,7 +2,7 @@
 This module handles the movement of states, connectors at the Canvas.
 """
 
-from actions import move_handling, move_handling_finish, move_handling_initialization
+from actions import move_handling, move_handling_canvas_movelist, move_handling_finish
 from project_manager import project_manager
 
 
@@ -23,7 +23,7 @@ class MoveHandlingCanvasItem:
 
         MoveHandlingCanvasItem.move_handling_canvas_item_is_active = True
         self.canvas_id = canvas_id
-        self.move_list, self.coords_before_move = move_handling_initialization.create_move_list_and_extend_transitions(
+        self.move_list, self.coords_before_move = move_handling_canvas_movelist.create_move_list_and_extend_transitions(
             self.canvas_id
         )
 

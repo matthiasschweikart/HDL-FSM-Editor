@@ -28,12 +28,10 @@ class CanvasWindow:
         canvas_delete_class,
         zoom_wheel_function,
         entry_dicts,
-        additional_move_func,
     ) -> None:
         self.difference_x = 0
         self.difference_y = 0
         self.borderwidth = 0
-        self.additional_move_func = additional_move_func
         self.old_text = ["" for _ in range(len(entry_dicts))]
         self.funcid_canvas_enter = None
         self.funcids_text_enter = []
@@ -228,8 +226,6 @@ class CanvasWindow:
         # Keep the distance between event and anchor point constant:
         event_x, event_y = event_x + self.difference_x, event_y + self.difference_y
         project_manager.canvas.coords(self.window_id, event_x, event_y)
-        if self.additional_move_func is not None:
-            self.additional_move_func(event_x, event_y)
 
     def apply_new_font_size_to_canvas_window(self) -> None:
         """Apply new font size to all label and text widgets of this window."""

@@ -43,7 +43,6 @@ class StateAction(CanvasWindow):
             canvas_delete_class,
             zoom_wheel_function,
             entry_dicts,
-            additional_move_func=None,
         )
         StateAction.state_action_id += 1
         StateAction.ref_dict[self.window_id] = self

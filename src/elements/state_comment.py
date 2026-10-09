@@ -42,7 +42,6 @@ class StateComment(CanvasWindow):
             canvas_delete_class,
             zoom_wheel_function,
             entry_dicts,
-            additional_move_func=None,
         )
         StateComment.ref_dict[self.window_id] = self  # Store the object-reference with the Canvas-id as key.
         # Line starts at comment, ends at state:
