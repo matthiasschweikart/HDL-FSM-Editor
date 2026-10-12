@@ -58,7 +58,7 @@ class UndoHandling:
         new_design = {}
         file_handling_save.save_canvas_data(new_design)
         visible_center = self._get_visible_center()
-        print("new stack entry", self.stack_write_pointer)
+        # print("new stack entry", self.stack_write_pointer)
         self.stack.append([new_design, visible_center])
         self.stack_write_pointer += 1
         if self.stack_write_pointer > 1:
