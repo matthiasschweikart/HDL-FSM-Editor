@@ -9,8 +9,8 @@ from actions import (
     canvas_editing,
     move_handling_canvas_item,
     move_handling_create_movelist,
+    move_handling_create_movelist_transition,
     move_handling_finish,
-    move_handling_transition_movelist,
     move_handling_work_on_movelist,
 )
 from elements import transition
@@ -32,8 +32,8 @@ class MoveHandlingTransition:
         move_handling_work_on_movelist.move_is_active = True
         canvas_id = canvas_id
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
-        self.move_list, self.coords_before_move = move_handling_transition_movelist.create_move_list_for_transition(
-            canvas_id, event_x, event_y
+        self.move_list, self.coords_before_move = (
+            move_handling_create_movelist_transition.create_move_list_for_transition(canvas_id, event_x, event_y)
         )
         transition_tags = project_manager.canvas.gettags(canvas_id)
         for tag in transition_tags:
