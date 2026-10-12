@@ -5,7 +5,7 @@ Module handling states on the canvas.
 import tkinter as tk
 from tkinter import messagebox
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_item, move_handling_initialization
+from actions import canvas_delete, canvas_editing, move_handling_canvas_item
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
@@ -113,7 +113,6 @@ class States:
         project_manager.undo_handling_ref.design_has_changed()
 
     def _edit_state_name(self, event) -> None:
-        project_manager.canvas.unbind("<Button-1>")
         project_manager.canvas.unbind_all("<Delete>")
         old_text = project_manager.canvas.itemcget(self.text_id, "text")
         text_box = tk.Entry(project_manager.canvas, width=10, justify=tk.CENTER)
@@ -140,7 +139,6 @@ class States:
                 self._show_new_state_name(new_text)
                 self._resize_state(state_tag)
         project_manager.undo_handling_ref.design_has_changed()
-        project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         tags = project_manager.canvas.gettags(state_tag)
         for t in tags:
@@ -155,7 +153,6 @@ class States:
         project_manager.canvas.delete("entry-window")
         project_manager.canvas.itemconfig(self.text_id, text=old_text)
         text_box.destroy()
-        project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
     def _show_new_state_name(self, new_text) -> None:

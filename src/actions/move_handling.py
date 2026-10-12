@@ -6,6 +6,8 @@ import constants
 from elements import connector, reset_entry, state, transition
 from project_manager import project_manager
 
+move_is_active = False
+
 
 def move_to_coordinates(event_x, event_y, move_list, first, move_to_grid):
     """Apply move to (event_x, event_y) for each item in move_list; respect grid and proximity checks."""

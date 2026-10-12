@@ -2,13 +2,12 @@
 This module contains method used when the user edits the diagram.
 """
 
-from actions import move_handling_initialization
 from project_manager import project_manager
 
 from . import canvas_editing
 
 
-def start_view_rectangle(event) -> None:
+def start_view_rectangle(event, button_used) -> None:
     """Begin drawing a view rectangle from the current event position."""
     [event_x, event_y] = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
     mode = project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label")
@@ -21,14 +20,16 @@ def start_view_rectangle(event) -> None:
     funcid_canvas_draw_view_rectangle = project_manager.canvas.bind(
         "<Motion>", lambda event: _draw_view_rectangle(event, rectangle_id), "+"
     )
-    project_manager.canvas.bind(
-        "<ButtonRelease-1>",
-        lambda event: _view_area(rectangle_id, funcid_canvas_draw_view_rectangle),
-    )
-    project_manager.canvas.bind(
-        "<ButtonRelease-3>",
-        lambda event: _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectangle),
-    )
+    if button_used == "button1":
+        project_manager.canvas.bind(
+            "<ButtonRelease-1>",
+            lambda event: _view_area(rectangle_id, funcid_canvas_draw_view_rectangle, "button1"),
+        )
+    else:
+        project_manager.canvas.bind(
+            "<ButtonRelease-3>",
+            lambda event: _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectangle),
+        )
 
 
 def _draw_view_rectangle(event, rectangle_id) -> None:  # Called by Motion-event.
@@ -38,11 +39,11 @@ def _draw_view_rectangle(event, rectangle_id) -> None:  # Called by Motion-event
         project_manager.canvas.coords(rectangle_id, rectangle_coords[0], rectangle_coords[1], event_x, event_y)
 
 
-def _view_area(rectangle_id, funcid_canvas_draw_view_rectangle) -> None:
+def _view_area(rectangle_id, funcid_canvas_draw_view_rectangle, button_used) -> None:
     # Called when "view area" was started by the button "view area".
     # Restore bindings first, because binding to Motion will not work anymore,
     # as the view rectangle is about to be removed here.
-    _restore_binding(funcid_canvas_draw_view_rectangle)
+    _restore_binding_after_view_area(funcid_canvas_draw_view_rectangle, button_used)
     rectangle_coords = project_manager.canvas.coords(rectangle_id)
     project_manager.canvas.delete(rectangle_id)
     canvas_editing.view_rectangle(rectangle_coords)
@@ -53,9 +54,9 @@ def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectan
     # Called when "view area" was started by the right mouse button or when the context menu is opened.
     rectangle_coords = project_manager.canvas.coords(rectangle_id)
     if rectangle_coords[0] != rectangle_coords[2] and rectangle_coords[1] != rectangle_coords[3]:
-        _view_area(rectangle_id, funcid_canvas_draw_view_rectangle)
+        _view_area(rectangle_id, funcid_canvas_draw_view_rectangle, "button3")
     else:
-        _restore_binding(funcid_canvas_draw_view_rectangle)
+        _restore_binding_after_view_area(funcid_canvas_draw_view_rectangle, "button3")
         project_manager.canvas.delete(rectangle_id)
         overlapping_canvas_ids = project_manager.canvas.find_overlapping(
             rectangle_coords[0] - 5, rectangle_coords[1] - 5, rectangle_coords[0] + 5, rectangle_coords[1] + 5
@@ -69,12 +70,13 @@ def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectan
             project_manager.grid_drawer.show_context_menu()
 
 
-def _restore_binding(funcid_canvas_draw_view_rectangle):
+def _restore_binding_after_view_area(funcid_canvas_draw_view_rectangle, button_used):
+    if button_used == "button1":
+        project_manager.canvas.unbind("<ButtonRelease-1>")
+        project_manager.canvas.unbind("<Button-1>")
+    else:  # button_used == "button3"
+        project_manager.canvas.unbind("<ButtonRelease-3>")
     project_manager.canvas.unbind("<Motion>", funcid_canvas_draw_view_rectangle)
-    project_manager.canvas.unbind("<ButtonRelease-1>")
-    project_manager.canvas.unbind("<ButtonRelease-3>")
-    # Restore the original binding (Button-1 is bound to start_view_rectangle(), when "view area"-Button was used):
-    project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
     project_manager.canvas.bind(
         "<Button-3>",
         lambda event: project_manager.tab_diagram_ref.run_start_view_rectangle(event, project_manager.canvas),

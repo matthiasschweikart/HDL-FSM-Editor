@@ -5,7 +5,12 @@ Module handling transitions on the canvas.
 import math
 import tkinter as tk
 
-from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_initialization
+from actions import (
+    canvas_delete,
+    canvas_editing,
+    canvas_modify_bindings,
+    move_handling_transition,
+)
 from elements import condition_action, state
 from project_manager import project_manager
 
@@ -49,6 +54,11 @@ class TransitionLine:
             self.transition_tag,
             "<Leave>",
             lambda event: project_manager.canvas.itemconfig(self.transition_tag, width=1),
+        )
+        project_manager.canvas.tag_bind(
+            self.transition_tag,
+            "<Button-1>",
+            lambda event: move_handling_transition.MoveHandlingTransition(event, self.transition_id),
         )
         project_manager.canvas.tag_bind(self.transition_tag, "<ButtonRelease-3>", self._show_menu)
         project_manager.canvas.tag_bind(self.priority_text, "<Double-Button-1>", self._edit_priority)
@@ -267,7 +277,6 @@ class TransitionLine:
         project_manager.undo_handling_ref.design_has_changed()
 
     def _edit_priority(self, event) -> None:
-        project_manager.canvas.unbind("<Button-1>")
         project_manager.canvas.unbind_all("<Delete>")
         priority_tag = self.transition_tag + "priority"
         old_text = project_manager.canvas.itemcget(priority_tag, "text")
@@ -291,7 +300,6 @@ class TransitionLine:
         project_manager.canvas.tag_raise(self.transition_tag + "rectangle", self.transition_tag)
         project_manager.canvas.tag_raise(self.transition_tag + "priority", self.transition_tag + "rectangle")
         project_manager.undo_handling_ref.design_has_changed()
-        project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
     def _abort_edit_text(self, text_box, old_text) -> None:
@@ -300,7 +308,6 @@ class TransitionLine:
         text_box.destroy()
         project_manager.canvas.tag_raise(self.transition_tag + "rectangle", self.transition_tag)
         project_manager.canvas.tag_raise(self.transition_tag + "priority", self.transition_tag + "rectangle")
-        project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
 
     def _straighten_transition(self, start_state_radius, end_state_radius):

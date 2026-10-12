@@ -13,16 +13,12 @@ class MoveHandlingCanvasItem:
     """
 
     transition_insertion_runs = False
-    move_handling_canvas_item_is_active = False
 
     def __init__(self, event, canvas_id):
-        if (
-            MoveHandlingCanvasItem.move_handling_canvas_item_is_active
-            or MoveHandlingCanvasItem.transition_insertion_runs
-        ):
+        if MoveHandlingCanvasItem.transition_insertion_runs or move_handling.move_is_active:
             return  # Button-1 shall now not move any canvas item
+        move_handling.move_is_active = True
 
-        MoveHandlingCanvasItem.move_handling_canvas_item_is_active = True
         self.canvas_id = canvas_id
         self.move_list, self.coords_before_move = move_handling_canvas_movelist.create_move_list(self.canvas_id)
         move_handling_canvas_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
@@ -56,7 +52,7 @@ class MoveHandlingCanvasItem:
             move_to_grid=True,
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
-        MoveHandlingCanvasItem.move_handling_canvas_item_is_active = False
+        move_handling.move_is_active = False
         coords_after_move = project_manager.canvas.coords(self.canvas_id)
         for index, coord_after_move in enumerate(coords_after_move):
             if abs(coord_after_move - self.coords_before_move[index]) > project_manager.state_radius / 2:

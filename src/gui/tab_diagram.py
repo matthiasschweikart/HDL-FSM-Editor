@@ -8,7 +8,6 @@ from actions import (
     canvas_editing,
     canvas_modify_bindings,
     canvas_view_rectangle,
-    move_handling_initialization,
 )
 from constants import GuiTab
 from project_manager import project_manager
@@ -131,7 +130,6 @@ class TabDiagram:
 
         canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         canvas.bind("<Home>", lambda event: canvas_editing.view_all())
-        canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
         canvas.bind("<Motion>", canvas_delete.CanvasDelete.store_mouse_position)
         canvas.bind("<Control-MouseWheel>", self._zoom_by_wheel)  # MouseWheel used at Windows.
         canvas.bind("<Control-Button-4>", self._zoom_by_wheel)  # MouseWheel-Scroll-Up used at Linux.
@@ -153,9 +151,8 @@ class TabDiagram:
 
     def run_start_view_rectangle(self, event, canvas) -> None:
         """Unbind events to create robustness"""
-        canvas.unbind("<Button-1>")
         canvas.unbind("<Button-3>")
-        canvas_view_rectangle.start_view_rectangle(event)
+        canvas_view_rectangle.start_view_rectangle(event, "button3")
 
     def _zoom_by_wheel(self, event) -> None:
         event_coords = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)

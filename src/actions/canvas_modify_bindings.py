@@ -3,7 +3,7 @@ This module contains all methods to change the binding of the left mouse-button 
 inserting the different graphical objects.
 """
 
-from actions import move_handling_canvas_item, move_handling_initialization
+from actions import move_handling_canvas_item
 from elements import (
     connector,
     global_actions_clocked,
@@ -84,7 +84,6 @@ def switch_to_move_mode() -> None:
     #    print("switch_to_move_mode")
     project_manager.root.config(cursor="arrow")
     project_manager.canvas.focus_set()  # Removes the focus from the last used button.
-    project_manager.canvas.bind("<Button-1>", move_handling_initialization.move_initialization)
 
 
 def switch_to_view_area() -> None:
@@ -92,4 +91,6 @@ def switch_to_view_area() -> None:
     move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs = False
     #    print("switch_to_view_area")
     project_manager.root.config(cursor="plus")
-    project_manager.canvas.bind("<Button-1>", canvas_view_rectangle.start_view_rectangle)
+    project_manager.canvas.bind(
+        "<Button-1>", lambda event: canvas_view_rectangle.start_view_rectangle(event, "button1")
+    )
