@@ -2,7 +2,7 @@
 This module handles the movement of states, connectors and reset-entry at the Canvas.
 """
 
-from actions import move_handling_canvas_movelist, move_handling_finish, move_handling_work_on_movelist
+from actions import move_handling_create_movelist, move_handling_finish, move_handling_work_on_movelist
 from project_manager import project_manager
 
 
@@ -20,8 +20,8 @@ class MoveHandlingCanvasItem:
         move_handling_work_on_movelist.move_is_active = True
 
         self.canvas_id = canvas_id
-        self.move_list, self.coords_before_move = move_handling_canvas_movelist.create_move_list(self.canvas_id)
-        move_handling_canvas_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
+        self.move_list, self.coords_before_move = move_handling_create_movelist.create_move_list(self.canvas_id)
+        move_handling_create_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
 
         # This first move does not move the object.
         # It is needed to define difference_x, difference_y of the used move_to method.

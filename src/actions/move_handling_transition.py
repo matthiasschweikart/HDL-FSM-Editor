@@ -8,7 +8,7 @@ from tkinter import messagebox
 from actions import (
     canvas_editing,
     move_handling_canvas_item,
-    move_handling_canvas_movelist,
+    move_handling_create_movelist,
     move_handling_finish,
     move_handling_transition_movelist,
     move_handling_work_on_movelist,
@@ -42,7 +42,7 @@ class MoveHandlingTransition:
         transition.TransitionLine.extend_transition_to_state_middle_points(transition_tag)
         point_to_move = self.move_list[0][1]
         self._prepare_for_disconnecting_the_transition(transition_tag, point_to_move)
-        move_handling_canvas_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
+        move_handling_create_movelist.add_connected_lines_and_add_transitions_extended(self.move_list)
 
         # With first=True the position of the cursor relativly to the anchor point of the object to move is
         # determined and stored. This distance is afterwards at each cursor movement added to the event coordinates
