@@ -2,7 +2,7 @@
 This module handles the movement of states, connectors and reset-entry at the Canvas.
 """
 
-from actions import move_handling_create_movelist, move_handling_finish, move_handling_work_on_movelist
+from actions import move_handling_create_movelist, move_handling_transition_finish, move_handling_work_on_movelist
 from project_manager import project_manager
 
 
@@ -53,7 +53,7 @@ class MoveHandlingCanvasItem:
             first=False,
             move_to_grid=True,
         )
-        move_handling_finish.move_finish_for_transitions(self.move_list)
+        move_handling_transition_finish.move_finish_for_transitions(self.move_list)
         move_handling_work_on_movelist.move_is_active = False
         coords_after_move = project_manager.canvas.coords(self.canvas_id)
         for index, coord_after_move in enumerate(coords_after_move):

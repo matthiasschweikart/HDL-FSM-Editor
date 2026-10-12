@@ -10,7 +10,7 @@ from actions import (
     move_handling_create_movelist,
     move_handling_create_movelist_transition,
     move_handling_element,
-    move_handling_finish,
+    move_handling_transition_finish,
     move_handling_work_on_movelist,
 )
 from elements import transition
@@ -78,7 +78,7 @@ class MoveHandlingTransition:
         if moved_point in ("start", "end"):
             self._move_the_line_to_the_center_of_the_target(canvas_ids_at_target)
             self._update_the_tags_of_the_transition(canvas_ids_at_target)
-        move_handling_finish.move_finish_for_transitions(self.move_list)
+        move_handling_transition_finish.move_finish_for_transitions(self.move_list)
         for index, coord_after_move in enumerate(project_manager.canvas.coords(self.move_list[0][0])):
             if abs(coord_after_move - self.coords_before_move[index]) > project_manager.state_radius / 2:
                 project_manager.undo_handling_ref.design_has_changed()

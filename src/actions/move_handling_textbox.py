@@ -5,7 +5,7 @@ A MoveCanvasWindow object is created, when the user moves a Canvas window object
 from actions import (
     move_handling_create_movelist,
     move_handling_element,
-    move_handling_finish,
+    move_handling_transition_finish,
     move_handling_work_on_movelist,
 )
 from project_manager import project_manager
@@ -95,7 +95,7 @@ class MoveHandlingCanvasWindow:
             first=False,
             move_to_grid=False,  # Only used by the line to a window.
         )
-        move_handling_finish.move_finish_for_transitions(self.move_list)
+        move_handling_transition_finish.move_finish_for_transitions(self.move_list)
         move_handling_work_on_movelist.move_is_active = False
         project_manager.undo_handling_ref.design_has_changed()
 

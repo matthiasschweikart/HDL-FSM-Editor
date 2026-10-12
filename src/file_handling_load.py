@@ -3,7 +3,7 @@
 import tkinter as tk
 from typing import Any
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, move_handling_textbox
 from elements import (
     condition_action,
     connector,
@@ -278,7 +278,7 @@ def _load_state_action_blocks(design_dictionary: dict[str, Any], state_action_li
                     line_coords=line_coords,
                     line_tags=line_tags,
                     action=text,
-                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
                     canvas_delete_class=canvas_delete.CanvasDelete,
                     zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
@@ -299,7 +299,7 @@ def _load_state_comment_blocks(
             tags=tags,
             line_coords=line_coords,
             comment=text,
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )
@@ -318,7 +318,7 @@ def _load_global_actions_clocked(design_dictionary: dict[str, Any]) -> None:
             tags=tags,
             before=text_before,
             after=text_after,
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )
@@ -335,7 +335,7 @@ def _load_global_actions_combinatorial(design_dictionary: dict[str, Any]) -> Non
             padding=1,
             tags=tags,
             actions=text,
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )
@@ -352,7 +352,7 @@ def _load_state_actions_default(design_dictionary: dict[str, Any]) -> None:
             padding=1,
             tags=tags,
             action=text,
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )
@@ -382,7 +382,7 @@ def _load_condition_action_blocks(
                     action=action,
                     line_coords=line_coords,
                     line_tags=line_tags,
-                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
                     canvas_delete_class=canvas_delete.CanvasDelete,
                     zoom_wheel_function=canvas_editing.zoom_wheel,
                 )
