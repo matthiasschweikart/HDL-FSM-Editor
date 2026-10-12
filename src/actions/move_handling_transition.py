@@ -7,9 +7,9 @@ from tkinter import messagebox
 
 from actions import (
     canvas_editing,
-    move_handling_canvas_element,
     move_handling_create_movelist,
     move_handling_create_movelist_transition,
+    move_handling_element,
     move_handling_finish,
     move_handling_work_on_movelist,
 )
@@ -25,7 +25,7 @@ class MoveHandlingTransition:
 
     def __init__(self, event, canvas_id):
         if (
-            move_handling_canvas_element.MoveHandlingCanvasItem.transition_insertion_runs
+            move_handling_element.MoveHandlingCanvasItem.transition_insertion_runs
             or move_handling_work_on_movelist.move_is_active
         ):
             return  # Button-1 shall now not move any canvas item

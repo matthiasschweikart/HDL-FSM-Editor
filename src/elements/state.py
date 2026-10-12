@@ -5,7 +5,7 @@ Module handling states on the canvas.
 import tkinter as tk
 from tkinter import messagebox
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_element
+from actions import canvas_delete, canvas_editing, move_handling_element
 from dialogs.color_changer import ColorChanger
 from elements import state_action, state_comment, transition
 from project_manager import project_manager
@@ -52,12 +52,12 @@ class States:
         project_manager.canvas.tag_bind(
             self.state_id,
             "<Button-1>",
-            lambda event: move_handling_canvas_element.MoveHandlingCanvasItem(event, self.state_id),
+            lambda event: move_handling_element.MoveHandlingCanvasItem(event, self.state_id),
         )
         project_manager.canvas.tag_bind(
             self.text_id,
             "<Button-1>",
-            lambda event: move_handling_canvas_element.MoveHandlingCanvasItem(event, self.text_id),
+            lambda event: move_handling_element.MoveHandlingCanvasItem(event, self.text_id),
         )
         project_manager.canvas.tag_bind(self.text_id, "<Double-Button-1>", self._edit_state_name)
         project_manager.canvas.tag_bind(self.text_id, "<ButtonRelease-3>", self._show_menu)

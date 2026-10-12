@@ -3,8 +3,8 @@ A MoveCanvasWindow object is created, when the user moves a Canvas window object
 """
 
 from actions import (
-    move_handling_canvas_element,
     move_handling_create_movelist,
+    move_handling_element,
     move_handling_finish,
     move_handling_work_on_movelist,
 )
@@ -16,7 +16,7 @@ class MoveHandlingCanvasWindow:
 
     def __init__(self, event, widget, window_id):
         if (
-            move_handling_canvas_element.MoveHandlingCanvasItem.transition_insertion_runs
+            move_handling_element.MoveHandlingCanvasItem.transition_insertion_runs
             or move_handling_work_on_movelist.move_is_active
         ):
             return  # Button-1 shall now not move any canvas item
