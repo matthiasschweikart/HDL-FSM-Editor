@@ -2,7 +2,7 @@
 This class handles "state-comments".
 """
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, move_handling_textbox
 from elements.canvas_window import CanvasWindow
 from project_manager import project_manager
 
@@ -94,7 +94,7 @@ class StateComment(CanvasWindow):
                         (state_coords[3] + state_coords[1]) / 2,
                     ],
                     comment="",
-                    move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+                    move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
                     canvas_delete_class=canvas_delete.CanvasDelete,
                     zoom_wheel_function=canvas_editing.zoom_wheel,
                 )

@@ -5,7 +5,7 @@ This class handles the condition&action box which can be activated for each tran
 
 import tkinter as tk
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, move_handling_textbox
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -126,7 +126,7 @@ class ConditionAction(CanvasWindow):
             action="",
             line_coords=line_coords,
             line_tags=line_tags,
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )

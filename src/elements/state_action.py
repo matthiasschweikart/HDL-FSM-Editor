@@ -2,7 +2,7 @@
 Handles the state action of all states.
 """
 
-from actions import canvas_delete, canvas_editing, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, move_handling_textbox
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -98,7 +98,7 @@ class StateAction(CanvasWindow):
             line_coords=line_coords,
             line_tags=line_tags,
             action="",
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )

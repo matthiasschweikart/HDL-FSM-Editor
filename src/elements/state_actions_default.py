@@ -4,7 +4,7 @@ Handles the combinatorial default actions for all states.
 
 import tkinter as tk
 
-from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_canvas_window
+from actions import canvas_delete, canvas_editing, canvas_modify_bindings, move_handling_textbox
 from project_manager import project_manager
 
 from .canvas_window import CanvasWindow
@@ -67,7 +67,7 @@ class StateActionsDefault(CanvasWindow):
             padding=1,
             tags=["state_actions_default"],
             action="",
-            move_handling_class=move_handling_canvas_window.MoveHandlingCanvasWindow,
+            move_handling_class=move_handling_textbox.MoveHandlingCanvasWindow,
             canvas_delete_class=canvas_delete.CanvasDelete,
             zoom_wheel_function=canvas_editing.zoom_wheel,
         )

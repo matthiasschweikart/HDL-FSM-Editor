@@ -25,8 +25,9 @@ class UndoHandling:
 
     def design_has_changed(self, store_in_tmp_file: bool = True) -> None:
         """Push current design to undo stack, update title, and save to .tmp if file is set."""
-        # import inspect
-        # print("design_has_changed is called from", inspect.stack()[1][3])
+        import inspect
+
+        print("design_has_changed is called from", inspect.stack()[1][3])
         self._add_changes_to_design_stack()
         self.update_window_title()
         if (
@@ -58,6 +59,7 @@ class UndoHandling:
         new_design = {}
         file_handling_save.save_canvas_data(new_design)
         visible_center = self._get_visible_center()
+        print("new stack entry", self.stack_write_pointer)
         self.stack.append([new_design, visible_center])
         self.stack_write_pointer += 1
         if self.stack_write_pointer > 1:
