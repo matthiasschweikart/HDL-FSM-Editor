@@ -7,11 +7,11 @@ from tkinter import messagebox
 
 from actions import (
     canvas_editing,
-    move_handling,
     move_handling_canvas_item,
     move_handling_canvas_movelist,
     move_handling_finish,
     move_handling_transition_movelist,
+    move_handling_work_on_movelist,
 )
 from elements import transition
 from project_manager import project_manager
@@ -24,9 +24,12 @@ class MoveHandlingTransition:
     """
 
     def __init__(self, event, canvas_id):
-        if move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs or move_handling.move_is_active:
+        if (
+            move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs
+            or move_handling_work_on_movelist.move_is_active
+        ):
             return  # Button-1 shall now not move any canvas item
-        move_handling.move_is_active = True
+        move_handling_work_on_movelist.move_is_active = True
         canvas_id = canvas_id
         event_x, event_y = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
         self.move_list, self.coords_before_move = move_handling_transition_movelist.create_move_list_for_transition(
@@ -45,7 +48,9 @@ class MoveHandlingTransition:
         # determined and stored. This distance is afterwards at each cursor movement added to the event coordinates
         # in order to get the new coordinates of the object to move.
         # This prevents the object from jumping to the cursor at the first movement.
-        move_handling.move_to_coordinates(event.x, event.y, self.move_list, first=True, move_to_grid=False)
+        move_handling_work_on_movelist.move_to_coordinates(
+            event.x, event.y, self.move_list, first=True, move_to_grid=False
+        )
 
         # Create a binding for the now following movements of the mouse and for finishing the moving.
         # Bind to canvas, because the cursor might leave the small line during moving.
@@ -54,7 +59,7 @@ class MoveHandlingTransition:
         self.funcid_release = project_manager.canvas.bind("<ButtonRelease-1>", self._release)
 
     def _motion(self, motion_event):
-        move_handling.move_to_coordinates(
+        move_handling_work_on_movelist.move_to_coordinates(
             motion_event.x,
             motion_event.y,
             self.move_list,
@@ -67,7 +72,7 @@ class MoveHandlingTransition:
         canvas_ids_at_target = self._get_canvas_ids_at_target(event, self.move_list)
         if moved_point in ("start", "end") and not canvas_ids_at_target:
             return  # no state/connector or illegal element under cursor
-        move_handling.move_is_active = False
+        move_handling_work_on_movelist.move_is_active = False
         project_manager.canvas.unbind("<Motion>", self.funcid_motion)
         project_manager.canvas.unbind("<ButtonRelease-1>")
         if moved_point in ("start", "end"):

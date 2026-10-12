@@ -3,10 +3,10 @@ A MoveCanvasWindow object is created, when the user moves a Canvas window object
 """
 
 from actions import (
-    move_handling,
     move_handling_canvas_item,
     move_handling_canvas_movelist,
     move_handling_finish,
+    move_handling_work_on_movelist,
 )
 from project_manager import project_manager
 
@@ -15,9 +15,12 @@ class MoveHandlingCanvasWindow:
     """Handles dragging of a canvas window when the user moves it."""
 
     def __init__(self, event, widget, window_id):
-        if move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs or move_handling.move_is_active:
+        if (
+            move_handling_canvas_item.MoveHandlingCanvasItem.transition_insertion_runs
+            or move_handling_work_on_movelist.move_is_active
+        ):
             return  # Button-1 shall now not move any canvas item
-        move_handling.move_is_active = True
+        move_handling_work_on_movelist.move_is_active = True
 
         self.move_active = True
         self.widget = widget  # This is a reference to the Frame or to a Label of the canvas_window object.
@@ -36,7 +39,7 @@ class MoveHandlingCanvasWindow:
         # position determined here and the position calculated in the used move_to method.
         # But they are not exactly 0, because of the conversion between the coordinate systems.
         window_coords_screen_before_move = self._canvas_to_screen(self.window_coords_before_move)
-        move_handling.move_to_coordinates(
+        move_handling_work_on_movelist.move_to_coordinates(
             window_coords_screen_before_move[0],
             window_coords_screen_before_move[1],
             self.move_list,
@@ -62,7 +65,7 @@ class MoveHandlingCanvasWindow:
         delta_y = motion_event.y - self.touching_point_y
         # Move the window by the delta values, which moves the touching point under the actual mouse pointer again:
         window_coords = self._canvas_to_screen(project_manager.canvas.coords(self.window_id))
-        move_handling.move_to_coordinates(
+        move_handling_work_on_movelist.move_to_coordinates(
             window_coords[0] + delta_x,
             window_coords[1] + delta_y,
             self.move_list,
@@ -85,7 +88,7 @@ class MoveHandlingCanvasWindow:
             self.widget.unbind("<ButtonRelease-1>", self.funcid_release)
             self.funcid_release = None
         window_coords = self._canvas_to_screen(project_manager.canvas.coords(self.window_id))
-        move_handling.move_to_coordinates(
+        move_handling_work_on_movelist.move_to_coordinates(
             window_coords[0],
             window_coords[1],
             self.move_list,
@@ -93,7 +96,7 @@ class MoveHandlingCanvasWindow:
             move_to_grid=False,  # Only used by the line to a window.
         )
         move_handling_finish.move_finish_for_transitions(self.move_list)
-        move_handling.move_is_active = False
+        move_handling_work_on_movelist.move_is_active = False
         project_manager.undo_handling_ref.design_has_changed()
 
     def _canvas_to_screen(self, coords):
