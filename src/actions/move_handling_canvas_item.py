@@ -1,5 +1,5 @@
 """
-This module handles the movement of states, connectors at the Canvas.
+This module handles the movement of states, connectors and reset-entry at the Canvas.
 """
 
 from actions import move_handling, move_handling_canvas_movelist, move_handling_finish
