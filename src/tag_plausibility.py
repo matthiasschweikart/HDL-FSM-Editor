@@ -93,10 +93,10 @@ class TagPlausibility:
                 canvas_item
             ) == "polygon" and "reset_entry" in project_manager.canvas.gettags(canvas_item):
                 self.__fill_reset_dict(canvas_item, reset_dict)
-            elif project_manager.canvas.type(
-                canvas_item
-            ) == "polygon" and "polygon_for_move" in project_manager.canvas.gettags(canvas_item):
-                pass
+            # elif project_manager.canvas.type(
+            #     canvas_item
+            # ) == "polygon" and "polygon_for_move" in project_manager.canvas.gettags(canvas_item):
+            #     pass
             elif (
                 project_manager.canvas.type(canvas_item) == "rectangle"
             ):  # "priority"-rectangle or "connector"-rectangle
