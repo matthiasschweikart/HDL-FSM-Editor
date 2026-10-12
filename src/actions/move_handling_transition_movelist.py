@@ -4,8 +4,7 @@ This module handles the creation of the move_list for transitions.
 A move_list has an entry for each item, which must be moved.
 In case of a transition the move_list has only 1 entry.
 Each entry is a list containing the canvas-item-id of the object to be moved,
-the point to move (or an empty string for non-transition items),
-and optionally a third entry which is not needed for moving transitions.
+the point to move (or an empty string for non-transition items).
 The point to move is always one of: 'start', 'next_to_start', 'next_to_end', 'end'.
 
 If the transition has a priority rectangle, the priority rectangle is moved
