@@ -2,7 +2,7 @@
 
 import tkinter as tk
 
-from actions import canvas_editing, canvas_modify_bindings, move_handling_canvas_item
+from actions import canvas_editing, canvas_modify_bindings, move_handling_canvas_element
 from elements import transition
 from project_manager import project_manager
 
@@ -44,12 +44,12 @@ class ResetEntry:
         project_manager.canvas.tag_bind(
             polygon_id,
             "<Button-1>",
-            lambda event: move_handling_canvas_item.MoveHandlingCanvasItem(event, polygon_id),
+            lambda event: move_handling_canvas_element.MoveHandlingCanvasItem(event, polygon_id),
         )
         project_manager.canvas.tag_bind(
             text_id,
             "<Button-1>",
-            lambda event: move_handling_canvas_item.MoveHandlingCanvasItem(event, text_id),
+            lambda event: move_handling_canvas_element.MoveHandlingCanvasItem(event, text_id),
         )
 
     @classmethod
