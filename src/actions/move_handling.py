@@ -1,5 +1,5 @@
 """
-This module contains a method to decide which graphical object must be moved.
+This module reads the move_list and executes the movement of the listed graphical objects on the canvas.
 """
 
 import constants
