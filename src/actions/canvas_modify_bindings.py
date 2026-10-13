@@ -83,6 +83,7 @@ def switch_to_move_mode() -> None:
     move_handling_element.MoveHandlingCanvasItem.transition_insertion_runs = False
     #    print("switch_to_move_mode")
     project_manager.root.config(cursor="arrow")
+    project_manager.canvas.unbind("<Button-1>")
     project_manager.canvas.focus_set()  # Removes the focus from the last used button.
 
 
