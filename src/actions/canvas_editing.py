@@ -167,7 +167,7 @@ def _zoom_scroll_region(factor) -> None:
     adapt_scroll_region_to_visible_area()
     scroll_region = project_manager.canvas.cget("scrollregion").split()
     scroll_region = [float(x) for x in scroll_region]
-    scroll_region_scaled = [int(float(x) * factor) for x in scroll_region]
+    scroll_region_scaled = [x * factor for x in scroll_region]
     project_manager.canvas.configure(scrollregion=scroll_region_scaled)
 
 
