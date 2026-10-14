@@ -47,7 +47,7 @@ class ProjectManager:
         self._fontsize = 10
         self._label_fontsize = 8
         self._state_name_font = None
-        self._abs_zoom_factor = 5.0
+        self._abs_zoom_factor = 1.0
         self._regex_message_find_for_vhdl: str = "(.*?):([0-9]+):[0-9]+:.*"
         self._regex_message_find_for_verilog: str = (
             "(.*?):([0-9]+): .*"  # Added ' ' after the second ':', to get no hit at time stamps (i.e. 16:58:36).
