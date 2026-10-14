@@ -114,7 +114,6 @@ def clear_diagram():
     """Clear the current diagram from canvas."""
     _clear_read_and_written_variables_dict()
     project_manager.canvas.delete("all")
-    project_manager.notebook.init_scroll_region()
     _clear_ref_dicts()
     condition_action.ConditionAction.conditionaction_id = 0
     connector.ConnectorInstance.connector_number = 0

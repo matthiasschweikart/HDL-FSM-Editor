@@ -12,11 +12,19 @@ from . import canvas_font_sizes
 def view_all() -> None:
     """Fit all canvas content in view and optionally adjust font size."""
     complete_rectangle = project_manager.canvas.bbox("diagram-element")
-    # print("complete_rectangle:", complete_rectangle)
     if complete_rectangle is not None:
         project_manager.grid_drawer.remove_grid()
         project_manager.canvas.grid_remove()
         view_rectangle(complete_rectangle, check_fit=True)
+        scroll_region = [
+            project_manager.canvas.canvasx(0) - project_manager.canvas.winfo_width(),
+            project_manager.canvas.canvasy(0) - project_manager.canvas.winfo_height(),
+            project_manager.canvas.canvasx(project_manager.canvas.winfo_width()) + project_manager.canvas.winfo_width(),
+            project_manager.canvas.canvasy(
+                project_manager.canvas.winfo_height() + project_manager.canvas.winfo_height()
+            ),
+        ]
+        project_manager.canvas.configure(scrollregion=scroll_region)
 
 
 def view_rectangle(rectangle_to_view, check_fit: bool = False) -> None:
