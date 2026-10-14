@@ -29,7 +29,7 @@ class TabDiagram:
         v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL, cursor="arrow", style="My.Vertical.TScrollbar")
         h.configure(command=self._scroll_xview)
         v.configure(command=self._scroll_yview)
-        canvas = tk.Canvas(
+        self.canvas = tk.Canvas(
             diagram_frame,
             borderwidth=2,
             bg="white",
@@ -38,12 +38,12 @@ class TabDiagram:
             highlightthickness=0,
             relief=tk.SUNKEN,
         )
-        project_manager.canvas = canvas
+        project_manager.canvas = self.canvas
 
         button_frame = ttk.Frame(diagram_frame, borderwidth=1, style="My2.TFrame")
 
         # Layout of the drawing area:
-        canvas.grid(column=0, row=0, sticky="nsew")
+        self.canvas.grid(column=0, row=0, sticky="nsew")
         h.grid(column=0, row=1, sticky="ew")  # "sticky" extends the scrollbar, so that a "shift" is possible.
         v.grid(column=1, row=0, sticky="ns")
         button_frame.grid(column=0, columnspan=2, row=2, sticky="swe")
@@ -128,30 +128,30 @@ class TabDiagram:
         plus_button.config(command=lambda: canvas_editing.zoom_plus_minus(1.1))
         minus_button.config(command=lambda: canvas_editing.zoom_plus_minus(1 / 1.1))
 
-        canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
-        canvas.bind("<Home>", lambda event: canvas_editing.view_all())
-        canvas.bind("<Motion>", canvas_delete.CanvasDelete.store_mouse_position)
-        canvas.bind("<Control-MouseWheel>", self._zoom_by_wheel)  # MouseWheel used at Windows.
-        canvas.bind("<Control-Button-4>", self._zoom_by_wheel)  # MouseWheel-Scroll-Up used at Linux.
-        canvas.bind("<Control-Button-5>", self._zoom_by_wheel)  # MouseWheel-Scroll-Down used at Linux.
-        canvas.bind("<Control-Button-1>", self._scroll_start)
-        canvas.bind("<Control-B1-Motion>", self._scroll_move)
-        canvas.bind("<Control-ButtonRelease-1>", self._scroll_end)
-        canvas.bind("<MouseWheel>", TabDiagram.scroll_wheel)
-        canvas.bind("<Button-4>", TabDiagram.scroll_wheel)
-        canvas.bind("<Button-5>", TabDiagram.scroll_wheel)
-        canvas.bind("<Button-3>", lambda event: self.run_start_view_rectangle(event, canvas))
-        canvas.bind("<Configure>", self._adapt_length_of_grid_lines)
-        canvas.bind("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
-        canvas.bind("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
+        self.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
+        self.canvas.bind("<Home>", lambda event: canvas_editing.view_all())
+        self.canvas.bind("<Motion>", canvas_delete.CanvasDelete.store_mouse_position)
+        self.canvas.bind("<Control-MouseWheel>", self._zoom_by_wheel)  # MouseWheel used at Windows.
+        self.canvas.bind("<Control-Button-4>", self._zoom_by_wheel)  # MouseWheel-Scroll-Up used at Linux.
+        self.canvas.bind("<Control-Button-5>", self._zoom_by_wheel)  # MouseWheel-Scroll-Down used at Linux.
+        self.canvas.bind("<Control-Button-1>", self._scroll_start)
+        self.canvas.bind("<Control-B1-Motion>", self._scroll_move)
+        self.canvas.bind("<Control-ButtonRelease-1>", self._scroll_end)
+        self.canvas.bind("<MouseWheel>", self.scroll_wheel)
+        self.canvas.bind("<Button-4>", self.scroll_wheel)
+        self.canvas.bind("<Button-5>", self.scroll_wheel)
+        self.canvas.bind("<Button-3>", lambda event: self.run_start_view_rectangle(event))
+        self.canvas.bind("<Configure>", self._adapt_length_of_grid_lines)
+        self.canvas.bind("<Control-z>", lambda event: project_manager.undo_handling_ref.undo())
+        self.canvas.bind("<Control-Z>", lambda event: project_manager.undo_handling_ref.redo())
 
         self._create_font_for_state_names()
-        grid_drawer = grid_drawing.GridDraw(canvas)
+        grid_drawer = grid_drawing.GridDraw(self.canvas)
         project_manager.grid_drawer = grid_drawer
 
-    def run_start_view_rectangle(self, event, canvas) -> None:
+    def run_start_view_rectangle(self, event) -> None:
         """Unbind events to create robustness"""
-        canvas.unbind("<Button-3>")
+        self.canvas.unbind("<Button-3>")
         canvas_view_rectangle.start_view_rectangle(event, "button3")
 
     def _zoom_by_wheel(self, event) -> None:
@@ -160,29 +160,28 @@ class TabDiagram:
 
     def _scroll_xview(self, *args) -> None:
         project_manager.grid_drawer.remove_grid()
-        project_manager.canvas.xview(*args)
+        self.canvas.xview(*args)
         project_manager.grid_drawer.draw_grid()
 
     def _scroll_yview(self, *args) -> None:
         project_manager.grid_drawer.remove_grid()
-        project_manager.canvas.yview(*args)
+        self.canvas.yview(*args)
         project_manager.grid_drawer.draw_grid()
 
     def _scroll_start(self, event) -> None:
         project_manager.grid_drawer.remove_grid()
-        project_manager.canvas.scan_mark(event.x, event.y)
+        self.canvas.scan_mark(event.x, event.y)
 
     def _scroll_move(self, event) -> None:
-        project_manager.canvas.scan_dragto(event.x, event.y, gain=1)
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def _scroll_end(self, _event) -> None:
         project_manager.grid_drawer.draw_grid()
 
-    @classmethod
-    def scroll_wheel(cls, event) -> None:
+    def scroll_wheel(self, event) -> None:
         """Handle mouse wheel: scroll the canvas."""
         project_manager.grid_drawer.remove_grid()
-        project_manager.canvas.scan_mark(event.x, event.y)
+        self.canvas.scan_mark(event.x, event.y)
         scroll_delta = 10.0
         delta = 0.0
         if event.num == 5 or event.delta < 0:  # scroll down
@@ -193,14 +192,14 @@ class TabDiagram:
         shift_mask = 1 << 0  # Tkinter shift key bit
         scroll_direction = "x" if (event.state & shift_mask) else "y"
         dx, dy = (delta, 0) if scroll_direction == "x" else (0, delta)
-        project_manager.canvas.scan_dragto(int(event.x + dx), int(event.y + dy), gain=1)
+        self.canvas.scan_dragto(int(event.x + dx), int(event.y + dy), gain=1)
         project_manager.grid_drawer.draw_grid()
 
     def _adapt_length_of_grid_lines(self, _) -> None:
         # Will be called, because resizing the window causes a change of the canvas size.
         # Only adapt the grid_lines if they are actually really present on the canvas,
         # because if they are temporarily not present, they should not be drawn:
-        canvas_ids_of_grid_lines = project_manager.canvas.find_withtag("grid_line")
+        canvas_ids_of_grid_lines = self.canvas.find_withtag("grid_line")
         if canvas_ids_of_grid_lines:
             project_manager.grid_drawer.remove_grid()
             project_manager.grid_drawer.draw_grid()

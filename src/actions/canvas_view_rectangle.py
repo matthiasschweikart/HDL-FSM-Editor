@@ -79,5 +79,5 @@ def _restore_binding_after_view_area(funcid_canvas_draw_view_rectangle, button_u
     project_manager.canvas.unbind("<Motion>", funcid_canvas_draw_view_rectangle)
     project_manager.canvas.bind(
         "<Button-3>",
-        lambda event: project_manager.tab_diagram_ref.run_start_view_rectangle(event, project_manager.canvas),
+        lambda event: project_manager.tab_diagram_ref.run_start_view_rectangle(event),
     )

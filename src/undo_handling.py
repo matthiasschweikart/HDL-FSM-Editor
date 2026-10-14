@@ -36,7 +36,6 @@ class UndoHandling:
         ):
             # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
             file_handling.save_in_file(project_manager.current_file + ".tmp")
-        self.resize_scrollregion()
 
     def resize_scrollregion(self):
         """Update the scroll region of the canvas based on its content."""

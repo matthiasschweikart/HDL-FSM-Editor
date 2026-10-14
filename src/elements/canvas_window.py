@@ -59,7 +59,7 @@ class CanvasWindow:
         label_id = ttk.Label(
             self.frame_id,
             text=entry_dict["label_text"],
-            font=("Arial", int(project_manager.label_fontsize)),
+            font=("Arial", int(max(1, project_manager.label_fontsize))),
             style="Window.TLabel",
         )
         self.label_ids.append(label_id)
@@ -104,7 +104,9 @@ class CanvasWindow:
                     ),
                 )
             for seq in seq2_list:
-                canvas_id.bind(seq, tab_diagram.TabDiagram.scroll_wheel)
+                canvas_id.bind(
+                    seq, lambda event: tab_diagram.TabDiagram.scroll_wheel(project_manager.tab_diagram_ref, event)
+                )
 
     def _show_all_text_widgets(self) -> None:
         for i, label_id in enumerate(self.label_ids):

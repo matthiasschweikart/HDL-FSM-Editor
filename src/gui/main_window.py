@@ -80,10 +80,12 @@ class MainWindow:
             print(f"Warning: Could not set application icon: {e}")
 
     def _check_for_window_resize(self, event) -> None:
-        if event.widget == project_manager.notebook and self.window_height != event.height:
+        # Shift sashes to a optimal position after window resize:
+        if self.window_height != event.height:
             if self.window_height != 0:  # equal 0 at application start, so ignore first event
                 self._move_sashes_after_window_resize()
             self.window_height = event.height
+        canvas_editing.adapt_scroll_region_to_visible_area()
 
     def _move_sashes_after_window_resize(self):
         active_tab = project_manager.notebook.get_active_tab()

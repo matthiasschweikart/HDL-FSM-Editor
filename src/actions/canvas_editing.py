@@ -62,7 +62,8 @@ def zoom_wheel(event, event_x, event_y) -> None:
     # Adapt the zoom factor here, so that the new center of the zoomed window can be predicted correctly here.
     # Otherwise canvas_zoom() would adapt the zoom factor, which would change the position of the zoom center.
     factor = _modify_zoom_factor_to_achieve_reproducable_zoom_results(factor)
-    if factor == 0:
+    if factor == 0 or project_manager.fontsize * factor > 300:  # do not accept fontsize above 300
+        project_manager.canvas.grid()
         return
     visible_canvas_area = [
         project_manager.canvas.canvasx(0),
@@ -82,15 +83,14 @@ def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
     """Apply zoom factor around the given center; update scroll and font size."""
     zoom_factor = _modify_zoom_factor_to_achieve_reproducable_zoom_results(zoom_factor)
     if zoom_factor == 0 or project_manager.fontsize * zoom_factor > 300:  # do not accept fontsize above 300
+        project_manager.canvas.grid()
         return
     project_manager.abs_zoom_factor *= zoom_factor
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
-    # Must be called before shifting the canvas, because otherwise the scrollregion is not adapted to the new
-    # zoom factor and the canvas cannot be shifted to the correct position:
-    _adapt_scroll_region(zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
+    _zoom_scroll_region(zoom_factor)
     canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
     if check_fit:
         # Wait until the canvas is rendered before checking the new size:
@@ -133,10 +133,42 @@ def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_vie
     project_manager.canvas.scan_dragto(int(visible_center[0]), int(visible_center[1]), gain=1)
 
 
-def _adapt_scroll_region(factor) -> None:
-    scrollregion_strings = project_manager.canvas.cget("scrollregion").split()
-    scrollregion_scaled = [int(float(x) * factor) for x in scrollregion_strings]
-    project_manager.canvas.configure(scrollregion=scrollregion_scaled)
+def adapt_scroll_region_to_visible_area() -> None:
+    # Adapt the scroll region if necessary:
+    scroll_region = project_manager.canvas.cget("scrollregion").split()
+    if not scroll_region:
+        return
+    scroll_region = [float(coord) for coord in scroll_region]
+    visible_area = (
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    )
+    # If the visible window is extend beyond the scroll region, adjust the scroll region accordingly:
+    # When the window is resized, the visible area of the canvas changes.
+    # When the window-size is increased to the right side,
+    # the canvas is not moved, but more of its right area is shown until the right scroll region limit is reached.
+    # When the window-size is increased to the left side,
+    # the canvas is moved to the left, and again more of its right area is shown until the right scroll region
+    # limit is reached.
+    # Afterwards more of the left area is shown until the left scroll region limit is reached.
+    # If the window is increased further, the scroll region must be adapted accordingly:
+    if (
+        visible_area[0] < scroll_region[0]  # left limit exceeded
+        or visible_area[2] > scroll_region[2]  # right limit exceeded
+        or visible_area[1] < scroll_region[1]  # top limit exceeded
+        or visible_area[3] > scroll_region[3]  # bottom limit exceeded
+    ):
+        project_manager.canvas.configure(scrollregion=visible_area)
+
+
+def _zoom_scroll_region(factor) -> None:
+    adapt_scroll_region_to_visible_area()
+    scroll_region = project_manager.canvas.cget("scrollregion").split()
+    scroll_region = [float(x) for x in scroll_region]
+    scroll_region_scaled = [int(float(x) * factor) for x in scroll_region]
+    project_manager.canvas.configure(scrollregion=scroll_region_scaled)
 
 
 def _modify_zoom_factor_to_achieve_reproducable_zoom_results(zoom_factor):
@@ -145,6 +177,8 @@ def _modify_zoom_factor_to_achieve_reproducable_zoom_results(zoom_factor):
     fontsize_rounded = round(project_manager.fontsize * zoom_factor)
     if zoom_factor > 1 and fontsize_rounded == project_manager.fontsize:
         fontsize_rounded += 1
+    elif zoom_factor < 1 and fontsize_rounded == project_manager.fontsize:  # new factor would be 1
+        fontsize_rounded = int(project_manager.fontsize * zoom_factor)
     return fontsize_rounded / project_manager.fontsize
 
 

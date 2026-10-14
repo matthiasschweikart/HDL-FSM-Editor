@@ -22,6 +22,7 @@ class NotebookTop(ttk.Notebook):
     def __init__(self, row, column) -> None:
         super().__init__(padding=5, style="My.TNotebook")
         self.grid(column=column, row=row, sticky="nsew")
+        self.scroll_region_is_initialized = False
         project_manager.notebook = self
         project_manager.tab_control_ref = tab_control.TabControl()
         project_manager.tab_interface_ref = tab_interface.TabInterface()
@@ -34,7 +35,19 @@ class NotebookTop(ttk.Notebook):
     def _handle_notebook_tab_changed_event(self) -> None:
         self._update_hdl_tab_if_necessary()
         self._if_hdl_tab_set_focus()
+        if not self.scroll_region_is_initialized and self.index(self.select()) == 3:  # diagram-tab is active
+            self.init_scroll_region()
         project_manager.tab_control_ref.module_name_entry.select_clear()
+
+    def init_scroll_region(self) -> None:
+        scroll_region = (
+            project_manager.canvas.canvasx(0) - project_manager.canvas.winfo_width(),
+            project_manager.canvas.canvasy(0) - project_manager.canvas.winfo_height(),
+            project_manager.canvas.canvasx(2 * project_manager.canvas.winfo_width()),
+            project_manager.canvas.canvasy(2 * project_manager.canvas.winfo_height()),
+        )
+        project_manager.canvas.configure(scrollregion=scroll_region)
+        self.scroll_region_is_initialized = True
 
     def _update_hdl_tab_if_necessary(self) -> None:
         if self.index(self.select()) == 4:  # HDL-tab is active

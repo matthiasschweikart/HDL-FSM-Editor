@@ -116,7 +116,7 @@ def clear_diagram():
     project_manager.canvas.delete("all")
     project_manager.canvas.xview_moveto(0)
     project_manager.canvas.yview_moveto(0)
-    project_manager.canvas.configure(scrollregion=())
+    project_manager.notebook.init_scroll_region()
     _clear_ref_dicts()
     condition_action.ConditionAction.conditionaction_id = 0
     connector.ConnectorInstance.connector_number = 0
