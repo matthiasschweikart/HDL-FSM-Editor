@@ -90,7 +90,7 @@ def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
-    _zoom_scroll_region(zoom_factor)
+    _adapt_scroll_region_after_zoom(zoom_factor)
     canvas_font_sizes.adapt_fontsizes_and_store_global_size_variables(zoom_factor)
     if check_fit:
         # Wait until the canvas is rendered before checking the new size:
@@ -163,11 +163,36 @@ def adapt_scroll_region_to_visible_area() -> None:
         project_manager.canvas.configure(scrollregion=visible_area)
 
 
-def _zoom_scroll_region(factor) -> None:
-    adapt_scroll_region_to_visible_area()
-    scroll_region = project_manager.canvas.cget("scrollregion").split()
-    scroll_region = [float(x) for x in scroll_region]
-    scroll_region_scaled = [x * factor for x in scroll_region]
+def _adapt_scroll_region_after_zoom(factor) -> None:
+    scroll_region_old = project_manager.canvas.cget("scrollregion").split()
+    scroll_region_old = [float(x) for x in scroll_region_old]
+    scroll_region_scaled = [x * factor for x in scroll_region_old]
+    if factor > 1:
+        project_manager.canvas.configure(scrollregion=scroll_region_scaled)
+        return
+    # Here factor is less than 1:
+    visible_area_new = (
+        project_manager.canvas.canvasx(0),
+        project_manager.canvas.canvasy(0),
+        project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+        project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+    )
+    if (
+        visible_area_new[0] < scroll_region_scaled[0]  # left limit exceeded
+        or visible_area_new[2] > scroll_region_scaled[2]  # right limit exceeded
+        or visible_area_new[1] < scroll_region_scaled[1]  # top limit exceeded
+        or visible_area_new[3] > scroll_region_scaled[3]  # bottom limit exceeded
+    ):
+        # The shrunked scroll region is at the correct position.
+        # Resize it to its previous size, because it is smaller than the visible area:
+        delta_x = (scroll_region_scaled[2] - scroll_region_scaled[0]) / factor / 2
+        delta_y = (scroll_region_scaled[3] - scroll_region_scaled[1]) / factor / 2
+        scroll_region_scaled = [
+            scroll_region_scaled[0] - delta_x,
+            scroll_region_scaled[1] - delta_y,
+            scroll_region_scaled[2] + delta_x,
+            scroll_region_scaled[3] + delta_y,
+        ]
     project_manager.canvas.configure(scrollregion=scroll_region_scaled)
 
 
