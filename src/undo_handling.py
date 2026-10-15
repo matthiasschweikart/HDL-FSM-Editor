@@ -37,15 +37,15 @@ class UndoHandling:
             # print("design_has_changed: tmp is created by =", inspect.stack()[1][3])
             file_handling.save_in_file(project_manager.current_file + ".tmp")
 
-    def resize_scrollregion(self):
+    def _resize_scroll_region(self):
         """Update the scroll region of the canvas based on its content."""
         bbox = project_manager.canvas.bbox("diagram-element")
         if bbox:
             scrollregion_scaled = (
-                bbox[0] - (bbox[2] - bbox[0]) * 0.5,
-                bbox[1] - (bbox[3] - bbox[1]) * 0.5,
-                bbox[2] + (bbox[2] - bbox[0]) * 0.5,
-                bbox[3] + (bbox[3] - bbox[1]) * 0.5,
+                bbox[0] - (bbox[2] - bbox[0]),
+                bbox[1] - (bbox[3] - bbox[1]),
+                bbox[2] + (bbox[2] - bbox[0]),
+                bbox[3] + (bbox[3] - bbox[1]),
             )
             project_manager.canvas.configure(scrollregion=scrollregion_scaled)
             # redraw grid, because visible canvas area may have increased:
@@ -107,7 +107,7 @@ class UndoHandling:
         custom_text.CustomText.highlight_brackets_in_all_texts()
         self._shift_visible_center_to_window_center(visible_center)
         project_manager.grid_drawer.draw_grid()
-        self.resize_scrollregion()
+        self._resize_scroll_region()
 
     def _shift_visible_center_to_window_center(self, visible_center) -> None:
         """Pan canvas so the given center string becomes the current window center."""
