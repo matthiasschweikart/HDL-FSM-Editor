@@ -183,16 +183,21 @@ class TabDiagram:
         """Handle mouse wheel: scroll the canvas."""
         project_manager.grid_drawer.remove_grid()
         self.canvas.scan_mark(event.x, event.y)
-        scroll_delta = 10.0
-        delta = 0.0
+        width = project_manager.canvas.winfo_width()
+        height = project_manager.canvas.winfo_height()
         if event.num == 5 or event.delta < 0:  # scroll down
-            delta = -scroll_delta * project_manager.abs_zoom_factor
+            delta_x = -width / 50
+            delta_y = -height / 50
         elif event.num == 4 or event.delta >= 0:  # scroll up
-            delta = scroll_delta * project_manager.abs_zoom_factor
+            delta_x = width / 50
+            delta_y = height / 50
+        else:
+            delta_x = 0
+            delta_y = 0
 
         shift_mask = 1 << 0  # Tkinter shift key bit
         scroll_direction = "x" if (event.state & shift_mask) else "y"
-        dx, dy = (delta, 0) if scroll_direction == "x" else (0, delta)
+        dx, dy = (delta_x, 0) if scroll_direction == "x" else (0, delta_y)
         self.canvas.scan_dragto(int(event.x + dx), int(event.y + dy), gain=1)
         project_manager.grid_drawer.draw_grid()
 

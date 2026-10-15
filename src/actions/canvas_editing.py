@@ -104,7 +104,6 @@ def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
     if zoom_factor == 0 or project_manager.fontsize * zoom_factor > 300:  # do not accept fontsize above 300
         project_manager.canvas.grid()
         return
-    project_manager.abs_zoom_factor *= zoom_factor
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]

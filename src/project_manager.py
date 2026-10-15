@@ -47,7 +47,6 @@ class ProjectManager:
         self._fontsize = 10
         self._label_fontsize = 8
         self._state_name_font = None
-        self._abs_zoom_factor = 1.0
         self._regex_message_find_for_vhdl: str = "(.*?):([0-9]+):[0-9]+:.*"
         self._regex_message_find_for_verilog: str = (
             "(.*?):([0-9]+): .*"  # Added ' ' after the second ':', to get no hit at time stamps (i.e. 16:58:36).
@@ -588,16 +587,6 @@ class ProjectManager:
     def previous_file(self, value: str) -> str:
         """Set the previous file path."""
         self._previous_file = value
-
-    @property
-    def abs_zoom_factor(self) -> float:
-        """Get the absolute zoom factor."""
-        return self._abs_zoom_factor
-
-    @abs_zoom_factor.setter
-    def abs_zoom_factor(self, value: float) -> None:
-        """Set the absolute zoom factor."""
-        self._abs_zoom_factor = value
 
     @property
     def write_data_creator_ref(self) -> object:
