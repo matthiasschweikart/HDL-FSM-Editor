@@ -37,6 +37,7 @@ class TabDiagram:
             yscrollcommand=v.set,
             highlightthickness=0,
             relief=tk.SUNKEN,
+            confine=False,  # Canvas can moved beyond its scrollregion (needed at zooming before scrollregion adaption)
         )
         project_manager.canvas = self.canvas
 
