@@ -152,7 +152,7 @@ def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_vie
     project_manager.canvas.scan_dragto(int(visible_center[0]), int(visible_center[1]), gain=1)
 
 
-def adapt_scroll_region_to_visible_area() -> None:
+def adapt_scroll_region_after_window_resize() -> None:
     scroll_region = project_manager.canvas.cget("scrollregion").split()
     if not scroll_region:  # Possible after tool start.
         return
