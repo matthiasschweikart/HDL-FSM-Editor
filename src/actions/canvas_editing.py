@@ -196,26 +196,35 @@ def adapt_scroll_region_after_window_resize() -> None:
 
 
 def _adapt_scroll_region_after_zoom(factor) -> None:
-    scroll_region_old = project_manager.canvas.cget("scrollregion").split()
-    scroll_region_old = [float(x) for x in scroll_region_old]
-    scroll_region_scaled = [x * factor for x in scroll_region_old]
+    scroll_region_old = [float(x) for x in project_manager.canvas.cget("scrollregion").split()]
+    scroll_region_scaled = [x * factor for x in scroll_region_old]  # shift and scale the scroll region values.
     if factor > 1:
+        # The elements in the diagram are now bigger visible within the visible area.
+        # The size of the visible area has not changed, so when the expanded scroll region is
+        # applied, the scrollbar-shifters will get smaller, what is the expected behavior.
         project_manager.canvas.configure(scrollregion=scroll_region_scaled)
         return
-    # Here factor is less than 1:
-    visible_area_new = (
+    # factor < 1:
+    # The elements in the diagram are now smaller visible within the visible area.
+    # The size of the visible area has not changed, so when the shrunk scroll region is
+    # applied, the scrollbar-shifters will get bigger, what is the expected behavior.
+    # When one of scrollbar-shifters has reached its maximum value, then the visible area
+    # in that direction is as big as or bigger than the scroll-region. In that case the
+    # scroll-region must be made bigger, which will shrink the shifters, so that they later
+    # can grow again.
+    visible_area = (
         project_manager.canvas.canvasx(0),
         project_manager.canvas.canvasy(0),
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     )
     if (
-        visible_area_new[0] < scroll_region_scaled[0]  # left limit exceeded
-        or visible_area_new[2] > scroll_region_scaled[2]  # right limit exceeded
-        or visible_area_new[1] < scroll_region_scaled[1]  # top limit exceeded
-        or visible_area_new[3] > scroll_region_scaled[3]  # bottom limit exceeded
+        visible_area[0] < scroll_region_scaled[0]  # left limit exceeded
+        or visible_area[2] > scroll_region_scaled[2]  # right limit exceeded
+        or visible_area[1] < scroll_region_scaled[1]  # top limit exceeded
+        or visible_area[3] > scroll_region_scaled[3]  # bottom limit exceeded
     ):
-        # The shrunked scroll region is at the correct position.
+        # The shrunk scroll region is at the correct position.
         # Resize it to its previous size, because it is smaller than the visible area:
         delta_x = (scroll_region_scaled[2] - scroll_region_scaled[0]) / factor / 2
         delta_y = (scroll_region_scaled[3] - scroll_region_scaled[1]) / factor / 2
