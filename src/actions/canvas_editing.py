@@ -16,6 +16,17 @@ def view_all() -> None:
         project_manager.grid_drawer.remove_grid()
         project_manager.canvas.grid_remove()
         view_rectangle(complete_rectangle, check_fit=True)
+        set_scroll_region_if_needed()
+
+
+def set_scroll_region_if_needed() -> None:
+    # The scroll region must be set at tool start and file read:
+    scroll_region = project_manager.canvas.cget("scrollregion")
+    if not scroll_region:
+        scroll_region = "0.0 0.0 0.0 0.0"
+    scroll_region = [float(value) for value in scroll_region.split()]
+    if scroll_region[2] - scroll_region[0] < 10:
+        # scroll region was not initialized yet.
         scroll_region = [
             project_manager.canvas.canvasx(0) - project_manager.canvas.winfo_width(),
             project_manager.canvas.canvasy(0) - project_manager.canvas.winfo_height(),
@@ -142,9 +153,8 @@ def _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_vie
 
 
 def adapt_scroll_region_to_visible_area() -> None:
-    # Adapt the scroll region if necessary:
     scroll_region = project_manager.canvas.cget("scrollregion").split()
-    if not scroll_region:
+    if not scroll_region:  # Possible after tool start.
         return
     scroll_region = [float(coord) for coord in scroll_region]
     visible_area = (
@@ -153,22 +163,36 @@ def adapt_scroll_region_to_visible_area() -> None:
         project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
         project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
     )
-    # If the visible window is extend beyond the scroll region, adjust the scroll region accordingly:
-    # When the window is resized, the visible area of the canvas changes.
-    # When the window-size is increased to the right side,
-    # the canvas is not moved, but more of its right area is shown until the right scroll region limit is reached.
-    # When the window-size is increased to the left side,
-    # the canvas is moved to the left, and again more of its right area is shown until the right scroll region
-    # limit is reached.
-    # Afterwards more of the left area is shown until the left scroll region limit is reached.
-    # If the window is increased further, the scroll region must be adapted accordingly:
-    if (
-        visible_area[0] < scroll_region[0]  # left limit exceeded
-        or visible_area[2] > scroll_region[2]  # right limit exceeded
-        or visible_area[1] < scroll_region[1]  # top limit exceeded
-        or visible_area[3] > scroll_region[3]  # bottom limit exceeded
+    # When the tool window is enlarged by the user, the scroll region must be adapted accordingly:
+    # When the window-size is increased to the right side, the canvas is not moved,
+    # but more of its area gets visible until the right scroll region limit is reached.
+    # When the window-size is further increased to the right side, then the canvas is moved to the right
+    # until the left scroll region limit is reached. At this point the horizontal scroll bar has its
+    # maximum size. If the window is increased further, the visible area the first time exceeds
+    # the scroll region and the scroll region will be adapted in horizontal direction.
+    # When the window-size is increased to the left side, first the canvas is moved, until on the
+    # right side the scroll region limit is reached. If the window is increased further to the left side,
+    # the canvas is not moved anymore, but more of its left area gets visible until the left
+    # scroll region limit is reached. At this point the horizontal scroll bar has its maximum size.
+    # If the window is increased further, the visible area exceeds the scroll region and the scroll
+    # region will be adapted in horizontal direction.
+    # When the window-size is increased to the top or bottom side, the behavior is equivalent to the horizontal case.
+    margin = 10
+    if (  # Both condition should get true at the same time:
+        visible_area[0] < scroll_region[0] - margin  # left limit exceeded
+        or visible_area[2] > scroll_region[2] + margin  # right limit exceeded
     ):
-        project_manager.canvas.configure(scrollregion=visible_area)
+        project_manager.canvas.configure(
+            scrollregion=[visible_area[0], scroll_region[1], visible_area[2], scroll_region[3]]
+        )
+    scroll_region = [float(coord) for coord in project_manager.canvas.cget("scrollregion").split()]
+    if (  # Both condition should get true at the same time:
+        visible_area[1] < scroll_region[1] - margin  # top limit exceeded
+        or visible_area[3] > scroll_region[3] + margin  # bottom limit exceeded
+    ):
+        project_manager.canvas.configure(
+            scrollregion=[scroll_region[0], visible_area[1], scroll_region[2], visible_area[3]]
+        )
 
 
 def _adapt_scroll_region_after_zoom(factor) -> None:
