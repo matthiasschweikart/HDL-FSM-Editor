@@ -95,7 +95,7 @@ class CanvasWindow:
             text_id.bind("<FocusIn>", lambda event: project_manager.canvas.unbind_all("<Delete>"))
         seq1_list = ("<Control-MouseWheel>", "<Control-Button-4>", "<Control-Button-5>")
         seq2_list = ("<MouseWheel>", "<Button-4>", "<Button-5>")
-        for canvas_id in self.label_ids + self.text_ids:
+        for canvas_id in self.label_ids + self.text_ids + [self.frame_id]:
             for seq in seq1_list:
                 canvas_id.bind(
                     seq,
