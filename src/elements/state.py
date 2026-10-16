@@ -145,7 +145,7 @@ class States:
             if t.endswith("_start"):
                 transition.TransitionLine.extend_transition_to_state_middle_points(t[:-6])
                 transition.TransitionLine.shorten_to_state_border(t[:-6])
-            elif t.endswith("_end") and not t.endswith("_comment_line_end"):
+            elif t.endswith("_end") and not t.endswith("_comment_line_end") and not t.startswith("connection"):
                 transition.TransitionLine.extend_transition_to_state_middle_points(t[:-4])
                 transition.TransitionLine.shorten_to_state_border(t[:-4])
 
