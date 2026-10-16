@@ -67,7 +67,6 @@ class CustomText(CodeEditor):
         self.bind("<Control-z>", lambda event: self.undo())
         self.bind("<Control-Z>", lambda event: self.redo())
         self.bind("<Control-e>", lambda event: self.edit_in_external_editor())
-        self.bind("<<TextModified>>", lambda event: project_manager.undo_handling_ref.update_window_title())
         self.signals_list = []  # Will be updated at file-read, key-event, undo/redo if text_type is a declaration.
         self.signal_and_variable_types_list = []
         self.constants_list = []
@@ -145,9 +144,9 @@ class CustomText(CodeEditor):
         cmd = (self._orig, command) + args
         try:
             result = self.tk.call(cmd)
-            if command in ("insert", "delete", "replace"):
-                # insert is used by find&replace, delete is used by delete-key.
-                self.event_generate("<<TextModified>>")
+            # insert is used by find&replace, delete is used by delete-key.
+            if command in ("insert", "delete", "replace") and self.text_type not in ("generated", "log"):
+                project_manager.undo_handling_ref.add_star_to_window_title()
             return result
         except Exception:  # pylint: disable=broad-except
             return None

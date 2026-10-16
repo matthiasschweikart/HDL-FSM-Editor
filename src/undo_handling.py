@@ -28,7 +28,7 @@ class UndoHandling:
         # import inspect
         # print("design_has_changed is called from", inspect.stack()[1][3])
         self._add_changes_to_design_stack()
-        self.update_window_title()
+        self.add_star_to_window_title()
         if (
             store_in_tmp_file
             and project_manager.current_file != ""
@@ -134,7 +134,7 @@ class UndoHandling:
         if self.stack_write_pointer == len(self.stack):
             project_manager.redo_button.config(state="disabled")
 
-    def update_window_title(self) -> None:
+    def add_star_to_window_title(self) -> None:
         """Set window title to 'unnamed' or append '*' if the design is already named."""
         title = project_manager.root.title()
         if not title.endswith("*"):
