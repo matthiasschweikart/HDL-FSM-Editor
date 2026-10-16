@@ -65,6 +65,21 @@ class MoveHandlingCanvasWindow:
         delta_y = motion_event.y - self.touching_point_y
         # Move the window by the delta values, which moves the touching point under the actual mouse pointer again:
         window_coords = self._canvas_to_screen(project_manager.canvas.coords(self.window_id))
+        window_bbox = project_manager.canvas.bbox(self.window_id)
+        visible_area = [
+            project_manager.canvas.canvasx(0),
+            project_manager.canvas.canvasy(0),
+            project_manager.canvas.canvasx(project_manager.canvas.winfo_width()),
+            project_manager.canvas.canvasy(project_manager.canvas.winfo_height()),
+        ]
+        if (
+            window_bbox[0] + delta_x < visible_area[0]
+            or window_bbox[2] + delta_x > visible_area[2]
+            or window_bbox[1] + delta_y < visible_area[1]
+            or window_bbox[3] + delta_y > visible_area[3]
+        ):
+            self._release(None)
+            return
         move_handling_work_on_movelist.move_to_coordinates(
             window_coords[0] + delta_x,
             window_coords[1] + delta_y,
