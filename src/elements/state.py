@@ -138,7 +138,6 @@ class States:
                 state_tag = t[:-5]
                 self._show_new_state_name(new_text)
                 self._resize_state(state_tag)
-        project_manager.undo_handling_ref.design_has_changed()
         project_manager.canvas.bind_all("<Delete>", lambda event: canvas_delete.CanvasDelete())
         tags = project_manager.canvas.gettags(state_tag)
         for t in tags:
@@ -148,6 +147,7 @@ class States:
             elif t.endswith("_end") and not t.endswith("_comment_line_end") and not t.startswith("connection"):
                 transition.TransitionLine.extend_transition_to_state_middle_points(t[:-4])
                 transition.TransitionLine.shorten_to_state_border(t[:-4])
+        project_manager.undo_handling_ref.design_has_changed()
 
     def _abort_edit_text(self, text_box, old_text) -> None:
         project_manager.canvas.delete("entry-window")
