@@ -88,6 +88,7 @@ class CustomText(CodeEditor):
             self.configure_mode("Normal Mode")
         else:
             self.configure_mode("Dark Mode")
+        self.tag_raise("sel")  # Ensure the selection highlight is above other tags.
 
     def configure_mode(self, mode):
         """Apply the appropriate highlight colors based on the mode."""
