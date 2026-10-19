@@ -91,6 +91,7 @@ def _clear_design():
     project_manager.module_name.set("")
     project_manager.reset_signal_name.set("")
     project_manager.clock_signal_name.set("")
+    project_manager.clock_enable_name.set("")
     project_manager.include_timestamp_in_output.set(True)
     text_widgets_to_reset = [
         project_manager.tab_interface_ref.interface_packages_text,

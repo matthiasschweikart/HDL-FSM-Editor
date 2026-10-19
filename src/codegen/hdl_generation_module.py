@@ -103,7 +103,10 @@ def create_module_logic(file_name, file_line_number, state_tag_list_sorted) -> N
     file_line_number += number_of_new_lines
 
     architecture += "        end\n"
-    architecture += "        else begin\n"
+    if project_manager.clock_enable_name.get() != "":
+        architecture += "        else if (" + project_manager.clock_enable_name.get() + ") begin\n"
+    else:
+        architecture += "        else begin\n"
     file_line_number += 2
 
     global_actions_before_reference, global_actions_before = hdl_generation_library.create_global_actions_before()

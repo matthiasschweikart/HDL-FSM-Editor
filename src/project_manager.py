@@ -61,6 +61,7 @@ class ProjectManager:
         self._module_name: tk.Entry = None
         self._reset_signal_name: tk.StringVar = None
         self._clock_signal_name: tk.StringVar = None
+        self._clock_enable_name: tk.StringVar = None
 
         # Parameters of the project:
         self._current_file: str = ""
@@ -552,6 +553,16 @@ class ProjectManager:
     def clock_signal_name(self, value: tk.StringVar) -> None:
         """Set the clock signal name StringVar."""
         self._clock_signal_name = value
+
+    @property
+    def clock_enable_name(self) -> tk.StringVar:
+        """Get the clock enable name StringVar."""
+        return self._clock_enable_name
+
+    @clock_enable_name.setter
+    def clock_enable_name(self, value: tk.StringVar) -> None:
+        """Set the clock enable name StringVar."""
+        self._clock_enable_name = value
 
     @property
     def entry_widgets(self) -> list:

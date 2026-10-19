@@ -113,17 +113,31 @@ class TabControl:
         reset_signal_name_label.grid(row=4, column=0, sticky=tk.W)
         reset_signal_name_entry.grid(row=4, column=1, sticky=tk.W)
 
-        self.clock_signal_name = tk.StringVar()
-        project_manager.clock_signal_name = self.clock_signal_name
-        self.clock_signal_name.set("")
         clock_signal_name_label = ttk.Label(
             control_frame, text="Name of clock input port:", padding=5, style="My.TLabel"
         )
-        self.clock_signal_name_entry = ttk.Entry(
-            control_frame, width=23, textvariable=self.clock_signal_name, style="My.TEntry"
-        )
+        clock_names_entry_frame = ttk.Frame(control_frame, style="My.TFrame")
         clock_signal_name_label.grid(row=5, column=0, sticky=tk.W)
-        self.clock_signal_name_entry.grid(row=5, column=1, sticky=tk.W)
+        clock_names_entry_frame.grid(row=5, column=1, sticky=(tk.W, tk.E))
+
+        self.clock_signal_name = tk.StringVar()
+        project_manager.clock_signal_name = self.clock_signal_name
+        self.clock_signal_name.set("")
+        self.clock_signal_name_entry = ttk.Entry(
+            clock_names_entry_frame, width=23, textvariable=self.clock_signal_name, style="My.TEntry"
+        )
+        clock_enable_name_label = ttk.Label(
+            clock_names_entry_frame, text="Name of optional clock-enable input port:", padding=5, style="My.TLabel"
+        )
+        self.clock_enable_name = tk.StringVar()
+        project_manager.clock_enable_name = self.clock_enable_name
+        self.clock_enable_name.set("")
+        self.clock_enable_name_entry = ttk.Entry(
+            clock_names_entry_frame, width=23, textvariable=self.clock_enable_name, style="My.TEntry"
+        )
+        self.clock_signal_name_entry.grid(row=0, column=0, sticky=tk.W)
+        clock_enable_name_label.grid(row=0, column=1, sticky=tk.W)
+        self.clock_enable_name_entry.grid(row=0, column=2, sticky=tk.W)
 
         self.compile_cmd = tk.StringVar()
         project_manager.compile_cmd = self.compile_cmd
@@ -207,6 +221,7 @@ class TabControl:
         self._include_timestamp_trace_id = None
         self._reset_signal_name_trace_id = None
         self._clock_signal_name_trace_id = None
+        self._clock_enable_name_trace_id = None
         self._compile_cmd_trace_id = None
         self._edit_cmd_trace_id = None
         self._additional_sources_trace_id = None
@@ -221,6 +236,7 @@ class TabControl:
             {"stringvar": self.generate_path_value, "entry": generate_path_entry},
             {"stringvar": self.reset_signal_name, "entry": reset_signal_name_entry},
             {"stringvar": self.clock_signal_name, "entry": self.clock_signal_name_entry},
+            {"stringvar": self.clock_enable_name, "entry": self.clock_enable_name_entry},
             {"stringvar": self.compile_cmd, "entry": compile_cmd_entry},
             {"stringvar": self.edit_cmd, "entry": edit_cmd_entry},
             {"stringvar": self.additional_sources_value, "entry": additional_sources_entry},
@@ -363,6 +379,8 @@ class TabControl:
             self.module_name_entry.select_range(0, tk.END)
         elif hdl_item_type == "reset_and_clock_signal_name":
             self.clock_signal_name_entry.select_range(0, tk.END)
+        elif hdl_item_type == "clock_enable_name":
+            self.clock_enable_name_entry.select_range(0, tk.END)
 
     def activate_traces(self) -> None:
         """Activate the traces for the given StringVars to mark the design as changed when they are modified."""
@@ -381,6 +399,9 @@ class TabControl:
             "write", lambda *args: self._control_tab_has_changed()
         )
         self._clock_signal_name_trace_id = self.clock_signal_name.trace_add(
+            "write", lambda *args: self._control_tab_has_changed()
+        )
+        self._clock_enable_name_trace_id = self.clock_enable_name.trace_add(
             "write", lambda *args: self._control_tab_has_changed()
         )
         self._compile_cmd_trace_id = self.compile_cmd.trace_add("write", lambda *args: self._control_tab_has_changed())
@@ -404,6 +425,7 @@ class TabControl:
         self.include_timestamp_in_output.trace_remove("write", self._include_timestamp_trace_id)
         self.reset_signal_name.trace_remove("write", self._reset_signal_name_trace_id)
         self.clock_signal_name.trace_remove("write", self._clock_signal_name_trace_id)
+        self.clock_enable_name.trace_remove("write", self._clock_enable_name_trace_id)
         self.compile_cmd.trace_remove("write", self._compile_cmd_trace_id)
         self.edit_cmd.trace_remove("write", self._edit_cmd_trace_id)
         self.additional_sources_value.trace_remove("write", self._additional_sources_trace_id)

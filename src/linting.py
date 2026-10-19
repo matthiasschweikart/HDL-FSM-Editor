@@ -74,14 +74,20 @@ class HighLightDict:
                 # Input is read but must not be written:
                 variables_to_write.remove(input_port_lower)
             else:
-                # Input port is never read:
+                # Input port is never read (correct for clock signal and clock enable signal):
                 clock_signal_name_lower = (
                     project_manager.clock_signal_name.get()
                     if project_manager.language.get() != "VHDL"
                     else project_manager.clock_signal_name.get().lower()
                 )
-                if input_port_lower != clock_signal_name_lower:
+                clock_enable_name_lower = (
+                    project_manager.clock_enable_name.get()
+                    if project_manager.language.get() != "VHDL"
+                    else project_manager.clock_enable_name.get().lower()
+                )
+                if input_port_lower not in (clock_signal_name_lower, clock_enable_name_lower):
                     self.highlight_pattern_dict["not_read"].append(input_port)
+
         return variables_to_write
 
     def _handle_not_read_generics(self, variables_to_write, variables_to_read):

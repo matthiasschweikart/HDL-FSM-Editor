@@ -39,6 +39,7 @@ def _save_control_data(design_dictionary: dict[str, Any]) -> None:
     design_dictionary["number_of_files"] = project_manager.select_file_number_text.get()
     design_dictionary["reset_signal_name"] = project_manager.reset_signal_name.get()
     design_dictionary["clock_signal_name"] = project_manager.clock_signal_name.get()
+    design_dictionary["clock_enable_name"] = project_manager.clock_enable_name.get()
     design_dictionary["compile_cmd"] = project_manager.compile_cmd.get()
     design_dictionary["edit_cmd"] = project_manager.edit_cmd.get()
     design_dictionary["include_timestamp_in_output"] = project_manager.include_timestamp_in_output.get()

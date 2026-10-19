@@ -54,6 +54,8 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
         project_manager.select_file_number_text.set(design_dictionary["number_of_files"])
     project_manager.reset_signal_name.set(design_dictionary["reset_signal_name"])
     project_manager.clock_signal_name.set(design_dictionary["clock_signal_name"])
+    if "clock_enable_name" in design_dictionary:
+        project_manager.clock_enable_name.set(design_dictionary["clock_enable_name"])
     project_manager.compile_cmd.set(design_dictionary["compile_cmd"])
     project_manager.edit_cmd.set(design_dictionary["edit_cmd"])
     project_manager.include_timestamp_in_output.set(design_dictionary.get("include_timestamp_in_output", True))

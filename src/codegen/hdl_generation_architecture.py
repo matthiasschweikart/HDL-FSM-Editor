@@ -123,12 +123,22 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     project_manager.link_dict_ref.add(file_name, file_line_number, "Control-Tab", 1, "reset_and_clock_signal_name")
     file_line_number += 1
 
+    if project_manager.clock_enable_name.get() != "":
+        architecture += "            if " + project_manager.clock_enable_name.get() + "='1' then\n"
+        project_manager.link_dict_ref.add(file_name, file_line_number, "Control-Tab", 1, "clock_enable_name")
+        file_line_number += 1
+        clock_enable_indent = 1
+    else:
+        clock_enable_indent = 0
+
     reference_to_global_actions_before_custom_text, global_actions_before = (
         hdl_generation_library.create_global_actions_before()
     )
     if global_actions_before != "":
         global_actions_before = "-- Global Actions before:\n" + global_actions_before
-        architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(3, global_actions_before)
+        architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+            3 + clock_enable_indent, global_actions_before
+        )
         # global_actions_before starts always with "-- Global Actions before:", which is not a line entered by the user,
         # and therefore cannot be linked:
         file_line_number += 1
@@ -142,8 +152,12 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
         )
         file_line_number += number_of_new_lines
 
-    architecture += "            -- State Machine:\n"
-    architecture += "            case state is\n"
+    architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+        3 + clock_enable_indent, "-- State Machine:\n"
+    )
+    architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+        3 + clock_enable_indent, "case state is\n"
+    )
     file_line_number += 2
     transition_specifications = hdl_generation_transitions.extract_transition_specifications_from_the_graph(
         state_tag_list_sorted
@@ -151,8 +165,12 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     state_sequence, file_line_number = hdl_generation_architecture_state_sequence.create_vhdl_for_the_state_sequence(
         transition_specifications, file_name, file_line_number
     )
-    architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(4, state_sequence)
-    architecture += "            end case;\n"
+    architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+        4 + clock_enable_indent, state_sequence
+    )
+    architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+        3 + clock_enable_indent, "end case;\n"
+    )
     file_line_number += 1
 
     reference_to_global_actions_after_custom_text, global_actions_after = (
@@ -160,7 +178,9 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
     )
     if global_actions_after != "":
         global_actions_after = "-- Global Actions after:\n" + global_actions_after
-        architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(3, global_actions_after)
+        architecture += hdl_generation_library.indent_text_by_the_given_number_of_tabs(
+            3 + clock_enable_indent, global_actions_after
+        )
         # global_actions_before starts always with "-- Global Actions after:", which is not a line entered by the user,
         # and therefore cannot be linked:
         file_line_number += 1
@@ -173,6 +193,10 @@ def create_architecture(file_name, file_line_number, state_tag_list_sorted) -> N
             reference_to_global_actions_after_custom_text,
         )
         file_line_number += number_of_new_lines
+
+    if project_manager.clock_enable_name.get() != "":
+        architecture += "            end if; -- Clock enable\n"
+        file_line_number += 1
 
     architecture += "        end if;\n"
     architecture += "    end process;\n"
