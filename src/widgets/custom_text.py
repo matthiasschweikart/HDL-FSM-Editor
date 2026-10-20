@@ -405,7 +405,7 @@ class CustomText(CodeEditor):
         """Highlight the word under the mouse pointer in all text widgets."""
         if self.tag_ranges(tk.SEL):
             # If a selection exists, highlight this selection in all text widgets:
-            selected_text = self.get(tk.SEL_FIRST, tk.SEL_LAST)
+            selected_text = self.get(tk.SEL_FIRST, tk.SEL_LAST).rstrip()  # Remove "return" at the end.
             if selected_text.strip() == "":
                 return
             CustomText.selection_is_active = True
