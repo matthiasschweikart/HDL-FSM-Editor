@@ -46,7 +46,16 @@ def _load_control_data(design_dictionary: dict[str, Any]) -> None:
     project_manager.generate_path_value.set(design_dictionary["generate_path"])
     project_manager.additional_sources_value.set(design_dictionary.get("additional_sources", ""))
     project_manager.working_directory_value.set(design_dictionary.get("working_directory", ""))
-    project_manager.diagram_background_color.set(design_dictionary.get("diagram_background_color", "white"))
+    background_color = design_dictionary.get("diagram_background_color", "white")
+    if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode" and background_color == "black":
+        # This is the "Normal Mode" but the background color is black, which is not appropriate.
+        # This is probably caused by a switch between "Normal Mode" and "Dark Mode". So fix it:
+        background_color = "white"
+    elif project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Normal Mode" and background_color == "white":
+        # This is the "Dark Mode" but the background color is white, which is not appropriate.
+        # This is probably caused by a switch between "Normal Mode" and "Dark Mode". So fix it:
+        background_color = "black"
+    project_manager.diagram_background_color.set(background_color)
     # For Verilog and SystemVerilog, always use single file mode regardless of what's in the file
     if design_dictionary["language"] in ["Verilog", "SystemVerilog"]:
         project_manager.select_file_number_text.set(1)
