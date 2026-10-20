@@ -124,6 +124,7 @@ class CustomText(CodeEditor):
         self.tag_configure("generated_entity_bg", background=entity_background)
         self.tag_configure("generated_arch_bg", background=arch_background)
         self.tag_configure("tab_markup", background=background_tab_markup, bgstipple="gray25")
+        self.tag_configure("goto-line", background="orange")
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_configure(
                 highlight_tag_name,
@@ -374,14 +375,13 @@ class CustomText(CodeEditor):
     def _dehighlight_in_all_texts(self) -> None:
         # Removes first all highlighting introduced by links, by word-selecting, by bracket-background.
         # Afterwards a new bracket-match highlighting may be applied based on the new cursor position.
-        if self.cget("state") == "normal" or self._mouse_click_in_hdl_tab_outside_link():
-            # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
-            # "normal" (editable) text widget. This check is needed, when in "generated HDL"/"Compile Messages",
-            # which are disabled text widgets, a line is clicked, in order to jump to the source code.
-            # In this case the highlight tag must not be removed, because the user wants to see
-            # the highlighted line in the source code.
+        if (
+            self.cget("state") == "normal"
+            or self._mouse_click_in_hdl_tab_outside_link()  # A click at the link shall not deselect
+        ):
             for text_widget in self._get_all_custom_text_widgets():
                 text_widget.tag_remove("highlight", "1.0", tk.END)
+                text_widget.tag_remove("goto-line", "1.0", tk.END)
             CustomText.selection_is_active = False
             # "after_idle" is used to schedule the bracket highlighting after "tag_remove" has been processed.
             self.after_idle(lambda: self.bracket_highlighter.highlight_brackets(project_manager.language.get()))
@@ -394,9 +394,12 @@ class CustomText(CodeEditor):
         delta_x = self.winfo_pointerx() - self.winfo_rootx()
         delta_y = self.winfo_pointery() - self.winfo_rooty()
         index_string = self.index(f"@{delta_x},{delta_y}")  # index_string has the format "1.34"
-        # if underline is found, then this click is on a link:
-        underlined_range = self.tag_nextrange("underline", index_string + " linestart")
-        return not underlined_range
+        self.mark_set("click", index_string)
+        underline_range = self.tag_ranges("underline")
+        if not underline_range:
+            return True
+        # Check if the click was in the link:
+        return not (self.compare("click", ">=", underline_range[0]) and self.compare("click", "<", underline_range[1]))
 
     def _highlight_in_all_texts(self) -> None:
         self.after_idle(self._highlight_in_all_texts_after_idle)

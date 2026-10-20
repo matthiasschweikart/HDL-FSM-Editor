@@ -48,14 +48,14 @@ class LineNumberDialog:
         self.line_number_entry.bind("<Return>", lambda e: self._jump())
 
     def _jump(self):
-        project_manager.tab_hdl_ref.hdl_frame_text.tag_delete("goto-line")
+        project_manager.tab_hdl_ref.hdl_frame_text.tag_remove("goto-line", "1.0", tk.END)
         line_number = self.line_number_entry.get().strip()
         if not line_number.isdigit():
             return
         if self.file_var.get() == 1:
             project_manager.tab_hdl_ref.hdl_frame_text.see(f"{line_number}.0")
             project_manager.tab_hdl_ref.hdl_frame_text.tag_add(
-                "goto-line", f"{line_number}.0", f"{int(line_number) + 1}.0"
+                "goto-line", f"{line_number}.0", f"{line_number}.0 lineend"
             )
         else:
             project_manager.tab_hdl_ref.hdl_frame_text.see(
@@ -64,7 +64,6 @@ class LineNumberDialog:
             project_manager.tab_hdl_ref.hdl_frame_text.tag_add(
                 "goto-line",
                 f"{int(line_number) + hdl_generation.HdlGeneration.last_line_number_of_file1}.0",
-                f"{int(line_number) + 1 + hdl_generation.HdlGeneration.last_line_number_of_file1}.0",
+                f"{int(line_number) + hdl_generation.HdlGeneration.last_line_number_of_file1}.0 lineend",
             )
-        project_manager.tab_hdl_ref.hdl_frame_text.tag_configure("goto-line", background="yellow")
         self.window.destroy()
