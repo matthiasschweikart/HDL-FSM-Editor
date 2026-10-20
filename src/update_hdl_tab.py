@@ -135,3 +135,41 @@ class UpdateHdlTab:
         project_manager.tab_hdl_ref.hdl_frame_text.bracket_highlighter.highlight_brackets(
             project_manager.language.get()
         )
+        project_manager.tab_hdl_ref.hdl_frame_text.add_tab_markup(all=True)
+        if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode":
+            # In "normal mode" there are different background colors in the HDL-tab than in all other text boxes.
+            # To look nicer therefore the used colors for the tag "tab_markup" must be changed:
+            if project_manager.select_file_number_text.get() == "1":
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup",
+                    background="papaya whip",  # for entity and architecure part (or module if Verilog)
+                    bgstipple="gray75",
+                )
+            else:  # The content of the HDL-tab is VHDL with different backgrounds for entity and architecture.
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup",
+                    background="khaki",  # for architecture part
+                    bgstipple="gray75",
+                )
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup_entity",  # new tag
+                    background="papaya whip",  # for entity part
+                    bgstipple="gray75",
+                )
+                cls.replace_tag_in_entity("tab_markup", "tab_markup_entity")
+
+    @classmethod
+    def replace_tag_in_entity(cls, old_tag, new_tag):
+        # Replace the old tag with the new tag for the entity part:
+        entity_tag_ranges = project_manager.tab_hdl_ref.hdl_frame_text.tag_ranges("generated_entity_bg")
+        project_manager.tab_hdl_ref.hdl_frame_text.mark_set("current", "1.0")
+        while True:
+            next_range = project_manager.tab_hdl_ref.hdl_frame_text.tag_nextrange(
+                old_tag, "current", entity_tag_ranges[1]
+            )
+            if not next_range:
+                break
+            start, end = next_range
+            project_manager.tab_hdl_ref.hdl_frame_text.tag_remove(old_tag, start, end)
+            project_manager.tab_hdl_ref.hdl_frame_text.tag_add(new_tag, start, end)
+            project_manager.tab_hdl_ref.hdl_frame_text.mark_set("current", end)

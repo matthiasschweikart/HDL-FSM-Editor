@@ -100,6 +100,7 @@ class CustomText(CodeEditor):
             highlightbackground = "black"  # Unfocused border color
             entity_background = "black"
             arch_background = "black"
+            background_tab_markup = "gray25"
             highlight_colors = config.HIGHLIGHT_COLORS_DARK_MODE
             bracket_highlighting_color_normal_list = config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST_DARK_MODE
         else:
@@ -110,6 +111,7 @@ class CustomText(CodeEditor):
             highlightbackground = "light gray"  # Unfocused border color
             entity_background = "#F5E6D3"
             arch_background = "#FFF9CC"
+            background_tab_markup = "gray85"
             highlight_colors = config.HIGHLIGHT_COLORS
             bracket_highlighting_color_normal_list = config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST
         self.configure(
@@ -121,6 +123,7 @@ class CustomText(CodeEditor):
         )
         self.tag_configure("generated_entity_bg", background=entity_background)
         self.tag_configure("generated_arch_bg", background=arch_background)
+        self.tag_configure("tab_markup", background=background_tab_markup, bgstipple="gray25")
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_configure(
                 highlight_tag_name,
@@ -290,6 +293,7 @@ class CustomText(CodeEditor):
                 CustomText.written_variables_of_all_windows[self],
             )
         self._update_size_of_text_box(text)
+        self.tag_raise("sel")
         if event == "element-insertion":
             # The event has this value if the element is inserted manually or if it is inserted by loading a file.
             # If it is manually inserted, update_highlight_tags_in_all_texts() must not be called as the element is
@@ -298,12 +302,48 @@ class CustomText(CodeEditor):
             # element is inserted, as this would slow down the loading of the file.
             # In this case update_highlight_tags_in_all_texts() and highlight_brackets() are not called here but
             # called from file_handling.py after the whole file is loaded.
+            self.add_tab_markup(all=True)
             return
+        self.add_tab_markup(all=False)
         self.update_highlight_tags_in_all_texts()
         if event is not None and event.keysym == "BackSpace":
             # In order to keep the mouse-pointer inside the shrinking window:
             self._move_mouse_to_insert_cursor()
         self.bracket_highlighter.highlight_brackets(project_manager.language.get())
+
+    def add_tab_markup(self, all) -> None:
+        if all:
+            self.tag_remove("tab_markup", "1.0", tk.END)
+            self.mark_set("current", "1.0")
+            while self.compare("current", "<", tk.END):
+                # Move over the line number if it exists:
+                hits = self.tag_nextrange("line_number", "current", "current lineend")
+                if hits:
+                    self.mark_set("current", hits[1] + "+ 1c")
+                # Search 1 line:
+                i = 0
+                line_end = self.index("current lineend")
+                while self.compare("current", "<=", line_end):
+                    if self.get("current") == " ":
+                        if i % 4 == 0:
+                            self.tag_add("tab_markup", "current")
+                        i += 1
+                        self.mark_set("current", "current + 1c")
+                    else:
+                        self.mark_set("current", "current lineend + 1c")
+        else:  # After a key press only update the tab markup for the current line.
+            cursor_index = self.index("insert")
+            self.mark_set("current", cursor_index + " linestart")
+            self.tag_remove("tab_markup", "current", "current lineend")
+            while True:
+                if self.get("current") != " ":
+                    break
+                remainder = int(self.index("current").split(".")[1]) % 4
+                if remainder == 0:
+                    self.tag_add("tab_markup", "current")
+                if self.compare("current +1c", "==", "current lineend"):
+                    break
+                self.mark_set("current", "current + 1c")
 
     def _move_mouse_to_insert_cursor(self) -> None:
         bbox_char = self.bbox("insert")
