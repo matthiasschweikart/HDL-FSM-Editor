@@ -374,7 +374,7 @@ class CustomText(CodeEditor):
     def _dehighlight_in_all_texts(self) -> None:
         # Removes first all highlighting introduced by links, by word-selecting, by bracket-background.
         # Afterwards a new bracket-match highlighting may be applied based on the new cursor position.
-        if self.cget("state") == "normal":
+        if self.cget("state") == "normal" or self._mouse_click_in_hdl_tab_outside_link():
             # Remove the highlight tag from all text widgets, but only if the mouse pointer is inside an
             # "normal" (editable) text widget. This check is needed, when in "generated HDL"/"Compile Messages",
             # which are disabled text widgets, a line is clicked, in order to jump to the source code.
@@ -386,6 +386,17 @@ class CustomText(CodeEditor):
             # "after_idle" is used to schedule the bracket highlighting after "tag_remove" has been processed.
             self.after_idle(lambda: self.bracket_highlighter.highlight_brackets(project_manager.language.get()))
             project_manager.canvas.focus_set()  # canvas shall react to delete-key.
+
+    def _mouse_click_in_hdl_tab_outside_link(self):
+        if self.text_type != "generated":
+            return False
+        # Determine current cursor position:
+        delta_x = self.winfo_pointerx() - self.winfo_rootx()
+        delta_y = self.winfo_pointery() - self.winfo_rooty()
+        index_string = self.index(f"@{delta_x},{delta_y}")  # index_string has the format "1.34"
+        # if underline is found, then this click is on a link:
+        underlined_range = self.tag_nextrange("underline", index_string + " linestart")
+        return not underlined_range
 
     def _highlight_in_all_texts(self) -> None:
         self.after_idle(self._highlight_in_all_texts_after_idle)
@@ -422,6 +433,7 @@ class CustomText(CodeEditor):
             project_manager.tab_internals_ref.internals_architecture_text,
             project_manager.tab_internals_ref.internals_process_clocked_text,
             project_manager.tab_internals_ref.internals_process_combinatorial_text,
+            project_manager.tab_hdl_ref.hdl_frame_text,
         ]
         for element_ref in project_manager.canvas_windows_ref_dict.values():
             all_custom_text_widgets.extend(element_ref.text_ids)
