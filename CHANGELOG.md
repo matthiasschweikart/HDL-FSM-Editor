@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 ## Security
 
+## [7.1]
+## Added
+- If there is a newer version of the tool, the tool title now shows a hint.
+- A clock enable signal is now supported.
+- All text boxes now show a tab markup for better readability.
+- Selecting text in the "generated HDL"-tab is now supported.
+## Changed
+- Refactoring of element-moving by now using the same moving method for all elements.
+- Refactoring
+## Deprecated
+## Removed
+## Fixed
+- User defined types in type-converting were marked as not-read/not-written signals.
+- The scrollbars in the diagram-tab did not always work as expected.
+- The undo/redo stack contained unnecessary entries after certain actions.
+- The undo/redo stack sometimes did contain incorrectly moved connection lines.
+- At zoom out the diagram sometimes "jumped".
+- At resizing a state by name change sometimes the connected lines were not moved accordingly.
+- View-all sometimes did not work correctly.
+## Security
+
 ## [7.0]
 ## Added
 - Added "dark mode" support.
