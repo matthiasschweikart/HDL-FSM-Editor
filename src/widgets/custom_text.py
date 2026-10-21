@@ -77,6 +77,9 @@ class CustomText(CodeEditor):
         self.function_names_list = []  # Is read by linting.HighLightDict
         CustomText.read_variables_of_all_windows[self] = []
         CustomText.written_variables_of_all_windows[self] = []
+        self._define_text_tags(font_size)
+
+    def _define_text_tags(self, font_size):
         self.tag_configure("message_red", foreground="red")
         self.tag_configure("message_green", foreground="green")
         self.tag_configure("highlight", background="orange")
