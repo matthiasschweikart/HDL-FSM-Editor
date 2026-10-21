@@ -72,10 +72,9 @@ class TabControl:
             select_file_number_frame,
             variable=self.include_timestamp_in_output,
             takefocus=False,
+            width=40,
+            text="Include timestamp in generated HDL files",
             style="My.TCheckbutton",
-        )
-        include_timestamp_label = ttk.Label(
-            select_file_number_frame, text="Include timestamp in generated HDL files", width=40, style="My.TLabel"
         )
         self.select_file_number_text = tk.IntVar()
         project_manager.select_file_number_text = self.select_file_number_text
@@ -97,9 +96,8 @@ class TabControl:
             style="My.TRadiobutton",
         )
         include_timestamp_checkbox.grid(row=0, column=0, sticky=tk.W)
-        include_timestamp_label.grid(row=0, column=1, sticky=tk.W)
-        self.select_file_number_radio_button1.grid(row=0, column=2, sticky=tk.W)
-        self.select_file_number_radio_button2.grid(row=0, column=3, sticky=tk.W)
+        self.select_file_number_radio_button1.grid(row=0, column=1, sticky=tk.W)
+        self.select_file_number_radio_button2.grid(row=0, column=2, sticky=tk.W)
 
         self.reset_signal_name = tk.StringVar()
         project_manager.reset_signal_name = self.reset_signal_name

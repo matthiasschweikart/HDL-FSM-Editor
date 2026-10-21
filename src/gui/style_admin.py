@@ -87,7 +87,7 @@ class StyleAdmin:
                 },
             },
             "My.TCheckbutton": {
-                "configure": {"background": "light gray"},
+                "configure": {"foreground": "black", "background": "light gray"},
                 "map": {
                     "background": [("active", "light gray")],
                     "indicatorcolor": [("selected", "#4A6984"), ("!selected", "white")],
@@ -255,7 +255,7 @@ class StyleAdmin:
                 },
             },
             "My.TCheckbutton": {
-                "configure": {"background": "black"},
+                "configure": {"foreground": "light gray", "background": "black"},
                 "map": {
                     "background": [("active", "black")],
                     "indicatorcolor": [("selected", "white"), ("!selected", "black")],
