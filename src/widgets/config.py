@@ -23,20 +23,13 @@ HIGHLIGHT_COLORS_DARK_MODE = {
     "comment": "#5BCBFE",
 }
 BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST = ["green3", "blue", "cyan", "brown"]
+BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST_DARK_MODE = ["green2", "#5BCBFE", "cyan", "orange"]
 BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST = [
     f"bracket_color_{position}{index}"
     for index in range(len(BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST))
     for position in ("start", "end")
 ]
-BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST_DARK_MODE = ["green2", "#5BCBFE", "cyan", "orange"]
-BRACKET_HIGHLIGHTING_NAME_NORMAL_LIST_DARK_MODE = [
-    f"bracket_color_{position}{index}"
-    for index in range(len(BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST_DARK_MODE))
-    for position in ("start", "end")
-]
-BRACKET_HIGHLIGHTING_NAME_BOLD_LIST = [
-    "bracket_color_wrong",
-]
+BRACKET_HIGHLIGHTING_NAME_BOLD_LIST = ["bracket_color_wrong"]
 
 ELEMENT_NAMES_IN_DESIGN_DICTIONARY = (
     "state",
