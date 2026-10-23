@@ -12,9 +12,12 @@ class GridDraw:
     This class draws a grid into the canvas.
     """
 
+    grid_color_normal_mode = "gray85"
+    grid_color_dark_mode = "gray50"
+
     def __init__(self, canvas) -> None:
         self.canvas = canvas
-        self.color = "gray85"
+        self.color = GridDraw.grid_color_normal_mode
         self.grid_is_visible = True
         self.draw_grid()
 

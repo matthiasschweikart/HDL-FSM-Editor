@@ -264,10 +264,10 @@ class MenuBar:
     def _configure_diagram_tab_background(self, mode):
         if mode == "Dark Mode":
             diagram_background = "black"
-            grid_color = "gray40"
+            grid_color = type(project_manager.grid_drawer).grid_color_dark_mode
         else:
             diagram_background = "white"
-            grid_color = "gray85"
+            grid_color = type(project_manager.grid_drawer).grid_color_normal_mode
         project_manager.grid_drawer.remove_grid()
         project_manager.canvas.configure(bg=diagram_background)
         project_manager.diagram_background_color.set(diagram_background)
