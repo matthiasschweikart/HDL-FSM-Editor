@@ -200,7 +200,7 @@ class MenuBar:
     def switch_between_normal_and_dark_mode(self) -> None:
         """Switch between "Dark Mode" and "Normal Mode"."""
         mode = self.prefs_menu.entrycget(0, "label")
-        project_manager.style_admin_ref.activate_mode(mode)
+        project_manager.style_admin_ref.switch_style(mode)
         # Configure all widgets which do not support the ttk.style feature:
         self._configure_menus(mode)
         self._configure_listboxes(mode)

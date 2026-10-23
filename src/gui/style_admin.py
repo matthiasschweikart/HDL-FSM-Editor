@@ -382,9 +382,9 @@ class StyleAdmin:
                 },
             },
         }
-        self.activate_mode("Normal Mode")
+        self.switch_style("Normal Mode")
 
-    def activate_mode(self, mode) -> None:
+    def switch_style(self, mode) -> None:
         """Switch the styling mode for the application."""
         if mode == "Dark Mode":
             self.style.theme_settings("default", self.dark_theme)
