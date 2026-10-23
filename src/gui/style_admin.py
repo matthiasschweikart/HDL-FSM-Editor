@@ -23,14 +23,6 @@ class StyleAdmin:
         self.style.configure("Window.TLabel", foreground="black", background="PaleTurquoise2")
         self.style.configure("WindowSelected.TFrame", foreground="black", background="PaleTurquoise3")
         self.style.configure("WindowSelected.TLabel", foreground="black", background="PaleTurquoise3")
-        self.style.configure("StateActionsWindow.TFrame", foreground="black", background="cyan2")
-        self.style.configure("StateActionsWindow.TLabel", foreground="black", background="cyan2")
-        self.style.configure("StateActionsWindowSelected.TFrame", foreground="black", background="turquoise1")
-        self.style.configure("StateActionsWindowSelected.TLabel", background="turquoise1")
-        self.style.configure("GlobalActionsWindow.TFrame", foreground="black", background="PaleGreen2")
-        self.style.configure("GlobalActionsWindow.TLabel", foreground="black", background="PaleGreen2")
-        self.style.configure("GlobalActionsWindowSelected.TFrame", foreground="black", background="lawn green")
-        self.style.configure("GlobalActionsWindowSelected.TLabel", foreground="black", background="lawn green")
 
         # Configure the custom style for the TEntry widget:
         self.style.element_create("plain.field", "from", "clam")
@@ -141,28 +133,28 @@ class StyleAdmin:
             # Control tab:
             "Path.TButton": {"configure": {"foreground": "black", "background": "light gray"}},
             # Diagram tab:
-            "NewState.TButton": {
+            "SkyBlue1.TButton": {
                 "configure": {"foreground": "black", "background": "SkyBlue1"},
                 "map": {
                     "foreground": [("active", "black")],
                     "background": [("active", "deep sky blue")],
                 },
             },
-            "NewTransition.TButton": {
+            "DeepSkyBlue.TButton": {
                 "configure": {"foreground": "black", "background": "deep sky blue"},
                 "map": {
                     "foreground": [("active", "black")],
                     "background": [("active", "dodger blue")],
                 },
             },
-            "NewConnector.TButton": {
+            "Orchid1.TButton": {
                 "configure": {"foreground": "black", "background": "orchid1"},
                 "map": {
                     "foreground": [("active", "black")],
                     "background": [("active", "orchid2")],
                 },
             },
-            "ResetEntry.TButton": {
+            "IndianRed1.TButton": {
                 "configure": {"foreground": "black", "background": "IndianRed1"},
                 "map": {
                     "font": [],
@@ -170,7 +162,7 @@ class StyleAdmin:
                     "background": [("active", "IndianRed2"), ("disabled", "grey85")],
                 },
             },
-            "DefaultStateActions.TButton": {
+            "Cyan.TButton": {
                 "configure": {"foreground": "black", "background": "cyan2"},
                 "map": {
                     "font": [],
@@ -178,7 +170,7 @@ class StyleAdmin:
                     "background": [("active", "cyan"), ("disabled", "grey85")],
                 },
             },
-            "GlobalActionsClocked.TButton": {
+            "PaleGreen.TButton": {
                 "configure": {"foreground": "black", "background": "PaleGreen2"},
                 "map": {
                     "font": [],
@@ -186,15 +178,7 @@ class StyleAdmin:
                     "background": [("active", "PaleGreen"), ("disabled", "grey85")],
                 },
             },
-            "GlobalActionsCombinatorial.TButton": {
-                "configure": {"foreground": "black", "background": "PaleGreen2"},
-                "map": {
-                    "font": [],
-                    "foreground": [("active", "black"), ("disabled", "grey65")],
-                    "background": [("active", "PaleGreen"), ("disabled", "grey85")],
-                },
-            },
-            "Undo.TButton": {
+            "LightGray.TButton": {
                 "configure": {"foreground": "black", "background": "light gray"},
                 "map": {
                     "font": [],
@@ -202,15 +186,7 @@ class StyleAdmin:
                     "background": [("active", "grey85"), ("disabled", "grey85")],
                 },
             },
-            "Redo.TButton": {
-                "configure": {"foreground": "black", "background": "light gray"},
-                "map": {
-                    "font": [],
-                    "foreground": [("active", "black"), ("disabled", "grey65")],
-                    "background": [("active", "grey85"), ("disabled", "grey85")],
-                },
-            },
-            "View.TButton": {
+            "LemonChiffon.TButton": {
                 "configure": {"foreground": "black", "background": "lemon chiffon"},
                 "map": {
                     "font": [],
@@ -305,28 +281,28 @@ class StyleAdmin:
             # Control tab:
             "Path.TButton": {"configure": {"foreground": "black", "background": "light gray"}},
             # Diagram tab:
-            "NewState.TButton": {
+            "SkyBlue1.TButton": {
                 "configure": {"foreground": "SkyBlue1", "background": "black"},
                 "map": {
                     "foreground": [("active", "deep sky blue")],
                     "background": [("active", "black")],
                 },
             },
-            "NewTransition.TButton": {
+            "DeepSkyBlue.TButton": {
                 "configure": {"foreground": "deep sky blue", "background": "black"},
                 "map": {
                     "foreground": [("active", "dodger blue")],
                     "background": [("active", "black")],
                 },
             },
-            "NewConnector.TButton": {
+            "Orchid1.TButton": {
                 "configure": {"foreground": "orchid1", "background": "black"},
                 "map": {
                     "foreground": [("active", "orchid2")],
                     "background": [("active", "black")],
                 },
             },
-            "ResetEntry.TButton": {
+            "IndianRed1.TButton": {
                 "configure": {"foreground": "IndianRed1", "background": "black"},
                 "map": {
                     "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
@@ -334,7 +310,7 @@ class StyleAdmin:
                     "background": [("active", "black"), ("disabled", "black")],
                 },
             },
-            "DefaultStateActions.TButton": {
+            "Cyan.TButton": {
                 "configure": {"foreground": "cyan2", "background": "black"},
                 "map": {
                     "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
@@ -342,7 +318,7 @@ class StyleAdmin:
                     "background": [("active", "black"), ("disabled", "black")],
                 },
             },
-            "GlobalActionsClocked.TButton": {
+            "PaleGreen.TButton": {
                 "configure": {"foreground": "PaleGreen2", "background": "black"},
                 "map": {
                     "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
@@ -350,15 +326,7 @@ class StyleAdmin:
                     "background": [("active", "black"), ("disabled", "black")],
                 },
             },
-            "GlobalActionsCombinatorial.TButton": {
-                "configure": {"foreground": "PaleGreen2", "background": "black"},
-                "map": {
-                    "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
-                    "foreground": [("active", "PaleGreen"), ("disabled", "PaleGreen2")],
-                    "background": [("active", "black"), ("disabled", "black")],
-                },
-            },
-            "Undo.TButton": {
+            "LightGray.TButton": {
                 "configure": {"foreground": "gray90", "background": "black"},
                 "map": {
                     "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
@@ -366,15 +334,7 @@ class StyleAdmin:
                     "background": [("active", "black"), ("disabled", "black")],
                 },
             },
-            "Redo.TButton": {
-                "configure": {"foreground": "gray90", "background": "black"},
-                "map": {
-                    "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
-                    "foreground": [("active", "white"), ("disabled", "gray90")],
-                    "background": [("active", "black"), ("disabled", "black")],
-                },
-            },
-            "View.TButton": {
+            "LemonChiffon.TButton": {
                 "configure": {"foreground": "lemon chiffon", "background": "black"},
                 "map": {
                     "foreground": [("active", "yellow")],

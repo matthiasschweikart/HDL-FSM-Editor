@@ -55,7 +55,7 @@ class TabDiagram:
             undo_redo_frame,
             text="Undo (Ctrl-z)",
             command=project_manager.undo_handling_ref.undo,
-            style="Undo.TButton",
+            style="LightGray.TButton",
             state="disabled",
         )
         project_manager.undo_button = undo_button
@@ -63,7 +63,7 @@ class TabDiagram:
             undo_redo_frame,
             text="Redo(Ctrl-Z)",
             command=project_manager.undo_handling_ref.redo,
-            style="Redo.TButton",
+            style="LightGray.TButton",
             state="disabled",
         )
         project_manager.redo_button = redo_button
@@ -73,15 +73,15 @@ class TabDiagram:
         # Implement the global-action buttons of the drawing area:
         action_frame = ttk.Frame(button_frame, borderwidth=2, style="My2.TFrame")
         state_action_default_button = ttk.Button(
-            action_frame, text="Default State Actions (combinatorial)", style="DefaultStateActions.TButton"
+            action_frame, text="Default State Actions (combinatorial)", style="Cyan.TButton"
         )
         project_manager.state_action_default_button = state_action_default_button
         global_action_clocked_button = ttk.Button(
-            action_frame, text="Global Actions (clocked)", style="GlobalActionsClocked.TButton"
+            action_frame, text="Global Actions (clocked)", style="PaleGreen.TButton"
         )
         project_manager.global_action_clocked_button = global_action_clocked_button
         global_action_combinatorial_button = ttk.Button(
-            action_frame, text="Global Actions (combinatorial)", style="GlobalActionsCombinatorial.TButton"
+            action_frame, text="Global Actions (combinatorial)", style="PaleGreen.TButton"
         )
         project_manager.global_action_combinatorial_button = global_action_combinatorial_button
         state_action_default_button.grid(row=0, column=0)
@@ -89,15 +89,15 @@ class TabDiagram:
         global_action_combinatorial_button.grid(row=0, column=2)
 
         # Implement the insertion and view buttons of the drawing area:
-        new_transition_button = ttk.Button(button_frame, text="new Transition", style="NewTransition.TButton")
-        new_state_button = ttk.Button(button_frame, text="new State", style="NewState.TButton")
-        new_connector_button = ttk.Button(button_frame, text="new Connector", style="NewConnector.TButton")
-        reset_entry_button = ttk.Button(button_frame, text="Reset Entry", style="ResetEntry.TButton")
+        new_transition_button = ttk.Button(button_frame, text="new Transition", style="DeepSkyBlue.TButton")
+        new_state_button = ttk.Button(button_frame, text="new State", style="SkyBlue1.TButton")
+        new_connector_button = ttk.Button(button_frame, text="new Connector", style="Orchid1.TButton")
+        reset_entry_button = ttk.Button(button_frame, text="Reset Entry", style="IndianRed1.TButton")
         project_manager.reset_entry_button = reset_entry_button
-        view_all_button = ttk.Button(button_frame, text="view all", style="View.TButton")
-        view_area_button = ttk.Button(button_frame, text="view area", style="View.TButton")
-        plus_button = ttk.Button(button_frame, text="+", style="View.TButton")
-        minus_button = ttk.Button(button_frame, text="-", style="View.TButton")
+        view_all_button = ttk.Button(button_frame, text="view all", style="LemonChiffon.TButton")
+        view_area_button = ttk.Button(button_frame, text="view area", style="LemonChiffon.TButton")
+        plus_button = ttk.Button(button_frame, text="+", style="LemonChiffon.TButton")
+        minus_button = ttk.Button(button_frame, text="-", style="LemonChiffon.TButton")
 
         # Layout of the button area:
         new_state_button.grid(row=0, column=0)
