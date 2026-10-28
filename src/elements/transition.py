@@ -24,6 +24,9 @@ class TransitionLine:
     ref_dict = {}
     diff_dict = {}
 
+    fill_color_normal_mode = "blue"
+    fill_color_dark_mode = "lawn green"
+
     # A new transition object is created by the create() method of the TransitionLine class (see end of file).
     def __init__(self, transition_coords, tags, priority) -> None:
         self.difference_x = 0
@@ -77,9 +80,9 @@ class TransitionLine:
     def configure_mode(self, mode):
         """Apply highlight colors based on the mode"""
         if mode == "Dark Mode":
-            project_manager.canvas.itemconfigure(self.transition_id, fill="lawn green")
+            project_manager.canvas.itemconfigure(self.transition_id, fill=TransitionLine.fill_color_dark_mode)
         else:
-            project_manager.canvas.itemconfigure(self.transition_id, fill="blue")
+            project_manager.canvas.itemconfigure(self.transition_id, fill=TransitionLine.fill_color_normal_mode)
 
     def _determine_position_of_priority_rectangle(self, transition_coords):
         # Determine middle of the priority rectangle position by calculating a shortened transition:
@@ -757,7 +760,9 @@ class TransitionLine:
                     transition_id = project_manager.canvas.create_line(
                         [line_start_x, line_start_y, line_start_x, line_start_y],
                         arrow="last",
-                        fill="blue" if mode == "Dark Mode" else "lawn green",
+                        fill=TransitionLine.fill_color_dark_mode
+                        if mode == "Dark Mode"
+                        else TransitionLine.fill_color_normal_mode,
                         smooth=True,
                     )
                     project_manager.canvas.tag_lower(transition_id)  # Line should be under states/connectors

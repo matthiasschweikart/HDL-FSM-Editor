@@ -4,7 +4,6 @@ This module contains all methods to create the main-window of the HDL-FSM-Editor
 
 import http
 import json
-import re
 import sys
 import tkinter as tk
 import urllib.error
@@ -127,33 +126,6 @@ class MainWindow:
         # information see http://www.tcl.tk/man/tcl8.5/TclCmd/library.htm#M19
         project_manager.root.tk.call("set", "tcl_wordchars", "[a-zA-Z0-9_:<=]")
         project_manager.root.tk.call("set", "tcl_nonwordchars", "[^a-zA-Z0-9_:<=]")
-
-    def check_version(self) -> str:
-        """Fetch website and print whether a newer version is available."""
-        try:
-            print("Checking for a newer version ...")
-            with urllib.request.urlopen("http://www.hdl-fsm-editor.de/index.php") as source:
-                website_source = str(source.read())
-            version_start = website_source.find("Version")
-            new_version = website_source[version_start : version_start + 24]
-            end_index = new_version.find("(")
-            new_version = new_version[:end_index]
-            new_version = re.sub(" ", "", new_version)
-            if new_version != "Version" + constants.VERSION:
-                check_version_result = (
-                    "Please update to the new version of HDL-FSM-Editor available at http://www.hdl-fsm-editor.de"
-                )
-            else:
-                check_version_result = "Your version of HDL-FSM-Editor is up to date."
-                project_manager.menu_bar_ref.new_version_availabale.grid_remove()
-        except urllib.error.URLError:
-            check_version_result = "HDL-FSM-Editor version could not be checked, as you are offline."
-            project_manager.menu_bar_ref.new_version_availabale.grid_remove()
-        except http.client.RemoteDisconnected:
-            check_version_result = "Remote end closed connection without response, when checking the version."
-            project_manager.menu_bar_ref.new_version_availabale.grid_remove()
-        print(check_version_result)
-        return check_version_result
 
     def put_header_into_log_tab(self, check_version_result) -> None:
         """Fetch message from website and copy it into the log tab."""

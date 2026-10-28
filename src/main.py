@@ -3,7 +3,11 @@ HDL-FSM-Editor: A tool for modeling FSMs
 """
 
 import argparse
+import http
+import re
 import sys
+import urllib.error
+import urllib.request
 from os.path import exists
 from tkinter import messagebox
 
@@ -41,7 +45,7 @@ def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None
     # Handle version and message checks
     check_version_result = ""
     if not args.no_version_check:
-        check_version_result = mainwindow_ref.check_version()
+        check_version_result = _check_version()
     if not args.no_message:
         mainwindow_ref.put_header_into_log_tab(check_version_result)
 
@@ -72,6 +76,34 @@ def _parse_and_process_arguments(mainwindow_ref: main_window.MainWindow) -> None
     if args.generate_hdl:
         success = hdl_generation.HdlGeneration(write_to_file=True, is_script_mode=True).success
         sys.exit(0 if success else 1)
+
+
+def _check_version() -> str:
+    """Fetch website and print whether a newer version is available."""
+    try:
+        print("Checking for a newer version ...")
+        with urllib.request.urlopen("http://www.hdl-fsm-editor.de/index.php") as source:
+            website_source = str(source.read())
+        version_start = website_source.find("Version")
+        new_version = website_source[version_start : version_start + 24]
+        end_index = new_version.find("(")
+        new_version = new_version[:end_index]
+        new_version = re.sub(" ", "", new_version)
+        if new_version != "Version" + constants.VERSION:
+            check_version_result = (
+                "Please update to the new version of HDL-FSM-Editor available at http://www.hdl-fsm-editor.de"
+            )
+        else:
+            check_version_result = "Your version of HDL-FSM-Editor is up to date."
+            project_manager.menu_bar_ref.new_version_availabale.grid_remove()
+    except urllib.error.URLError:
+        check_version_result = "HDL-FSM-Editor version could not be checked, as you are offline."
+        project_manager.menu_bar_ref.new_version_availabale.grid_remove()
+    except http.client.RemoteDisconnected:
+        check_version_result = "Remote end closed connection without response, when checking the version."
+        project_manager.menu_bar_ref.new_version_availabale.grid_remove()
+    print(check_version_result)
+    return check_version_result
 
 
 def _main() -> None:
