@@ -36,6 +36,7 @@ class NotebookTop(ttk.Notebook):
         self._update_hdl_tab_if_necessary()
         self._if_hdl_tab_set_focus()
         if not self.scroll_region_is_initialized and self.index(self.select()) == 3:  # diagram-tab is active
+            self.scroll_region_is_initialized = True
             self._init_scroll_region()
         project_manager.tab_control_ref.module_name_entry.select_clear()
 
@@ -47,7 +48,6 @@ class NotebookTop(ttk.Notebook):
             project_manager.canvas.canvasy(2 * project_manager.canvas.winfo_height()),
         )
         project_manager.canvas.configure(scrollregion=scroll_region)
-        self.scroll_region_is_initialized = True
 
     def _update_hdl_tab_if_necessary(self) -> None:
         if self.index(self.select()) == 4:  # HDL-tab is active
