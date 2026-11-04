@@ -229,6 +229,7 @@ class MenuBar:
         if (
             project_manager.root.title() != "tk"
             and project_manager.root.title() != "tk*"
+            and not project_manager.root.title().startswith("tk ")
             and not project_manager.root.title().startswith("unnamed")
         ):
             file_handling.save()
