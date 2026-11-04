@@ -16,10 +16,10 @@ def view_all() -> None:
         project_manager.grid_drawer.remove_grid()
         project_manager.canvas.grid_remove()
         view_rectangle(complete_rectangle, check_fit=True)
-        set_scroll_region_if_needed()
+        _set_scroll_region_if_not_initialized()
 
 
-def set_scroll_region_if_needed() -> None:
+def _set_scroll_region_if_not_initialized() -> None:
     # The scroll region must be set at tool start and file read:
     scroll_region = project_manager.canvas.cget("scrollregion")
     if not scroll_region:
