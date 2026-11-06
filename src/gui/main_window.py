@@ -54,7 +54,8 @@ class MainWindow:
         project_manager.style_admin_ref = style_admin.StyleAdmin(self.root)
         project_manager.menu_bar_ref = menu_bar.MenuBar(row=0, column=0)
         project_manager.notebook = notebook_top.NotebookTop(row=1, column=0)
-        project_manager.notebook.bind("<Configure>", self._check_for_window_resize)
+        project_manager.notebook.bind("<Configure>", self._check_for_window_resize_after)
+        self.after_id = None
         # Create a combined reference dictionary for all canvas window items:
         project_manager.canvas_windows_ref_dict = ChainMap(
             condition_action.ConditionAction.ref_dict,
@@ -78,13 +79,19 @@ class MainWindow:
         except Exception as e:  # pylint: disable=broad-except
             print(f"Warning: Could not set application icon: {e}")
 
+    def _check_for_window_resize_after(self, event) -> None:
+        if self.after_id is not None:
+            self.root.after_cancel(self.after_id)
+        self.after_id = self.root.after(100, lambda: self._check_for_window_resize(event))
+
     def _check_for_window_resize(self, event) -> None:
-        # Shift sashes to a optimal position after window resize:
+        # After window resize shifts sashes to a optimal position and adapts the scroll region:
         if self.window_height != event.height:
             if self.window_height != 0:  # equal 0 at application start, so ignore first event
                 self._move_sashes_after_window_resize()
             self.window_height = event.height
         canvas_editing.adapt_scroll_region_after_window_resize()
+        self.after_id = None
 
     def _move_sashes_after_window_resize(self):
         active_tab = project_manager.notebook.get_active_tab()
