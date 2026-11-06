@@ -25,28 +25,32 @@ class TabDiagram:
         diagram_frame.rowconfigure(0, weight=1)
         project_manager.notebook.add(diagram_frame, sticky="nsew", text=GuiTab.DIAGRAM.value)
         # Create the elements of the drawing area:
-        h = ttk.Scrollbar(diagram_frame, orient=tk.HORIZONTAL, cursor="arrow", style="My.Horizontal.TScrollbar")
-        v = ttk.Scrollbar(diagram_frame, orient=tk.VERTICAL, cursor="arrow", style="My.Vertical.TScrollbar")
-        h.configure(command=self._scroll_xview)
-        v.configure(command=self._scroll_yview)
+        self.canvas_scrollbar_hor = ttk.Scrollbar(
+            diagram_frame, orient=tk.HORIZONTAL, cursor="arrow", style="My.Horizontal.TScrollbar"
+        )
+        self.canvas_scrollbar_ver = ttk.Scrollbar(
+            diagram_frame, orient=tk.VERTICAL, cursor="arrow", style="My.Vertical.TScrollbar"
+        )
         self.canvas = tk.Canvas(
             diagram_frame,
             borderwidth=2,
             bg="white",
-            xscrollcommand=h.set,
-            yscrollcommand=v.set,
+            xscrollcommand=self._scroll_in_x_direction,
+            yscrollcommand=self._scroll_in_y_direction,
             highlightthickness=0,
             relief=tk.SUNKEN,
             confine=False,  # Canvas can moved beyond its scrollregion (needed at zooming before scrollregion adaption)
         )
         project_manager.canvas = self.canvas
-
+        self.canvas_scrollbar_hor.configure(command=self._scroll_xview)
+        self.canvas_scrollbar_ver.configure(command=self._scroll_yview)
+        self.after_identifier = None
         button_frame = ttk.Frame(diagram_frame, borderwidth=1, style="My2.TFrame")
 
         # Layout of the drawing area:
         self.canvas.grid(column=0, row=0, sticky="nsew")
-        h.grid(column=0, row=1, sticky="ew")  # "sticky" extends the scrollbar, so that a "shift" is possible.
-        v.grid(column=1, row=0, sticky="ns")
+        self.canvas_scrollbar_hor.grid(column=0, row=1, sticky="ew")
+        self.canvas_scrollbar_ver.grid(column=1, row=0, sticky="ns")
         button_frame.grid(column=0, columnspan=2, row=2, sticky="swe")
 
         # Implement the undo/redo buttons of the drawing area:
@@ -150,6 +154,27 @@ class TabDiagram:
         grid_drawer = grid_drawing.GridDraw(self.canvas)
         project_manager.grid_drawer = grid_drawer
 
+    def _scroll_xview(self, *args) -> None:  # called first when the horizontal scrollbar is moved
+        project_manager.grid_drawer.remove_grid()
+        self.canvas.xview(*args)
+
+    def _scroll_yview(self, *args) -> None:  # called first when the vertical scrollbar is moved
+        project_manager.grid_drawer.remove_grid()
+        self.canvas.yview(*args)
+
+    def _scroll_in_x_direction(self, first, last):  # called second after the canvas got updated.
+        self.canvas_scrollbar_hor.set(first, last)
+        self._redraw_grid_after_idle()
+
+    def _scroll_in_y_direction(self, first, last):  # called second after the canvas got updated.
+        self.canvas_scrollbar_ver.set(first, last)
+        self._redraw_grid_after_idle()
+
+    def _redraw_grid_after_idle(self):
+        if self.after_identifier is not None:
+            self.canvas.after_cancel(self.after_identifier)
+        self.after_identifier = self.canvas.after(200, project_manager.grid_drawer.draw_grid)
+
     def run_start_view_rectangle(self, event) -> None:
         """Unbind events to create robustness"""
         self.canvas.unbind("<Button-3>")
@@ -158,16 +183,6 @@ class TabDiagram:
     def _zoom_by_wheel(self, event) -> None:
         event_coords = canvas_editing.translate_window_event_coordinates_in_exact_canvas_coordinates(event)
         canvas_editing.zoom_wheel(event, event_coords[0], event_coords[1])
-
-    def _scroll_xview(self, *args) -> None:
-        project_manager.grid_drawer.remove_grid()
-        self.canvas.xview(*args)
-        project_manager.grid_drawer.draw_grid()
-
-    def _scroll_yview(self, *args) -> None:
-        project_manager.grid_drawer.remove_grid()
-        self.canvas.yview(*args)
-        project_manager.grid_drawer.draw_grid()
 
     def _scroll_start(self, event) -> None:
         project_manager.grid_drawer.remove_grid()
