@@ -37,7 +37,6 @@ class MainWindow:
 
     def __init__(self) -> None:
         """Build main window, notebook, menu bar, and set project_manager references."""
-        self.window_height = 0
         self.root = tk.Tk()
         self.root.withdraw()  # Because it could be batch-mode because of "-generate_hdl" switch.
         self.root.columnconfigure(0, weight=1)  # The (only) column shall expand at window resize
@@ -82,14 +81,13 @@ class MainWindow:
     def _check_for_window_resize_after(self, event) -> None:
         if self.after_id is not None:
             self.root.after_cancel(self.after_id)
-        self.after_id = self.root.after(100, lambda: self._check_for_window_resize(event))
+        self.after_id = self.root.after(50, lambda: self._check_for_window_resize(event))
 
     def _check_for_window_resize(self, event) -> None:
-        # After window resize shifts sashes to a optimal position and adapts the scroll region:
-        if self.window_height != event.height:
-            if self.window_height != 0:  # equal 0 at application start, so ignore first event
-                self._move_sashes_after_window_resize()
-            self.window_height = event.height
+        # As several widgets may create a <Configure> event at window resize,
+        # it is not clear from which widget the not canceled event did actually come.
+        # Therefore it is neither possible nor needed, to filter out any event:
+        self._move_sashes_after_window_resize()
         canvas_editing.adapt_scroll_region_after_window_resize()
         self.after_id = None
 
