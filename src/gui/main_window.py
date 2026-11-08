@@ -19,7 +19,6 @@ import linting
 import undo_handling
 import write_data_creator
 from actions import canvas_editing
-from constants import GuiTab
 from elements import (
     condition_action,
     global_actions_clocked,
@@ -87,19 +86,11 @@ class MainWindow:
         # As several widgets may create a <Configure> event at window resize,
         # it is not clear from which widget the not canceled event did actually come.
         # Therefore it is neither possible nor needed, to filter out any event:
-        self._move_sashes_after_window_resize()
-        canvas_editing.adapt_scroll_region_after_window_resize()
-        self.after_id = None
-
-    def _move_sashes_after_window_resize(self):
-        active_tab = project_manager.notebook.get_active_tab()
-        project_manager.notebook.show_tab(GuiTab.INTERFACE)
         self.root.update_idletasks()  # update geometry information of all widgets
         project_manager.tab_interface_ref.adjust_sash_positions()
-        project_manager.notebook.show_tab(GuiTab.INTERNALS)
-        self.root.update_idletasks()  # update geometry information of all widgets
         project_manager.tab_internals_ref.adjust_sash_positions()
-        project_manager.notebook.show_tab(active_tab)
+        canvas_editing.adapt_scroll_region_after_window_resize()
+        self.after_id = None
 
     def _configure_hfe(self) -> None:
         try:
