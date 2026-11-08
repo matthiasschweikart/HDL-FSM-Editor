@@ -196,7 +196,6 @@ class TabDiagram:
 
     def scroll_wheel(self, event) -> None:
         """Handle mouse wheel: scroll the canvas."""
-        project_manager.grid_drawer.remove_grid()
         self.canvas.scan_mark(event.x, event.y)
         width = project_manager.canvas.winfo_width()
         height = project_manager.canvas.winfo_height()
@@ -214,7 +213,6 @@ class TabDiagram:
         scroll_direction = "x" if (event.state & shift_mask) else "y"
         dx, dy = (delta_x, 0) if scroll_direction == "x" else (0, delta_y)
         self.canvas.scan_dragto(int(event.x + dx), int(event.y + dy), gain=1)
-        project_manager.grid_drawer.draw_grid()
 
     def _adapt_length_of_grid_lines(self, _) -> None:
         # Will be called, because resizing the window causes a change of the canvas size.
