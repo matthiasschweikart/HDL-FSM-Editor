@@ -62,7 +62,21 @@ class GridDraw:
 
     def show_context_menu(self) -> None:
         """Show context menu at zoom_coords for background color and grid visibility."""
-        menu = tk.Menu(project_manager.canvas, tearoff=0)
+        if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode":
+            background = "gray92"
+            forgeround = "black"
+            activebackground = "royal blue"
+        else:
+            background = "black"
+            forgeround = "white"
+            activebackground = "gray"
+        menu = tk.Menu(
+            project_manager.canvas,
+            tearoff=0,
+            background=background,
+            foreground=forgeround,
+            activebackground=activebackground,
+        )
         menu.add_command(label="Change background color", command=project_manager.tab_control_ref.choose_bg_color)
         if self.grid_is_visible is True:
             menu.add_command(label="Hide grid", command=self._toggle_grid)
