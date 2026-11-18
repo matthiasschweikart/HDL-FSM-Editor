@@ -53,7 +53,20 @@ class StyleAdmin:
             },
             "My.TFrame": {"configure": {"background": "light gray"}},
             "My2.TFrame": {"configure": {"background": "light gray"}},
-            "My.TLabel": {"configure": {"foreground": "black", "background": "light gray"}},
+            "My.TLabel": {
+                "configure": {"foreground": "black", "background": "light gray"},
+                "map": {
+                    "foreground": [("active", "black"), ("disabled", "gray50")],
+                    "background": [("active", "light gray"), ("disabled", "light gray")],
+                },
+            },
+            "MyUnderlined.TLabel": {
+                "configure": {
+                    "foreground": "black",
+                    "background": "light gray",
+                    "font": ("TkDefaultFont", 9, "underline"),
+                }
+            },
             "My.TEntry": {
                 "configure": {
                     "foreground": "black",
@@ -71,11 +84,17 @@ class StyleAdmin:
             },
             "InvalidRegex.TEntry": {"configure": {"fieldbackground": "#ffcccc"}},
             "My.TCombobox": {
+                "configure": {
+                    "foreground": "black",  # text color
+                    "fieldbackground": "white",  # text background
+                    "background": "light gray",  # triangle box background
+                    "arrowcolor": "black",  # triangle arrow color
+                },
                 "map": {
-                    "foreground": [("readonly", "black")],  # text color when readonly
-                    "background": [("readonly", "light gray")],  # arrow field background color when readonly
-                    "fieldbackground": [("readonly", "light gray")],  # field background color when readonly
-                    "arrowcolor": [("readonly", "black")],  # arrow color when readonly
+                    "foreground": [("readonly", "black"), ("active", "black")],  # text color drop down list
+                    "fieldbackground": [("readonly", "white"), ("active", "white")],  # text background
+                    "background": [("readonly", "light gray"), ("active", "light gray")],  # triangle box background
+                    "arrowcolor": [("readonly", "black"), ("active", "black")],
                 },
             },
             "My.TCheckbutton": {
@@ -97,8 +116,11 @@ class StyleAdmin:
                 "configure": {"foreground": "black", "background": "light gray"},
                 "map": {"foreground": [("active", "black")], "background": [("active", "gray95")]},
             },
-            "My.TPanedwindow": {
-                "configure": {"background": "gray75"},
+            "My.TPanedwindow": {"configure": {"background": "gray75"}},  # color of the sash bar between the windows
+            "Sash": {
+                "configure": {
+                    "sashthickness": 2,
+                }
             },
             "My.Vertical.TScrollbar": {
                 "configure": {
@@ -189,12 +211,34 @@ class StyleAdmin:
             "LemonChiffon.TButton": {
                 "configure": {"foreground": "black", "background": "lemon chiffon"},
                 "map": {
-                    "font": [],
                     "foreground": [("active", "black")],
+                    "font": [],
                     "background": [("active", "khaki")],
                 },
             },
+            "My.Treeview": {
+                "configure": {
+                    "background": "white",  # element background
+                    "foreground": "black",  # element foreground
+                    "fieldbackground": "white",  # empty part
+                },
+                "map": {
+                    "background": [("selected", "#3498db")],
+                    "foreground": [("selected", "#ffffff")],
+                },
+            },
+            "My.Treeview.Heading": {
+                "configure": {
+                    "background": "light gray",
+                    "foreground": "black",  # text color
+                    "padding": 3,
+                },
+                "map": {
+                    "background": [("active", "light gray")]  # no hover effect needed
+                },
+            },
         }
+
         self.dark_theme = {
             "My.TMenubutton": {
                 "configure": {"foreground": "light gray", "background": "black"},
@@ -206,7 +250,20 @@ class StyleAdmin:
             },
             "My.TFrame": {"configure": {"background": "black"}},
             "My2.TFrame": {"configure": {"background": "gray20"}},
-            "My.TLabel": {"configure": {"foreground": "light gray", "background": "black"}},
+            "My.TLabel": {
+                "configure": {"foreground": "light gray", "background": "black"},
+                "map": {
+                    "foreground": [("active", "light gray"), ("disabled", "gray35")],
+                    "background": [("active", "black"), ("disabled", "black")],
+                },
+            },
+            "MyUnderlined.TLabel": {
+                "configure": {
+                    "foreground": "light gray",
+                    "background": "black",
+                    "font": ("TkDefaultFont", 9, "underline"),
+                },
+            },
             "My.TEntry": {
                 "configure": {
                     "foreground": "white",
@@ -223,11 +280,17 @@ class StyleAdmin:
                 },
             },
             "My.TCombobox": {
+                "configure": {
+                    "foreground": "white",  # text color
+                    "fieldbackground": "black",  # text background
+                    "background": "black",  # triangle box background
+                    "arrowcolor": "white",  # triangle arrow color
+                },
                 "map": {
-                    "foreground": [("readonly", "light gray")],  # text color when readonly
-                    "background": [("readonly", "black")],  # arrow field background color when readonly
-                    "fieldbackground": [("readonly", "black")],  # field background color when readonly
-                    "arrowcolor": [("readonly", "light gray")],  # arrow color when readonly
+                    "foreground": [("readonly", "white"), ("active", "white")],  # text color drop down list
+                    "fieldbackground": [("readonly", "black"), ("active", "black")],  # text background
+                    "background": [("readonly", "black"), ("active", "black")],  # triangle box background
+                    "arrowcolor": [("readonly", "light gray"), ("active", "light gray")],
                 },
             },
             "My.TCheckbutton": {
@@ -249,7 +312,7 @@ class StyleAdmin:
                 "configure": {"foreground": "light gray", "background": "black"},
                 "map": {"foreground": [("active", "white")], "background": [("active", "black")]},
             },
-            "My.TPanedwindow": {"configure": {"background": "gray20"}},
+            "My.TPanedwindow": {"configure": {"background": "gray20"}},  # color of the sash bar between the windows
             "My.Vertical.TScrollbar": {
                 "configure": {
                     "background": "gray30",  # slider and buttons
@@ -334,11 +397,40 @@ class StyleAdmin:
                     "background": [("active", "black"), ("disabled", "black")],
                 },
             },
+            "Redo.TButton": {
+                "configure": {"foreground": "gray90", "background": "black"},
+                "map": {
+                    "font": [("disabled", ("TkDefaultFont", 8, "italic"))],
+                    "foreground": [("active", "white"), ("disabled", "gray90")],
+                    "background": [("active", "black"), ("disabled", "black")],
+                },
+            },
             "LemonChiffon.TButton": {
                 "configure": {"foreground": "lemon chiffon", "background": "black"},
                 "map": {
                     "foreground": [("active", "yellow")],
                     "background": [("active", "black")],
+                },
+            },
+            "My.Treeview": {
+                "configure": {
+                    "background": "gray20",  # element background
+                    "foreground": "light gray",  # element foreground
+                    "fieldbackground": "gray20",  # empty part
+                },
+                "map": {
+                    "background": [("selected", "white")],
+                    "foreground": [("selected", "black")],
+                },
+            },
+            "My.Treeview.Heading": {
+                "configure": {
+                    "background": "black",
+                    "foreground": "light gray",  # text color
+                    "padding": 3,
+                },
+                "map": {
+                    "background": [("active", "black")]  # no hover effect needed
                 },
             },
         }
