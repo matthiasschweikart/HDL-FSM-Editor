@@ -40,9 +40,9 @@ class MenuBar:
         menue_frame.columnconfigure(3, weight=1)  # The column with the title expands.
 
         tool_title = ttk.Label(title_frame, text="HDL-FSM-Editor", font=("Arial", 15), style="My.TLabel")
-        self.new_version_availabale = ttk.Label(title_frame, text=" (new Version available)", style="My.TLabel")
+        self.new_version_available = ttk.Label(title_frame, text=" (new Version available)", style="My.TLabel")
         tool_title.grid(row=0, column=0)
-        self.new_version_availabale.grid(row=0, column=1)
+        self.new_version_available.grid(row=0, column=1)
 
         self.file_menu = tk.Menu(file_menu_button)  # , activeborderwidth=0, borderwidth=0)
         file_menu_button.configure(menu=self.file_menu)
