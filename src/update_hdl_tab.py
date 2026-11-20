@@ -135,7 +135,7 @@ class UpdateHdlTab:
         project_manager.tab_hdl_ref.hdl_frame_text.bracket_highlighter.highlight_brackets(
             project_manager.language.get()
         )
-        project_manager.tab_hdl_ref.hdl_frame_text.add_tab_markup(all=True)
+        project_manager.tab_hdl_ref.hdl_frame_text.add_tab_markup(all_lines=True)
         if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode":
             # In "normal mode" there are different background colors in the HDL-tab than in all other text boxes.
             # To look nicer therefore the used colors for the tag "tab_markup" must be changed:

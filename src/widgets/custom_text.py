@@ -306,17 +306,17 @@ class CustomText(CodeEditor):
             # element is inserted, as this would slow down the loading of the file.
             # In this case update_highlight_tags_in_all_texts() and highlight_brackets() are not called here but
             # called from file_handling.py after the whole file is loaded.
-            self.add_tab_markup(all=True)
+            self.add_tab_markup(all_lines=True)
             return
-        self.add_tab_markup(all=False)
+        self.add_tab_markup(all_lines=False)
         self.update_highlight_tags_in_all_texts()
         if event is not None and event.keysym == "BackSpace":
             # In order to keep the mouse-pointer inside the shrinking window:
             self._move_mouse_to_insert_cursor()
         self.bracket_highlighter.highlight_brackets(project_manager.language.get())
 
-    def add_tab_markup(self, all) -> None:
-        if all:
+    def add_tab_markup(self, all_lines) -> None:
+        if all_lines:
             self.tag_remove("tab_markup", "1.0", tk.END)
             self.mark_set("current", "1.0")
             while self.compare("current", "<", tk.END):
