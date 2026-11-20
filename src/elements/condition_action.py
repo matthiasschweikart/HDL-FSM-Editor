@@ -68,9 +68,9 @@ class ConditionAction(CanvasWindow):
         else:
             self.configure_mode("Dark Mode")
 
-    def configure_mode(self, mode):
+    def configure_mode(self, new_mode):
         """Apply highlight colors based on the mode"""
-        if mode == "Dark Mode":
+        if new_mode == "Dark Mode":
             project_manager.canvas.itemconfigure(self.line_id, fill="antique white")
         else:
             project_manager.canvas.itemconfigure(self.line_id, fill="black")

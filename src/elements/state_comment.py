@@ -53,10 +53,10 @@ class StateComment(CanvasWindow):
         else:
             self.configure_mode("Dark Mode")
 
-    def configure_mode(self, mode):
+    def configure_mode(self, new_mode):
         """Apply the specified mode highlight colors"""
         # StateComment has a CustomText object with a different text color than the regular Text widget.
-        if mode == "Dark Mode":
+        if new_mode == "Dark Mode":
             foreground = "#5BCBFE"
             background = "black"
             linecolor = "antique white"

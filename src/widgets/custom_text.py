@@ -114,7 +114,7 @@ class CustomText(CodeEditor):
             highlightbackground = "light gray"  # Unfocused border color
             entity_background = "#F5E6D3"
             arch_background = "#FFF9CC"
-            background_tab_markup = "gray85"
+            background_tab_markup = "papaya whip"
             highlight_colors = config.HIGHLIGHT_COLORS
             bracket_highlighting_color_normal_list = config.BRACKET_HIGHLIGHTING_COLOR_NORMAL_LIST
         self.configure(
@@ -126,7 +126,7 @@ class CustomText(CodeEditor):
         )
         self.tag_configure("generated_entity_bg", background=entity_background)
         self.tag_configure("generated_arch_bg", background=arch_background)
-        self.tag_configure("tab_markup", background=background_tab_markup, bgstipple="gray25")
+        self.tag_configure("tab_markup", background=background_tab_markup, bgstipple="gray75")
         self.tag_configure("goto-line", background="orange")
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_configure(

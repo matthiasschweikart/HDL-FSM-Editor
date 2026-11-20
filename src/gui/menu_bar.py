@@ -199,31 +199,32 @@ class MenuBar:
 
     def switch_between_normal_and_dark_mode(self) -> None:
         """Switch between "Dark Mode" and "Normal Mode"."""
-        mode = self.prefs_menu.entrycget(0, "label")
-        project_manager.style_admin_ref.switch_style(mode)
+        new_mode = self.prefs_menu.entrycget(0, "label")
+        project_manager.style_admin_ref.switch_style(new_mode)
         # Configure all widgets which do not support the ttk.style feature:
-        self._configure_menus(mode)
-        self._configure_listboxes(mode)
+        self._configure_menus(new_mode)
+        self._configure_listboxes(new_mode)
         for text_widget in custom_text.CustomText.declaration_text_widgets() + [
             project_manager.tab_hdl_ref.hdl_frame_text,
             project_manager.tab_log_ref.log_frame_text,
         ]:
-            text_widget.configure_mode(mode)
+            text_widget.configure_mode(new_mode)
         # Configure all elements already inserted into the diagram:
         for canvas_window in project_manager.canvas_windows_ref_dict.values():
             for text_widget in canvas_window.text_ids:
-                text_widget.configure_mode(mode)
+                text_widget.configure_mode(new_mode)
         for state_ref in state.States.ref_dict.values():
-            state_ref.configure_mode(mode)
+            state_ref.configure_mode(new_mode)
         for state_action_ref in state_action.StateAction.ref_dict.values():
-            state_action_ref.configure_mode(mode)
+            state_action_ref.configure_mode(new_mode)
         for state_comment_ref in state_comment.StateComment.ref_dict.values():
-            state_comment_ref.configure_mode(mode)
+            state_comment_ref.configure_mode(new_mode)
         for transition_line in transition.TransitionLine.ref_dict.values():
-            transition_line.configure_mode(mode)
+            transition_line.configure_mode(new_mode)
         for condition_action_ref in condition_action.ConditionAction.ref_dict.values():
-            condition_action_ref.configure_mode(mode)
-        self._configure_diagram_tab_background(mode)
+            condition_action_ref.configure_mode(new_mode)
+        self._configure_diagram_tab_background(new_mode)
+        self.configure_tab_markup_in_hdl_tab(new_mode)
         # The new background color must be stored for sure in the design file, as at any read from file
         # the background color is determined by the value found in design file:
         if (
@@ -233,22 +234,22 @@ class MenuBar:
             and not project_manager.root.title().startswith("unnamed")
         ):
             file_handling.save()
-        if mode == "Dark Mode":
+        if new_mode == "Dark Mode":
             self.prefs_menu.entryconfig(0, label="Normal Mode")
         else:
             self.prefs_menu.entryconfig(0, label="Dark Mode")
 
-    def _configure_menus(self, mode):
+    def _configure_menus(self, new_mode):
         menu_list = [self.file_menu, self.hdl_menu, self.prefs_menu, self.info_menu, self.help_menu]
         for menu in menu_list:
-            if mode == "Dark Mode":
+            if new_mode == "Dark Mode":
                 menu.configure(background="black", foreground="white", activebackground="gray")
             else:
                 menu.configure(background="gray92", foreground="black", activebackground="royal blue")
 
-    def _configure_listboxes(self, mode):
+    def _configure_listboxes(self, new_mode):
         project_manager.root.option_clear()
-        if mode == "Normal Mode":
+        if new_mode == "Normal Mode":
             project_manager.root.option_clear()
             project_manager.root.option_add("*TCombobox*Listbox.background", "white")
             project_manager.root.option_add("*TCombobox*Listbox.foreground", "black")
@@ -262,8 +263,8 @@ class MenuBar:
             project_manager.root.option_add("*TCombobox*Listbox.selectForeground", "white")
             project_manager.root.option_add("*TCombobox*Listbox.highlightThickness", "1")
 
-    def _configure_diagram_tab_background(self, mode):
-        if mode == "Dark Mode":
+    def _configure_diagram_tab_background(self, new_mode):
+        if new_mode == "Dark Mode":
             diagram_background = "black"
             grid_color = type(project_manager.grid_drawer).grid_color_dark_mode
         else:
@@ -274,3 +275,46 @@ class MenuBar:
         project_manager.diagram_background_color.set(diagram_background)
         project_manager.grid_drawer.color = grid_color
         project_manager.grid_drawer.draw_grid()
+
+    def configure_tab_markup_in_hdl_tab(self, new_mode):
+        if new_mode == "Normal Mode":
+            # In "normal mode" there are different background colors in the HDL-tab than in all other text boxes.
+            # To look nicer therefore the already configured colors for the tag "tab_markup" must be changed:
+            if project_manager.select_file_number_text.get() == "1":
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup",
+                    background="papaya whip",  # for entity and architecure part (or module if Verilog)
+                    bgstipple="gray75",
+                )
+            else:  # The content of the HDL-tab is VHDL with different backgrounds for entity and architecture.
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup",
+                    background="khaki",  # for architecture part
+                    bgstipple="gray75",
+                )
+                project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
+                    "tab_markup_entity",  # new tag
+                    background="papaya whip",  # for entity part
+                    bgstipple="gray75",
+                )
+                self._replace_tag_in_entity("tab_markup", "tab_markup_entity")
+        else:
+            print("Removing tab_markup_entity tag")
+            self._replace_tag_in_entity("tab_markup_entity", "tab_markup")
+
+    def _replace_tag_in_entity(self, old_tag, new_tag):
+        # Replace the old tag with the new tag for the entity part:
+        entity_tag_ranges = project_manager.tab_hdl_ref.hdl_frame_text.tag_ranges("generated_entity_bg")
+        if not entity_tag_ranges:
+            return
+        project_manager.tab_hdl_ref.hdl_frame_text.mark_set("current", "1.0")
+        while True:
+            next_range = project_manager.tab_hdl_ref.hdl_frame_text.tag_nextrange(
+                old_tag, "current", entity_tag_ranges[1]
+            )
+            if not next_range:
+                break
+            start, end = next_range
+            project_manager.tab_hdl_ref.hdl_frame_text.tag_remove(old_tag, start, end)
+            project_manager.tab_hdl_ref.hdl_frame_text.tag_add(new_tag, start, end)
+            project_manager.tab_hdl_ref.hdl_frame_text.mark_set("current", end)
