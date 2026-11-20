@@ -195,6 +195,7 @@ class FindReplace:
                     end_index = index + "+" + str(len(self.search_pattern)) + " chars"
                     text_field["ref"].delete(index, end_index)
                     text_field["ref"].insert(index, self.replace_pattern)
+                    text_field["ref"].add_tab_markup(all_lines=True)
                     start = index + "+" + str(len(self.replace_pattern)) + " chars"
                     if text_field["tab"] == GuiTab.INTERFACE:
                         if text_field["update"] == "Generics":

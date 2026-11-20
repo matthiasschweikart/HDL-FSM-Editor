@@ -132,6 +132,7 @@ class UpdateHdlTab:
         project_manager.tab_hdl_ref.hdl_frame_text.insert(tk.END, arch, "generated_arch_bg")
         project_manager.tab_hdl_ref.hdl_frame_text.config(state=tk.DISABLED)
         project_manager.tab_hdl_ref.hdl_frame_text.add_highlight_tags_to_characters()
+        project_manager.tab_hdl_ref.hdl_frame_text.add_tab_markup(all_lines=True)
         project_manager.tab_hdl_ref.hdl_frame_text.bracket_highlighter.highlight_brackets(
             project_manager.language.get()
         )
