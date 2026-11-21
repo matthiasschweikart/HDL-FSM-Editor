@@ -322,9 +322,9 @@ class CustomText(CodeEditor):
             self.mark_set("current", "1.0")
             while self.compare("current", "<", tk.END):
                 # Move over the line number if it exists:
-                hits = self.tag_nextrange("line_number", "current", "current lineend")
-                if hits:
-                    self.mark_set("current", hits[1] + "+ 1c")
+                line_number_hit = self.tag_nextrange("line_number", "current", "current lineend")
+                if line_number_hit:
+                    self.mark_set("current", line_number_hit[1] + "+ 1c")
                 # Search 1 line:
                 i = 0
                 line_end = self.index("current lineend")
