@@ -299,7 +299,6 @@ class MenuBar:
                 )
                 self._replace_tag_in_entity("tab_markup", "tab_markup_entity")
         else:
-            print("Removing tab_markup_entity tag")
             self._replace_tag_in_entity("tab_markup_entity", "tab_markup")
 
     def _replace_tag_in_entity(self, old_tag, new_tag):
