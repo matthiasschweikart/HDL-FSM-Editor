@@ -239,6 +239,7 @@ class CustomText(CodeEditor):
             os.unlink(tmp_name)
         self.delete("1.0", tk.END)
         self.insert("1.0", new_text)
+        self.add_tab_markup(all_lines=True)
         self.format(None)
 
     def format_after_idle(self, event) -> None:
