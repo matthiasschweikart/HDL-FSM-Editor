@@ -69,16 +69,16 @@ class TabHDL:
                 # Cursor is in file 2 (architecture file)
                 line_number_in_file = line_number - hdl_generation.HdlGeneration.last_line_number_of_file1
                 selected_file = config.get_architecture_file()
-                start_index = project_manager.size_of_file2_line_number
+                start_index = project_manager.size_of_file2_line_number - 1
             else:
                 line_number_in_file = line_number
                 selected_file = config.get_primary_file()
-                start_index = project_manager.size_of_file1_line_number
-            while self.hdl_frame_text.get(f"{line_number}.{start_index - 1}") == " ":
+                start_index = project_manager.size_of_file1_line_number - 1
+            while self.hdl_frame_text.get(f"{line_number}.{start_index}") == " ":
                 start_index += 1  # leading blanks shall not be underlined
             if project_manager.link_dict_ref.has_link(selected_file, line_number_in_file):
                 self.hdl_frame_text.tag_add(  # add tag for all characters until end of line
-                    "underline", f"{line_number}.{start_index - 1}", f"{line_number}.end"
+                    "underline", f"{line_number}.{start_index}", f"{line_number}.end"
                 )
                 self.hdl_frame_text.tag_config("underline", underline=1)  # activate underline
                 self.hdl_frame_text.tag_bind(
