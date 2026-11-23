@@ -264,8 +264,8 @@ class HdlGeneration:
                 content.count("\n") + 1
             )  # For example: 3 lines are separated by 2 returns.
             project_manager.size_of_file1_line_number = (
-                len(str(HdlGeneration.last_line_number_of_file1)) + 2
-            )  # "+2" because of string ": "
+                len(str(HdlGeneration.last_line_number_of_file1)) + 1
+            )  # "+1" because of string ":"
             project_manager.size_of_file2_line_number = 0
             content_with_numbers1 = self._add_line_numbers(content)
             content_with_numbers2 = ""
@@ -280,8 +280,8 @@ class HdlGeneration:
                 content1.count("\n") + 1
             )  # For example: 3 lines are separated by 2 returns.
             project_manager.size_of_file1_line_number = (
-                len(str(HdlGeneration.last_line_number_of_file1)) + 2
-            )  # "+2" because of string ": "
+                len(str(HdlGeneration.last_line_number_of_file1)) + 1
+            )  # "+1" because of string ":"
             _, name_of_architecture_file = os.path.split(path_name_architecture)
             content2 = "-- Filename: " + name_of_architecture_file + "\n"
             content2 += header
