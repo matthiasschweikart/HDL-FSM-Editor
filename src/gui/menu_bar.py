@@ -288,13 +288,13 @@ class MenuBar:
                 )
             else:  # The content of the HDL-tab is VHDL with different backgrounds for entity and architecture.
                 project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
-                    "tab_markup",
-                    background="khaki",  # for architecture part
+                    "tab_markup_entity",  # new tag
+                    background="papaya whip",  # for entity part
                     bgstipple="gray75",
                 )
                 project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
-                    "tab_markup_entity",  # new tag
-                    background="papaya whip",  # for entity part
+                    "tab_markup",
+                    background="khaki",  # for architecture part
                     bgstipple="gray75",
                 )
                 self._replace_tag_in_entity("tab_markup", "tab_markup_entity")
