@@ -100,14 +100,8 @@ class MainWindow:
             self.configure_message += "Configuration file " + str(Path.home()) + "/.hdl-fsm-editor.rc was read."
             work_dir = config_dict["working_directory"]
             project_manager.tab_control_ref.working_directory_value.set(work_dir)
-            project_manager.menu_bar_ref.prefs_menu.entryconfig(0, label=config_dict["graphical_mode"])
-            # Now the menu reflects the graphical mode specified in the configuration file which is
-            # wrong as it should reflect not the actual mode but the alternative mode. But the
-            # method switch_between_normal_and_dark_mode() reads this wrong menu entry and interpretes
-            # it correctly as a command to activate this mode. As at the end the
-            # method switch_between_normal_and_dark_mode() as always changes the
-            # menu entry to the alternative mode, everything is correct at the end:
-            project_manager.menu_bar_ref.switch_between_normal_and_dark_mode()
+            if config_dict.get("graphical_mode", "Normal Mode") == "Dark Mode":
+                project_manager.menu_bar_ref.switch_between_normal_and_dark_mode()
             if config_dict.get("tab_markup", "Visible") == "Hidden":
                 project_manager.menu_bar_ref.toggle_tabulator_markup()
         except Exception:  # pylint: disable=broad-except
