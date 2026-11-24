@@ -127,6 +127,7 @@ class CustomText(CodeEditor):
         self.tag_configure("generated_entity_bg", background=entity_background)
         self.tag_configure("generated_arch_bg", background=arch_background)
         self.tag_configure("tab_markup", background=background_tab_markup, bgstipple="gray75")
+        self.tag_configure("tab_markup_entity", background=background_tab_markup, bgstipple="gray75")
         self.tag_configure("goto-line", background="orange")
         for highlight_tag_name in constants.VHDL_HIGHLIGHT_PATTERN_DICT:
             self.tag_configure(
@@ -317,6 +318,9 @@ class CustomText(CodeEditor):
         self.bracket_highlighter.highlight_brackets(project_manager.language.get())
 
     def add_tab_markup(self, all_lines) -> None:
+        next_mode = project_manager.menu_bar_ref.prefs_menu.entrycget(1, "label")
+        if next_mode == "Enable Tabulator Markup":
+            return
         if all_lines:
             self.tag_remove("tab_markup", "1.0", tk.END)
             self.mark_set("current", "1.0")

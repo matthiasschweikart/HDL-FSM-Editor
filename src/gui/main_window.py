@@ -108,6 +108,8 @@ class MainWindow:
             # method switch_between_normal_and_dark_mode() as always changes the
             # menu entry to the alternative mode, everything is correct at the end:
             project_manager.menu_bar_ref.switch_between_normal_and_dark_mode()
+            if config_dict.get("tab_markup", "Visible") == "Hidden":
+                project_manager.menu_bar_ref.toggle_tabulator_markup()
         except Exception:  # pylint: disable=broad-except
             self.configure_message += "Configuration file " + str(Path.home()) + "/.hdl-fsm-editor.rc was not found."
             work_dir = ""

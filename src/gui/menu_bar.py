@@ -76,6 +76,11 @@ class MenuBar:
             command=self.switch_between_normal_and_dark_mode,
             font=("Arial", 10),
         )
+        self.prefs_menu.add_command(
+            label="Disable Tabulator Markup",
+            command=self.toggle_tabulator_markup,
+            font=("Arial", 10),
+        )
 
         search_string = tk.StringVar()
         search_string.set("")
@@ -188,6 +193,9 @@ class MenuBar:
         config_dictionary = {}
         config_dictionary["graphical_mode"] = (
             "Normal Mode" if self.prefs_menu.entrycget(0, "label") == "Dark Mode" else "Dark Mode"
+        )
+        config_dictionary["tab_markup"] = (
+            "Visible" if self.prefs_menu.entrycget(1, "label") == "Disable Tabulator Markup" else "Hidden"
         )
         config_dictionary["working_directory"] = project_manager.tab_control_ref.working_directory_value.get()
         try:
@@ -317,3 +325,24 @@ class MenuBar:
             project_manager.tab_hdl_ref.hdl_frame_text.tag_remove(old_tag, start, end)
             project_manager.tab_hdl_ref.hdl_frame_text.tag_add(new_tag, start, end)
             project_manager.tab_hdl_ref.hdl_frame_text.mark_set("current", end)
+
+    def toggle_tabulator_markup(self) -> None:  # Called by menu item and by
+        """Toggle the tabulator markup feature."""
+        actual_menu_entry = self.prefs_menu.entrycget(1, "label")
+        if actual_menu_entry == "Enable Tabulator Markup":
+            self.prefs_menu.entryconfig(1, label="Disable Tabulator Markup")
+        else:
+            self.prefs_menu.entryconfig(1, label="Enable Tabulator Markup")
+        all_text_widgets = custom_text.CustomText.declaration_text_widgets()
+        all_text_widgets += [project_manager.tab_hdl_ref.hdl_frame_text]
+        for canvas_window in project_manager.canvas_windows_ref_dict.values():
+            all_text_widgets += canvas_window.text_ids
+        for text_widget in all_text_widgets:
+            if actual_menu_entry == "Enable Tabulator Markup":
+                text_widget.add_tab_markup(all_lines=True)
+            else:
+                # print("remove tab_markup from text widget", text_widget.text_type)
+                text_widget.tag_remove("tab_markup", "1.0", "end")
+                text_widget.tag_remove("tab_markup_entity", "1.0", "end")
+        if project_manager.select_file_number_text.get() == 2:
+            self._replace_tag_in_entity("tab_markup", "tab_markup_entity")
