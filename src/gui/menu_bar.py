@@ -280,7 +280,7 @@ class MenuBar:
         if new_mode == "Normal Mode":
             # In "normal mode" there are different background colors in the HDL-tab than in all other text boxes.
             # To look nicer therefore the already configured colors for the tag "tab_markup" must be changed:
-            if project_manager.select_file_number_text.get() == "1":
+            if project_manager.select_file_number_text.get() == 1:
                 project_manager.tab_hdl_ref.hdl_frame_text.tag_configure(
                     "tab_markup",
                     background="papaya whip",  # for entity and architecure part (or module if Verilog)
