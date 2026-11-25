@@ -141,7 +141,6 @@ class TabDiagram:
         self.canvas.bind("<Control-Button-5>", self._zoom_by_wheel)  # MouseWheel-Scroll-Down used at Linux.
         self.canvas.bind("<Control-Button-1>", self._scroll_start)
         self.canvas.bind("<Control-B1-Motion>", self._scroll_move)
-        self.canvas.bind("<Control-ButtonRelease-1>", self._scroll_end)
         self.canvas.bind("<MouseWheel>", self.scroll_wheel)
         self.canvas.bind("<Button-4>", self.scroll_wheel)
         self.canvas.bind("<Button-5>", self.scroll_wheel)
@@ -187,9 +186,6 @@ class TabDiagram:
 
     def _scroll_move(self, event) -> None:
         self.canvas.scan_dragto(event.x, event.y, gain=1)
-
-    def _scroll_end(self, _event) -> None:
-        project_manager.grid_drawer.draw_grid()
 
     def scroll_wheel(self, event) -> None:
         """Handle mouse wheel: scroll the canvas."""
