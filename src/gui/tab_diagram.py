@@ -222,3 +222,27 @@ class TabDiagram:
     def _create_font_for_state_names(self) -> None:
         project_manager.state_name_font = font.Font(font="TkDefaultFont")
         project_manager.state_name_font.configure(size=int(project_manager.fontsize))
+
+    def show_context_menu(self) -> None:
+        """Show context menu at zoom_coords for background color and grid visibility."""
+        if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode":
+            background = "gray92"
+            forgeround = "black"
+            activebackground = "royal blue"
+        else:
+            background = "black"
+            forgeround = "white"
+            activebackground = "gray"
+        menu = tk.Menu(
+            project_manager.canvas,
+            tearoff=0,
+            background=background,
+            foreground=forgeround,
+            activebackground=activebackground,
+        )
+        menu.add_command(label="Change background color", command=project_manager.tab_control_ref.choose_bg_color)
+        if project_manager.grid_drawer.grid_is_visible is True:
+            menu.add_command(label="Hide grid", command=project_manager.grid_drawer.toggle_grid)
+        else:
+            menu.add_command(label="Show grid", command=project_manager.grid_drawer.toggle_grid)
+        menu.tk_popup(project_manager.root.winfo_pointerx(), project_manager.root.winfo_pointery())

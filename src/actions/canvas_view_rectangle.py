@@ -67,7 +67,7 @@ def _view_area_or_show_context_menu(rectangle_id, funcid_canvas_draw_view_rectan
             if "grid_line" not in tags:
                 item_found = True
         if not item_found:
-            project_manager.grid_drawer.show_context_menu()
+            project_manager.tab_diagram_ref.show_context_menu()
 
 
 def _restore_binding_after_view_area(funcid_canvas_draw_view_rectangle, button_used):
