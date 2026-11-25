@@ -8,8 +8,8 @@ from project_manager import project_manager
 class GridDraw:
     """
     This class draws a grid into the canvas.
-    The methods draw_grid() and remove_grid() are used from other objects without
-    knowing if the grid is currently configured by the user to bevisible or not.
+    The method draw_grid() and toggle_grid() are used from other objects without
+    knowing if the grid is currently configured by the user to be visible or not.
     """
 
     grid_color_normal_mode = "gray85"
@@ -21,14 +21,10 @@ class GridDraw:
         self.grid_is_visible = True
         self.draw_grid()
 
-    def remove_grid(self) -> None:
-        """Remove all grid lines from the canvas."""
-        self.canvas.delete("grid_line")
-
     def draw_grid(self) -> None:
         """Draw grid lines in the visible window; lower grid below content."""
         if self.grid_is_visible:
-            self.remove_grid()  # prevent grid to exist multiple times
+            self.canvas.delete("grid_line")
             visible_window = [
                 self.canvas.canvasx(0),
                 self.canvas.canvasy(0),
@@ -63,7 +59,7 @@ class GridDraw:
     def toggle_grid(self) -> None:
         if self.grid_is_visible:
             self.grid_is_visible = False
-            self.remove_grid()
+            self.canvas.delete("grid_line")
         else:
             self.grid_is_visible = True
             self.draw_grid()

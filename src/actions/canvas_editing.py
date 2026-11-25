@@ -100,7 +100,6 @@ def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
         project_manager.canvas.grid()
         return
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
-    project_manager.grid_drawer.remove_grid()
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)
