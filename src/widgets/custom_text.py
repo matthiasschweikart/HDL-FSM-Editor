@@ -33,12 +33,11 @@ class CustomText(CodeEditor):
     written_variables_of_all_windows = {}
     selection_is_active = False  # True, when a selection exists in any CustomText window.
 
-    def __init__(self, *args, text_type, font_size, wrap=tk.NONE, **kwargs) -> None:
+    def __init__(self, *args, text_type, font_size, **kwargs) -> None:
         """A text widget that report on internal widget commands"""
         super().__init__(
             *args,
             font=(project_manager.style_admin_ref.font_name, font_size),
-            wrap=wrap,
             highlightthickness=1,  # show focus border
             **kwargs,
         )

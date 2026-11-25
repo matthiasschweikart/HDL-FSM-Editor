@@ -70,6 +70,7 @@ class CanvasWindow:
             undo=True,
             maxundo=-1,
             font_size=int(project_manager.fontsize),
+            wrap=None,
         )
         self.text_ids.append(custom_text_id)
         custom_text_id.insert("1.0", entry_dict["text"])
