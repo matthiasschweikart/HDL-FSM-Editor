@@ -163,9 +163,7 @@ class FindReplace:
                     size = tk.font.Font(font=fontspec).cget("size")
                     factor = 20 / size  # Zoom factor to make the text 20 pixels high
                     object_center = project_manager.canvas.coords(item)
-                    project_manager.grid_drawer.remove_grid()
                     canvas_editing.canvas_zoom(object_center, factor)
-                    project_manager.grid_drawer.draw_grid()
                 project_manager.canvas.select_from(item, hit_begin)
                 project_manager.canvas.select_to(item, hit_begin + len(self.search_pattern) - 1)
                 continue_search = self._ask_continue()

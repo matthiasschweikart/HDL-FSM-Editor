@@ -101,6 +101,8 @@ class MainWindow:
             work_dir = config_dict["working_directory"]
             project_manager.tab_control_ref.working_directory_value.set(work_dir)
             project_manager.canvas.configure(background=config_dict.get("diagram_background", "white"))
+            if config_dict.get("grid_is_visible") == "False":
+                project_manager.grid_drawer.toggle_grid()
             if config_dict.get("graphical_mode", "Normal Mode") == "Dark Mode":
                 project_manager.menu_bar_ref.switch_between_normal_and_dark_mode()
             if config_dict.get("tab_markup", "Visible") == "Hidden":

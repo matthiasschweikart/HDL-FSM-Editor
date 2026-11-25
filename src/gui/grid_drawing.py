@@ -1,5 +1,18 @@
 """
 This class draws a grid into the canvas.
+Das Menu soll der Zustansspeicher sein.
+Beim Toolstart wird erst immer das Grid sichtbar gemacht.
+Falls im .rc-File grid_invisible gespeichert ist, wird danach das Grid ausgeblendet.
+Das Menu muss immer entsprechend umgeschaltet werden.
+Die Methoden remove_grid und draw_grid werden verwendet, wenn z.B. beim Zoomen das Grid angepasst werden muss.
+Während remove_grid nicht prüfen muss, ob das Grid sichtbar ist,
+prüft draw_grid dies und zeichnet das Grid nur, wenn es sichtbar sein soll.
+Da das Menu der Zustandsspeicher ist und das Menu in der Klasse GridDraw nicht sichtbar ist,
+müsste der Zustand, wenn benötigt, eigentlich als Parameter mitgegeben werden.
+Besser wäre es aber, wenn die Klasse GridDraw solche Parameter nicht sehen würde,
+d.h. wenn grid_draw() aufgerufen wird, immer auch ein Grid zu zeichnen wäre.
+grid_draw wird aufgerufen:
+
 """
 
 import tkinter as tk
@@ -79,12 +92,12 @@ class GridDraw:
         )
         menu.add_command(label="Change background color", command=project_manager.tab_control_ref.choose_bg_color)
         if self.grid_is_visible is True:
-            menu.add_command(label="Hide grid", command=self._toggle_grid)
+            menu.add_command(label="Hide grid", command=self.toggle_grid)
         else:
-            menu.add_command(label="Show grid", command=self._toggle_grid)
+            menu.add_command(label="Show grid", command=self.toggle_grid)
         menu.tk_popup(project_manager.root.winfo_pointerx(), project_manager.root.winfo_pointery())
 
-    def _toggle_grid(self) -> None:
+    def toggle_grid(self) -> None:
         if self.grid_is_visible:
             self.grid_is_visible = False
             self.remove_grid()

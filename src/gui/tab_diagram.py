@@ -155,11 +155,9 @@ class TabDiagram:
         project_manager.grid_drawer = grid_drawer
 
     def _scroll_xview(self, *args) -> None:  # called first when the horizontal scrollbar is moved
-        project_manager.grid_drawer.remove_grid()
         self.canvas.xview(*args)
 
     def _scroll_yview(self, *args) -> None:  # called first when the vertical scrollbar is moved
-        project_manager.grid_drawer.remove_grid()
         self.canvas.yview(*args)
 
     def _scroll_in_x_direction(self, first, last):  # called second after the canvas got updated.
@@ -185,7 +183,6 @@ class TabDiagram:
         canvas_editing.zoom_wheel(event, event_coords[0], event_coords[1])
 
     def _scroll_start(self, event) -> None:
-        project_manager.grid_drawer.remove_grid()
         self.canvas.scan_mark(event.x, event.y)
 
     def _scroll_move(self, event) -> None:
@@ -220,7 +217,6 @@ class TabDiagram:
         # because if they are temporarily not present, they should not be drawn:
         canvas_ids_of_grid_lines = self.canvas.find_withtag("grid_line")
         if canvas_ids_of_grid_lines:
-            project_manager.grid_drawer.remove_grid()
             project_manager.grid_drawer.draw_grid()
 
     def _create_font_for_state_names(self) -> None:

@@ -48,9 +48,6 @@ class UndoHandling:
                 bbox[3] + (bbox[3] - bbox[1]),
             )
             project_manager.canvas.configure(scrollregion=scrollregion_scaled)
-            # redraw grid, because visible canvas area may have increased:
-            project_manager.grid_drawer.remove_grid()
-            project_manager.grid_drawer.draw_grid()
 
     def _add_changes_to_design_stack(self) -> None:
         self._remove_stack_entries_from_write_pointer_to_the_end_of_the_stack()
@@ -106,8 +103,8 @@ class UndoHandling:
         custom_text.CustomText.update_highlight_tags_in_all_texts()
         custom_text.CustomText.highlight_brackets_in_all_texts()
         self._shift_visible_center_to_window_center(visible_center)
-        project_manager.grid_drawer.draw_grid()
         self._resize_scroll_region()
+        project_manager.grid_drawer.draw_grid()
 
     def _shift_visible_center_to_window_center(self, visible_center) -> None:
         """Pan canvas so the given center string becomes the current window center."""

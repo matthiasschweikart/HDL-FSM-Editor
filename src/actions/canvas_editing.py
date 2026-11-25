@@ -13,7 +13,6 @@ def view_all() -> None:
     """Fit all canvas content in view and optionally adjust font size."""
     complete_rectangle = project_manager.canvas.bbox("diagram-element")
     if complete_rectangle is not None:
-        project_manager.grid_drawer.remove_grid()
         project_manager.canvas.grid_remove()
         view_rectangle(complete_rectangle, check_fit=True)
         _set_scroll_region_if_not_initialized()
@@ -42,9 +41,7 @@ def view_rectangle(rectangle_to_view, check_fit: bool = False) -> None:
     """Zoom and pan so the given rectangle is visible; optionally fix zooming if anything extends beyond the view."""
     if rectangle_to_view[2] - rectangle_to_view[0] == 0 or rectangle_to_view[3] - rectangle_to_view[1] == 0:
         project_manager.canvas.grid()
-        project_manager.grid_drawer.draw_grid()
         return
-    project_manager.grid_drawer.remove_grid()
     factor = _calculate_zoom_factor(rectangle_to_view)
     center_of_rectangle_to_view = _determine_center_of_rectangle(rectangle_to_view)
     _shift_canvas_to_make_point_visible_in_the_middle(center_of_rectangle_to_view)
@@ -53,7 +50,6 @@ def view_rectangle(rectangle_to_view, check_fit: bool = False) -> None:
 
 def zoom_plus_minus(factor) -> None:
     """Zoom in by 10% around the visible center."""
-    project_manager.grid_drawer.remove_grid()
     project_manager.canvas.grid_remove()
     visible_canvas_area = [
         project_manager.canvas.canvasx(0),
@@ -67,7 +63,6 @@ def zoom_plus_minus(factor) -> None:
 
 def zoom_wheel(event, event_x, event_y) -> None:
     """Zoom in/out at cursor position of the given window item."""
-    project_manager.grid_drawer.remove_grid()
     project_manager.canvas.grid_remove()
     # event.delta: attribute of the mouse wheel under Windows and MacOs.
     # One "felt step" at the mouse wheel gives this value:
@@ -105,6 +100,7 @@ def canvas_zoom(zoom_center, zoom_factor, check_fit: bool = False) -> None:
         project_manager.canvas.grid()
         return
     # Scaling must use xoffset=0 and yoffset=0 to preserve the gridspacing of state_radius:
+    project_manager.grid_drawer.remove_grid()
     project_manager.canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
     new_position_of_zoom_center = [coord * zoom_factor for coord in zoom_center]
     _shift_canvas_to_make_point_visible_in_the_middle(new_position_of_zoom_center)

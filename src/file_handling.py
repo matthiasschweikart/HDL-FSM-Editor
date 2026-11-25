@@ -42,9 +42,9 @@ def new_design() -> bool:
             # Check if save was successful (current_file is not empty)
             if project_manager.current_file == "":
                 return False
-    _clear_design()
-    project_manager.root.title("unnamed")
+    _clear_design()  # Removes "all", including the grid
     project_manager.grid_drawer.draw_grid()
+    project_manager.root.title("unnamed")
     project_manager.write_data_creator_ref.store_as_compare_object(None)
     return True
 

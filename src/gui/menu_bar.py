@@ -199,6 +199,7 @@ class MenuBar:
         )
         config_dictionary["working_directory"] = project_manager.tab_control_ref.working_directory_value.get()
         config_dictionary["diagram_background"] = project_manager.canvas.cget("background")
+        config_dictionary["grid_is_visible"] = str(project_manager.grid_drawer.grid_is_visible)
         try:
             with open(Path.home() / ".hdl-fsm-editor.rc", "w", encoding="utf-8") as fileobject:
                 fileobject.write(json.dumps(config_dictionary, indent=4, default=str))
@@ -284,7 +285,6 @@ class MenuBar:
                 # Change the color because the user has not changed the background color from the default.
                 diagram_background = "white"
             grid_color = type(project_manager.grid_drawer).grid_color_normal_mode
-        project_manager.grid_drawer.remove_grid()
         project_manager.canvas.configure(bg=diagram_background)
         project_manager.diagram_background_color.set(diagram_background)
         project_manager.grid_drawer.color = grid_color
