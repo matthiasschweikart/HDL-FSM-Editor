@@ -198,6 +198,7 @@ class MenuBar:
             "Visible" if self.prefs_menu.entrycget(1, "label") == "Disable Tabulator Markup" else "Hidden"
         )
         config_dictionary["working_directory"] = project_manager.tab_control_ref.working_directory_value.get()
+        config_dictionary["diagram_background"] = project_manager.canvas.cget("background")
         try:
             with open(Path.home() / ".hdl-fsm-editor.rc", "w", encoding="utf-8") as fileobject:
                 fileobject.write(json.dumps(config_dictionary, indent=4, default=str))
@@ -272,17 +273,28 @@ class MenuBar:
             project_manager.root.option_add("*TCombobox*Listbox.highlightThickness", "1")
 
     def _configure_diagram_tab_background(self, new_mode):
+        diagram_background = project_manager.canvas.cget("bg")
         if new_mode == "Dark Mode":
-            diagram_background = "black"
+            if self._tk_color_to_hex(diagram_background) == self._tk_color_to_hex("white"):
+                # Change the color because the user has not changed the background color from the default.
+                diagram_background = "black"
             grid_color = type(project_manager.grid_drawer).grid_color_dark_mode
         else:
-            diagram_background = "white"
+            if self._tk_color_to_hex(diagram_background) == self._tk_color_to_hex("black"):
+                # Change the color because the user has not changed the background color from the default.
+                diagram_background = "white"
             grid_color = type(project_manager.grid_drawer).grid_color_normal_mode
         project_manager.grid_drawer.remove_grid()
         project_manager.canvas.configure(bg=diagram_background)
         project_manager.diagram_background_color.set(diagram_background)
         project_manager.grid_drawer.color = grid_color
         project_manager.grid_drawer.draw_grid()
+
+    def _tk_color_to_hex(self, color_name: str) -> str:
+        r16, g16, b16 = project_manager.root.winfo_rgb(color_name)  # 0..65535
+        # auf 8-bit umrechnen (0..255)
+        r8, g8, b8 = r16 // 256, g16 // 256, b16 // 256
+        return f"#{r8:02x}{g8:02x}{b8:02x}"
 
     def configure_tab_markup_in_hdl_tab(self, new_mode):
         if new_mode == "Normal Mode":

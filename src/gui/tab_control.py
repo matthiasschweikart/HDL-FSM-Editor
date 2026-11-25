@@ -361,7 +361,10 @@ class TabControl:
 
     def choose_bg_color(self) -> None:
         """Open color picker and set canvas background to the chosen color."""
-        new_color = ColorChanger(project_manager.canvas.cget("bg")).ask_color()
+        default_background_color = (
+            "white" if project_manager.menu_bar_ref.prefs_menu.entrycget(0, "label") == "Dark Mode" else "black"
+        )
+        new_color = ColorChanger(default_background_color).ask_color()
         if new_color is not None:
             project_manager.canvas.configure(bg=new_color)
             self.diagram_background_color.set(new_color)
