@@ -16,15 +16,17 @@ class LineNumberDialog:
         self.window = tk.Toplevel(project_manager.root)
         self.window.title("HFE:")
 
-        header = ttk.Label(self.window, text="Enter line number to jump to:", width=35, anchor="center")
-        frame1 = ttk.Frame(self.window)
-        frame2 = ttk.Frame(self.window)
+        header = ttk.Label(
+            self.window, text="Enter line number to jump to:", width=35, anchor="center", style="My.TLabel"
+        )
+        frame1 = ttk.Frame(self.window, style="My.TFrame")
+        frame2 = ttk.Frame(self.window, style="My.TFrame")
         header.grid(row=0, column=0, sticky="we")
         frame1.grid(row=1, column=0, sticky="we")
         frame2.grid(row=2, column=0, sticky="we")
 
         line_number = tk.IntVar()
-        self.line_number_entry = ttk.Entry(frame1, textvariable=line_number, width=10)
+        self.line_number_entry = ttk.Entry(frame1, textvariable=line_number, width=10, style="My.TEntry")
         self.line_number_entry.focus_set()
         self.line_number_entry.grid(row=0, column=1, pady=5)
         frame1.columnconfigure(0, weight=1)
@@ -33,14 +35,23 @@ class LineNumberDialog:
         self.file_var = tk.IntVar()
         if project_manager.language.get() == "VHDL" and project_manager.select_file_number_text.get() == 2:
             self.file_var.set(2)
-            radio1 = ttk.Radiobutton(frame2, takefocus=False, variable=self.file_var, text="in Architecture", value=2)
-            radio2 = ttk.Radiobutton(frame2, takefocus=False, variable=self.file_var, text="in Entity", value=1)
+            radio1 = ttk.Radiobutton(
+                frame2,
+                takefocus=False,
+                variable=self.file_var,
+                text="in Architecture",
+                value=2,
+                style="My.TRadiobutton",
+            )
+            radio2 = ttk.Radiobutton(
+                frame2, takefocus=False, variable=self.file_var, text="in Entity", value=1, style="My.TRadiobutton"
+            )
             radio1.grid(row=0, column=0)
             radio2.grid(row=0, column=1)
         else:
             self.file_var.set(1)
-        button1 = ttk.Button(frame2, text="OK", command=self._jump, padding=5)
-        button2 = ttk.Button(frame2, text="Cancel", command=self.window.destroy, padding=5)
+        button1 = ttk.Button(frame2, text="OK", command=self._jump, padding=5, style="My.TButton")
+        button2 = ttk.Button(frame2, text="Cancel", command=self.window.destroy, padding=5, style="My.TButton")
         button1.grid(row=1, column=0)
         button2.grid(row=1, column=1)
         frame2.columnconfigure(0, weight=1)
